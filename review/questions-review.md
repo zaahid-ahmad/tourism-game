@@ -19,6 +19,8 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 | 2026-09-16 | All gates, after Sustainable | 131 | 45 |
 | 2026-09-16 | Domestic 26–27 | 0 | 0 |
 | 2026-09-16 | All gates, after Domestic | 123 | 44 |
+| 2026-09-16 | Sectors 1–9 | 0 | 0 |
+| 2026-09-16 | All gates, after Sectors 1–9 | 101 | 37 |
 
 ---
 
@@ -26,6 +28,46 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 
 | gate.stage | question | correct option | page | wrong option | tech | belongs to / why wrong | page | OK |
 |---|---|---|---|---|---|---|---|---|
+| 1.1 | What is tourism? | Study of activities, services, industries providing a travel experience | 5 | Within own country >1 day · Crossing a border with passport control · Summary of wants and expectations | 3.2 | Domestic/tourist · international · tourist profile | 5–6 | ☑ |
+| 1.2 | Germans arriving; South Africans leaving? | Inbound; outbound | 5 | Outbound; inbound · Inbound; domestic · Domestic; outbound | 3.5 | Swapped/other destination types | 5 | ☑ |
+| 1.3 | Durban → Kimberley? | Domestic | 5 | Regional · International · Inbound | 3.1 | Other destination types | 5 | ☑ |
+| 1.4 | Travel within a specific geographical area? | Regional tourism | 5 | Domestic · International · Inbound | 3.3 | Definitions (answer-key example: Aimee → Zimbabwe) | 5 | ☑ |
+| 1.5 | Same-day visitor + tourist's max stay? | an excursionist; a year | 5 | excursionist; six months · inbound tourist; a year · inbound tourist; six months | 3.5 | Six months made up; inbound is not same-day | 5 | ☑ |
+| 2.1 | Higher-level needs? | Achievement, status, personal growth | 5 | Order, law, security · Family, relationships, work · Food, shelter, sleep | 3.2 | Basic needs | 5 | ☑ |
+| 2.2 | List of ONLY tourist types? | VFR, incentive, health, religion | 5–6 | …camels · …donkey carts · …hot air balloons | 3.5 | Extraordinary transport | 7 | ☑ |
+| 2.3 | Backpackers and gap year = ? | Youth travel | 5 | Adventure · Leisure and holiday · Eco | 3.1 | Other tourist types (guide puts backpackers under youth) | 5 | ☑ |
+| 2.4 | Define a tourist profile | Summary of what tourists want and expect | 6 | Classification (VFR) · Higher needs · Study of travel services | 3.2 | Types · why people travel · tourism definition | 5 | ☑ |
+| 2.5 | NOT part of a tourist profile? | Passport number | 6 | Nationality · Occupation · Arrival and departure dates | — | All three are listed fields | 6 | ☑ |
+| 3.1 | Bus for backpackers? | The Baz Bus | 6 | Greyhound · Intercape · Shuttle bus | 3.1 | Coach companies · airports/harbours | 6 | ☑ |
+| 3.2 | Metered vs minibus taxis? | Metered by distance; minibus no timetable | 6 | Swapped · minibus set timetable · metered set timetable | 3.5 | Set timetables = coaches | 6 | ☑ |
+| 3.3 | Describes microlights? | One or two people; adventure | 7 | Small airfields, viewing · Chartered by executives · Fast, between major centres | 3.2 | Helicopters · small aircraft · aeroplanes | 6–7 | ☑ |
+| 3.4 | Aeroplane disadvantage? | Airports outside cities | 8 | Getting to the port · Toll fees · Overcrowded commuter services | 3.2 | Cruise liner · car · train | 8 | ☑ |
+| 3.5 | Shuttle buses? | Airports, harbours, terminals | 6 | Hired whole bus · Set timetables · Backpackers | 3.2 | Chartered · coaches · Baz Bus | 6 | ☑ |
+| 4.1 | OR Tambo – Jhb – Pretoria? | Gautrain | 7 | Shosholoza Meyl · Metrorail · Rovos Rail | 3.1 | City-to-city · commuter · private luxury | 7 | ☑ |
+| 4.2 | Blue Train? | Luxury, weekly, CT–Pretoria | 7 | Crosses borders · City-to-city · Bullet train | 3.2 | Rovos · Shosholoza · Gautrain | 7 | ☑ |
+| 4.3 | Rail advantage? | Stations in town and city centres | 8 | Exact destination · Cabin crew · Luggage + meals | 3.2 | Car · aeroplane · cruise liner | 8 | ☑ |
+| 4.4 | Boats popular for? | Harbour cruises, fishing, whale watching | 7 | Private cruising · Embark at SA ports · Tracks in streets | 3.2 | Yachts · cruise liners · trams | 7 | ☑ |
+| 4.5 | ONLY extraordinary modes? | Camels, donkey carts, bicycles | 7 | …microlights · …trams · …helicopters | 3.5 | Air · rail · air | 7 | ☑ |
+| 5.1 | ALL transport factors? | Cost, safety, reliability, distance and time | 7–8 | Budget, location, quality, type · Nationality, age, occupation · Nationality + factors | 3.2 | Accommodation choice (9) · tourist profile (6) | 6–9 | ☑ |
+| 5.2 | Flexibility advantage? | Car | 8 | Bus · Aeroplane · Train | 3.2 | Fixed schedules | 8 | ☑ |
+| 5.3 | Bus/coach disadvantage? | Fixed schedules, getting to depot | 8 | Low capacity, fatigue · Luggage, jet lag · Sea-sickness, port | 3.2 | Car · aeroplane · cruise liner | 8 | ☑ |
+| 5.4 | Minibus parked 40 min? | Waits until full | 8 | Road works · Fixed schedule · Driver fatigue | 3.2 | Bus/car · bus · car | 8 | ☑ |
+| 5.5 | Fare includes accommodation, meals, entertainment? | Cruise liner | 8 | Aeroplane · Train · Coach | 3.2 | Other modes ("safest" removed: arguable for aeroplanes) | 8 | ☑ |
+| 6.1 | Factor in choosing an establishment? | Budget available | 9 | Flexibility · Distance and time · Reliability | 3.2 | Transport factors | 7–8 | ☑ |
+| 6.2 | Valet, room service, gym, conference room? | Formal service | 9 | Guest · Self-catering · Backpackers | 3.1 | Other accommodation types | 9–10 | ☑ |
+| 6.3 | Self-catering must provide? | Kitchen area, cooking equipment | 9 | Room service, valet, gym · Meals by arrangement · Dormitories | 3.2 | Formal · guest · backpackers | 9–10 | ☑ |
+| 6.4 | Caravan and camping require? | Caretaker, wash lines, running water | 9 | Host, meals, linen · Dorms, reception · Manager, valet, gift shop | 3.2 | Guest · backpackers · formal | 9–10 | ☑ |
+| 6.5 | Guest accommodation? | Owner run, family atmosphere, meals by arrangement | 9 | Near game reserve · Limited budget, shared areas · Own cooking | 3.2 | Game lodge · backpackers · self-catering | 9–10 | ☑ |
+| 8.1 | Bedroom with private bathroom? | En suite | 11 | Suite · Twin room · Penthouse | 3.1 | Other room terms | 11 | ☑ |
+| 8.2 | Top-floor luxury apartment? | Penthouse | 11 | Suite · Family room · Double room | 3.1 | Other room terms | 11 | ☑ |
+| 8.3 | Extra charge, single in a double? | Single supplement | 11 | Fully inclusive · Per person sharing · Room service charge | 3.1 | Pricing terms · meal service | 11–12 | ☑ |
+| 8.4 | pppn? | Per person per night | 11 | pps · pppd · fully inclusive | 3.1 | Pricing abbreviations | 11 | ☑ |
+| 8.5 | Bread rolls, coffee, juice brought to table? | Continental breakfast | 12 | English · Buffet · A la carte | 3.1 | Other meal types | 12 | ☑ |
+| 9.1 | Why hotels invest in in-room tech? | Leisure: entertainment; business: work | 12 | Swapped · safety/comfort · comfort/information | 3.5 | Tech categories | 12–13 | ☑ |
+| 9.2 | Menus, weather, wake-up call? | Information | 12 | Comfort · Entertainment · Work | 3.1 | Other categories | 12–13 | ☑ |
+| 9.3 | Environmental responsibility tech? | Key card, energy-saving lights | 13 | Door key, safe · Curtains, towel rails · Internet, phone | 3.2 | Safety · comfort · work | 12–13 | ☑ |
+| 9.4 | SAFETY tech? | Entry sensor system | 13 | Occupancy sensor lights · Soundproofing, curtains · Digital showers | 3.2 | Environmental · comfort · environmental | 12–13 | ☑ |
+| 9.5 | WORK tech? | Hot-spot Internet, Wi-Fi, multi-plug | 13 | Channels, games · Towel rails, mini-bar · Safe, door lock | 3.2 | Entertainment · comfort · safety | 12–13 | ☑ |
 | 7.1 | Which organisation awards stars to accommodation and conference venues? | Tourism Grading Council of SA | 10, 20 | Tourism Business Council of SA | 3.1 | TBCSA: represents private sector in talks with government | 20 | ☑ |
 | 7.1 | … | … | | South African Tourism Services Association | 3.1 | SATSA: checks standard of members' products and services | 21 | ☑ |
 | 7.1 | … | … | | Federated Hospitality Association of SA | 3.1 | FEDHASA: promotes the hospitality industry | 21 | ☑ |
