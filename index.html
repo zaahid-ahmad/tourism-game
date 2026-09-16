@@ -242,6 +242,7 @@ footer{color:var(--amber-ghost);font-size:12px;margin-top:26px;line-height:1.7}
 </div>
 
 <div class="btnrow">
+  <button class="btn" type="button" id="lookBtn">Back to question</button>
   <button class="btn" type="button" id="helpBtn">Help</button>
   <button class="btn" type="button" id="mapBtn">Map</button>
   <button class="btn" type="button" id="statsBtn">Stats</button>
@@ -2289,6 +2290,7 @@ function cmdHelp(){
   out("", "rule");
   out("COMMANDS", "tag");
   out("1-4        choose an answer\nr          retry after a death\nlook       re-read the current stage\nmap        show gate progress\nstats      show current run figures\nawards     list achievements\nmode       show the current mode\nreport     end the run and open the debrief\nnew        start a new run and pick a mode (keeps achievements)\nwipe       erase everything, including achievements", "sys");
+  out("Click Back to question (or type look / r) to return.", "sys");
   unlock("brochure");
 }
 function cmdMap(){
@@ -2304,6 +2306,7 @@ function cmdMap(){
     lines.push(pad(c.id) + "  " + state + "  " + c.name + (dd ? "   (" + dd + " death" + (dd>1?"s":"") + ")" : ""));
   });
   out(lines.join("\n").replace(/^\n/, ""), "sys");
+  out("Click Back to question (or type look / r) to return.", "sys");
   unlock("mapread");
 }
 function cmdStats(){
@@ -2315,6 +2318,7 @@ function cmdStats(){
   var acc = attempted ? Math.round(clean / attempted * 100) : 0;
   var pct = Math.floor((S.done ? 1 : stagesDone() / NST) * 100);
   out("mode                " + (S.mode || "not chosen") + "\njourney             " + pct + "%  (" + stagesDone() + " of " + NST + " stages)\nstages reached      " + attempted + "\nfirst-time correct  " + clean + "  (" + acc + "%)\ndeaths              " + S.deaths.length + "\ngates cleared       " + Math.min(S.ch,NCH) + " of " + NCH + "\ncurrent streak      " + S.streak + "\nbest streak         " + (S.bestStreak||0) + "\nbest hardcore run   " + (S.hcBest||0) + " gates\nachievements        " + Object.keys(S.ach).length + " of " + ACH.length, "sys");
+  out("Click Back to question (or type look / r) to return.", "sys");
 }
 function cmdAwards(){
   clear();
@@ -2323,6 +2327,7 @@ function cmdAwards(){
   out(ACH.map(function(a){
     return (S.ach[a.id] ? "[★] " : "[ ] ") + a.name + "\n    " + a.d;
   }).join("\n"), "sys");
+  out("Click Back to question (or type look / r) to return.", "sys");
 }
 function cmdMode(){
   clear();
@@ -2333,6 +2338,7 @@ function cmdMode(){
     : S.mode === "standard"
       ? "You are in STANDARD. Deaths send you back to the stage. Use New run to switch to hardcore."
       : "No mode chosen yet.", "sys");
+  out("Click Back to question (or type look / r) to return.", "sys");
 }
 /* teacher tool, not listed in help: "warp 37" or "warp 37.3" jumps to a gate/stage.
    A warped run earns no achievements or lifetime records; New run clears the flag. */
@@ -2380,6 +2386,7 @@ function runCmd(raw){
 document.getElementById("cmd").addEventListener("keydown", function(e){
   if(e.key === "Enter"){ runCmd(this.value); this.value = ""; }
 });
+document.getElementById("lookBtn").addEventListener("click", function(){ renderStage(); });
 document.getElementById("helpBtn").addEventListener("click", cmdHelp);
 document.getElementById("mapBtn").addEventListener("click", cmdMap);
 document.getElementById("statsBtn").addEventListener("click", cmdStats);

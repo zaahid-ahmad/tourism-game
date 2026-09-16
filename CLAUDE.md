@@ -283,7 +283,7 @@ answer(i)
 | `new`, `new run` | `newRun()` |
 | `wipe`, `reset` | `askWipe()` (two-step confirm; no `confirm()` dialogs) |
 
-Buttons below the terminal: Help, Map, Stats, Achievements, End run & report, New run, Wipe everything.
+Buttons below the terminal: Back to question, Help, Map, Stats, Achievements, End run & report, New run, Wipe everything. Back to question just calls `renderStage()` (same as typing `look`/`r`) — Map, Stats, Achievements, Help and Mode now `clear()` the terminal before printing, so it's the only way back to the current question for a player who never types.
 
 ### 6.5 Debrief (`endGame`)
 
