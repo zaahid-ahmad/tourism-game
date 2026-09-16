@@ -116,6 +116,7 @@ Gate 27.2 already nearly follows this pattern and is the model to copy. Use it w
 7. **Four options** stay, matching the A–D format of their exams.
 8. **Wrong-answer text (`w`) teaches the difference.** It names the correct answer *and* says which sibling each tempting wrong option actually belongs to, e.g. "Kgalagadi. Joined in 2003 with the Nama is /Ai-/Ais-Richtersveld."
 9. **Only use wording from the guide.** Keep the guide's spellings where exams expect them (see §6 for exceptions already in place).
+10. **Never mention the guide in the game.** No "according to the guide", "the guide lists", "study guide" or "answer key" in `n`, `q`, `o`, `g`, `w` or any UI text. The game must make sense to players who have never seen the guide. If a fact is only true as of the guide, anchor it with a date or context instead.
 
 ---
 
@@ -278,7 +279,7 @@ These are the families of things learners mix up, taken from the study guide. **
 | National vs provincial heritage examples (unclear table) | Only use: Battlefields = provincial, the Grade numbers, and the 8 WHS |
 | Lesedi "in the Cradle of Humankind" but listed under North West | Don't ask which province Lesedi is in |
 | Lobola used for both "learned" and "dynamic" | See §5.7 |
-| "Eleven languages" (current count differs) | Keep as per the guide; don't swap it with other numbers |
+| "Eleven languages" (current count differs) | Say "eleven spoken official languages" (SASL became the twelfth in 2023); don't swap it with other numbers |
 | Old place names (Nelspruit, Mafikeng, Bisho, Swaziland) | Keep exam names in options; current names stay in the green feedback only |
 | Gariep is both a river and a dam | Don't use Gariep as a wrong option in river-vs-dam questions |
 

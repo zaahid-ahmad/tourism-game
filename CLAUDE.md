@@ -96,6 +96,7 @@ The number of gates per topic follows how much content that topic has in the stu
 - **Gain (`g`) lines** start with an uppercase keyword and a colon, e.g. `"GAUTRAIN: rapid transit…"`.
 - **Death (`w`) lines** state the right answer first, then the distinction that separates it from the distractors.
 - **Spelling is South African English** ("organisation", "programme", "centre").
+- **Never mention the study guide in player-facing text** (questions, feedback, report, footer, boot text). Anyone should be able to play, not only Tourism learners. Where a fact is only true "per the guide" (an older count, a disputed location), anchor it with a date or context instead, e.g. "By 2010, how many World Heritage Sites…?"
 
 ### 3.3 Gate list
 
@@ -135,9 +136,9 @@ These were conscious calls. Keep them unless the owner says otherwise.
 
 1. **International Date Line direction is not tested.** The guide's answer key says crossing the IDL eastward gains a day, which is factually backwards. Gate 20, stage 5 only asks for the IDL's position (180°).
 2. **Old place names are kept, with current names in the feedback.** Exam answers still use Nelspruit, Mafikeng, Bisho and Swaziland, so the options keep those names, and the `g` text adds Mbombela, Mahikeng, Bhisho and Eswatini.
-3. **Bloukrans Bridge follows the guide's answer key (Eastern Cape).** The `g` text notes it sits on the EC/WC border.
+3. **Bloukrans Bridge follows the guide's answer key (Eastern Cape).** Western Cape is never offered as an option, and the `g`/`w` text notes it sits on the EC/WC border.
 4. **National vs provincial heritage examples are not tested.** The guide's table doesn't clearly show which examples are which. Only the unambiguous facts are used: Grade 1/2/3, KZN Battlefields = Provincial (confirmed by the answer key), and the eight WHS.
-5. **"Eleven languages"** follows the guide (Gate 45), with "(as per the guide)" in the `g` text.
+5. **"Eleven languages"** follows the guide (Gate 45), worded as "eleven spoken official languages", and the `g` text notes that South African Sign Language became the twelfth in 2023. The WHS count (Gate 24) is anchored "by 2010" (eight).
 6. **Guide typo "Walter Sizulu"** is corrected to Walter Sisulu.
 
 **Known content weakness:** the correct option is often the longest or most detailed one, so a learner could guess by length. Shuffling doesn't fix this. Balancing distractor length is a good future content pass.
