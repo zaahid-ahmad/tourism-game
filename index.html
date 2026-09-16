@@ -2285,12 +2285,14 @@ function answer(i){
    COMMANDS
    ============================================================ */
 function cmdHelp(){
+  clear();
   out("", "rule");
   out("COMMANDS", "tag");
   out("1-4        choose an answer\nr          retry after a death\nlook       re-read the current stage\nmap        show gate progress\nstats      show current run figures\nawards     list achievements\nmode       show the current mode\nreport     end the run and open the debrief\nnew        start a new run and pick a mode (keeps achievements)\nwipe       erase everything, including achievements", "sys");
   unlock("brochure");
 }
 function cmdMap(){
+  clear();
   out("", "rule");
   out("MAP", "tag");
   var last = "";
@@ -2305,6 +2307,7 @@ function cmdMap(){
   unlock("mapread");
 }
 function cmdStats(){
+  clear();
   out("", "rule");
   out("RUN STATS", "tag");
   var attempted = Object.keys(S.seen).length;
@@ -2314,6 +2317,7 @@ function cmdStats(){
   out("mode                " + (S.mode || "not chosen") + "\njourney             " + pct + "%  (" + stagesDone() + " of " + NST + " stages)\nstages reached      " + attempted + "\nfirst-time correct  " + clean + "  (" + acc + "%)\ndeaths              " + S.deaths.length + "\ngates cleared       " + Math.min(S.ch,NCH) + " of " + NCH + "\ncurrent streak      " + S.streak + "\nbest streak         " + (S.bestStreak||0) + "\nbest hardcore run   " + (S.hcBest||0) + " gates\nachievements        " + Object.keys(S.ach).length + " of " + ACH.length, "sys");
 }
 function cmdAwards(){
+  clear();
   out("", "rule");
   out("ACHIEVEMENTS — " + Object.keys(S.ach).length + " / " + ACH.length, "tag");
   out(ACH.map(function(a){
@@ -2321,6 +2325,7 @@ function cmdAwards(){
   }).join("\n"), "sys");
 }
 function cmdMode(){
+  clear();
   out("", "rule");
   out("MODE", "tag");
   out(S.mode === "hardcore"
@@ -2404,6 +2409,7 @@ function askWipe(){
     boot();
     return;
   }
+  clear();
   btn.textContent = "Confirm: erase all + achievements"; btn.classList.add("warn");
   out("", "rule");
   out("Wipe everything erases your run AND all achievements. Press the button again (or type wipe) within 5 seconds to confirm.", "deadwhy");
@@ -2414,6 +2420,7 @@ function askWipe(){
    DEBRIEF
    ============================================================ */
 function endGame(){
+  clear();
   S.done = S.ch >= NCH;
   save(); hud();
 
