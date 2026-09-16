@@ -27,6 +27,8 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 | 2026-09-16 | All gates, after Attractions | 35 | 18 |
 | 2026-09-16 | Culture and heritage 45–48 (whole topic) | 0 | 0 |
 | 2026-09-16 | All gates, after Culture and heritage | 20 | 10 |
+| 2026-09-16 | Map work 19–25 (whole topic) | 0 | 0 |
+| 2026-09-16 | All gates, after Map work | 6 | 4 |
 
 ---
 
@@ -135,6 +137,46 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 | 18.3 | Portable speed points? | Card stays in sight, not copied | 23 | Immediate EFT · Hold a reservation · Bank guarantee | 3.2 | Debit card · credit card · bank cheque | 23–24 | ☑ |
 | 18.4 | Credit card disadvantage? | Commission charged to providers | 23 | Two-day transfers · Cheques bounce · Refused if low funds | 3.2 | Internet · cheque · debit card | 22–24 | ☑ |
 | 18.5 | Refuse personal cheque + bank-guaranteed? | May bounce; guaranteed costs a fee | 24 | Bounce + free · No signature + fee · No signature + free | 3.5 | Must be signed; bank charges a fee | 24 | ☑ |
+
+## Term 2 · Map work and tour planning
+
+| gate.stage | question | correct option | page | wrong option | tech | belongs to / why wrong | page | OK |
+|---|---|---|---|---|---|---|---|---|
+| 19.1 | Where are map symbols explained? | In the legend | 30 | In the scale bar · On the compass rose · In the grid reference | 3.1 | Other map tools | 30–32 | ☑ |
+| 19.2 | On a 1:50 000 map, 1 cm represents? | 0,5 km | 31 | 5 km · 50 km · 50 m | 3.4 | Common scale-conversion errors | 31 | ☑ |
+| 19.3 | How many compass points, and the cardinal points? | Sixteen; N, S, E, W | 31 | Eight; N, S, E, W · Sixteen; NE, NW, SE, SW · Four; N, NE, E, SE | 3.5 | Wrong count/ordinal pairings | 31 | ☑ |
+| 19.4 | What is a grid reference used for? | Finding a place or feature on the map | 32 | Measuring the time difference between places · Showing how big the map's scale is · Explaining what each map symbol means | 3.1 | Time zones · scale · legend | 30–32 | ☑ |
+| 19.5 | What are these (red) numbers beside roads? | Distance indicators | 33 | Road names · Altitude in metres · Speed limits | 3.1 | Other map/road features | 33 | ☑ |
+| 20.1 | Longitude interval, and how many time zones? | 15° intervals; 24 time zones | 32 | 10° intervals; 36 time zones · 15° intervals; 12 time zones · 30° intervals; 24 time zones | 3.5 | Wrong interval/count pairings | 32 | ☑ |
+| 20.2 | What is the 0° line of longitude called? | The Greenwich Meridian | 32 | The Equator · The International Date Line · The Tropic of Capricorn | 3.1 | 0° latitude · 180° longitude · unrelated line | 32 | ☑ |
+| 20.3 | Time in Cape Town (30° E) when London is 12:00? | 14:00 | 32 | 10:00 · 12:00 · 17:00 | 3.4 | Wrong direction/offset | 32 | ☑ |
+| 20.4 | Time in New York (75° W) when London is 12:00? | 07:00 | 32 | 17:00 · 09:00 · 05:00 | 3.4 | Wrong direction/offset | 32 | ☑ |
+| 20.5 | At what longitude is the IDL? | 180° | 32 | 0° · 90° · 30° E | 3.1 | Position only tested, not direction (§5.9) | 32 | ☑ |
+| 21.1 | Which map shows borders of countries/provinces? | Political map | 33 | Physical map · Street map · Road map | 3.1 | Other map types | 33 | ☑ |
+| 21.2 | On a physical map, orange and brown show? | High elevations | 33 | Water · Low elevations · Provincial borders | 3.2 | Other colour codes | 33 | ☑ |
+| 21.3 | Which map shows the location of airports? | A specialist map | 33 | A street map · A political map · A tourist attraction map | 3.1 | Other map types | 33 | ☑ |
+| 21.4 | Which map is most suitable for heritage sites/restaurants nearby? | A tourist information map | 33 | A political map · A physical map · A rainfall map | 3.1 | Other map types | 33 | ☑ |
+| 21.5 | Which map focuses on one place's layout and facilities? | A tourist attraction map | 33 | A general reference map · A political map · A road map | 3.1 | Other map types | 33 | ☑ |
+| 22.1 | How does a GPS work? | It receives satellite data to show your position | 33 | It reads printed grid lines to show your position · It calculates the time zone you are currently in · It connects to a fixed telephone line for directions | 3.2 | Grid references · time zones · landline devices | 30,32,33 | ☑ |
+| 22.2 | What does GPS stand for? | Global Positioning System | 33 | General Positioning System · Global Position System · General Position Systems | 3.1 | Word-order/wording mix-ups | 33 | ☑ |
+| 22.3 | Which tool lets her take a virtual walk? | Google Street View | 34 | A distance table · A political map · A map legend | 3.1 | Other map/ICT tools | 30,34,36 | ☑ |
+| 22.4 | Why is the Internet important to tourists? | It gives current information for trip planning | 34 | It replaces the need for a valid passport · It grades hotels using a star system · It removes the need for any printed maps | 3.2 | DHA passports · TGCSA grading · paper maps | 34 | ☑ |
+| 22.5 | How do you find information on an interactive map? | Click province, then town, then attraction | 34 | Type in a grid reference for the square · Measure the distance with the map's scale · Look up the symbol in the map's legend | 3.1 | Grid reference · scale · legend | 30,32,34 | ☑ |
+| 23.1 | Which province–capital pair is correct? | Mpumalanga – Nelspruit | 34–35 | Limpopo – Mafikeng · Free State – Kimberley · North West – Polokwane | 3.1 | Swapped real capitals (§5.9 old names kept) | 34–35 | ☑ |
+| 23.2 | What is the capital of KwaZulu-Natal? | Pietermaritzburg | 35 | Durban · Bisho · Bloemfontein | 3.1 | Biggest city, not capital · other capitals | 35 | ☑ |
+| 23.3 | Which countries neighbour South Africa? | Namibia, Botswana, Zimbabwe, Lesotho, Mozambique, Swaziland | 35 | Zambia, Tanzania, Kenya, Malawi, Uganda, Rwanda · Angola, Tanzania, Congo, Sudan, Ghana, Nigeria · Kenya, Egypt, Ghana, Nigeria, Uganda, Sudan | 3.4 | Real African countries, none neighbouring SA | 35 | ☑ |
+| 23.4 | What are the tourism 'gateways' to the provinces? | Airports and harbours | 35 | National highways · Border posts · Tourist information offices | 3.1 | Other map/infrastructure features | 35 | ☑ |
+| 23.5 | How many oceans and continents? | Two oceans; seven continents | 35 | Four oceans; seven continents · Two oceans; five continents · Three oceans; six continents | 3.5 | Wrong count pairings | 35 | ☑ |
+| 24.1 | By 2010, how many WHS did SA have? | Eight | 35 | Nine · Six · Twelve | 3.4 | Made up, no clash with other guide numbers | 35 | ☑ |
+| 24.2 | Which is NOT a South African WHS? | Modjadji Cycad Reserve | 35 | Vredefort Dome · Cape Floral Region · Mapungubwe Cultural Landscape | 3.1 | Real WHS, wrongly excluded | 35 | ☑ |
+| 24.3 | Which list contains only South African harbours? | Durban, Mossel Bay, Saldanha | 35 | Lanseria, George, Upington · Gariep, Vaal, Hartebeespoort · Magaliesberg, Waterberg, Pilanesberg | 3.2 | Airports · dams · mountains | 35 | ☑ |
+| 24.4 | Which is a Transfrontier PARK? | Kgalagadi TFP | 35 | Maloti-Drakensberg · Addo · Table Mountain | 3.1 | TFCA, not TFP · national parks | 35 | ☑ |
+| 24.5 | Which are all major South African mountains? | Drakensberg, Magaliesberg | 35 | Gariep, Breede, Tugela · Vaal, Hartebeespoort, Gariep · Addo, Karoo, Mokala | 3.2 | Rivers · dams · parks | 35 | ☑ |
+| 25.1 | What are distance tables used for? | Planning self-drive routes | 36 | Converting currency amounts · Calculating time zone differences · Grading hotels and lodges | 3.2 | Unrelated tourism tasks | 36 | ☑ |
+| 25.2 | Average driving speed used by the route planner? | 100 km/h | 36 | 80 km/h · 120 km/h · 60 km/h | 3.4 | Plausible other speeds | 36 | ☑ |
+| 25.3 | Driving time for a 581 km route? | 5,81 hours | 36 | 58,1 hours · 4,5 hours · 6,81 hours | 3.4 | Decimal-place and calculation slips | 36 | ☑ |
+| 25.4 | Driving time for a 1 400 km route? | 14 hours of driving | 36 | 1,4 hours of driving · 140 hours of driving · 10 hours of driving | 3.4 | Decimal-place slips | 36 | ☑ |
+| 25.5 | What else affects driving time (besides weather)? | Stops, speed limits and road conditions | 36 | The make and colour of the car · The time zone at the destination · The tourist's passport number | 3.2 | Unrelated factors | 36 | ☑ |
 
 ## Term 2 · Domestic, regional and international tourism
 
