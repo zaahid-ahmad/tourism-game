@@ -1,3 +1,5 @@
 # Source material stays local: never commit or publish it (Netlify serves the repo root)
 *.pdf
 node_modules/
+# Local session handover notes
+continue.md

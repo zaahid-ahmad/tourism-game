@@ -23,6 +23,8 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 | 2026-09-16 | All gates, after Sectors 1–9 | 101 | 37 |
 | 2026-09-16 | Sectors 1–18 (whole topic) | 0 | 0 |
 | 2026-09-16 | All gates, after Sectors 10–18 | 64 | 26 |
+| 2026-09-16 | Attractions 28–37 (whole topic) | 0 | 0 |
+| 2026-09-16 | All gates, after Attractions | 35 | 18 |
 
 ---
 
@@ -151,6 +153,51 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 
 | gate.stage | question | correct option | page | wrong option | tech | belongs to / why wrong | page | OK |
 |---|---|---|---|---|---|---|---|---|
+| 28.1 | Bloukrans Bridge facts? | 216 m; highest bungee | 47 | 215 m + bungee · 216 m + hand-dug hole · 56 m + bungee | 3.4, 3.5 | Big Hole depth · Big Hole · Augrabies falls | 55, 58 | ☑ |
+| 28.2 | National Arts Festival where + when? | Grahamstown; June/July | 47 | Grahamstown Sept/Oct · Potchefstroom June/July · Potchefstroom Sept/Oct | 3.5 | Aardklop / Fish River months | 47, 55 | ☑ |
+| 28.3 | Vredefort Dome? | Oldest and largest meteorite impact site | 47 | Hand-dug hole · Water-eroded formations · Third largest canyon | 3.2 | Big Hole · Bourke's Luck · Blyde | 54–55 | ☑ |
+| 28.4 | Mrs Ples + Little Foot ages? | 2,8 million; 4 million | 47 | Swapped · + 2 billion · 2 billion + 4 million | 3.4, 3.5 | Vredefort age | 47 | ☑ |
+| 28.5 | Apartheid Museum facts? | Opened 2001; 1948–1994 | 48 | Opened 1994 · 1961–1994 · gold mining history | 3.4, 3.2 | Swapped years · WWF year · Gold Reef City | 22, 48 | ☑ |
+| 29.1 | First WHS? | iSimangaliso Wetland Park | 48 | Drakensberg Park · Robben Island · Cradle of Humankind | 3.1 | Other WHS | 48–56 | ☑ |
+| 29.2 | Highest range + largest rock painting group? | uKhahlamba-Drakensberg | 48 | Golden Gate · Mapungubwe · Cradle | 3.1 | Other heritage attractions | 47–49 | ☑ |
+| 29.3 | uShaka's three sections? | Sea World, Wet 'n Wild, Village Walk | 49 | Valley of Waves · Two Oceans Aquarium + Superbowl · Golden Loop | 3.2 | Sun City · V&A · Gold Reef City | 48–56 | ☑ |
+| 29.4 | Comrades facts? | 90 km; PMB–Durban | 49 | 109 km PMB–Durban · 90 km Cape Town · 109 km Cape Town | 3.4, 3.5 | Cape Argus | 56 | ☑ |
+| 29.5 | Sardine Run when + who? | May–July; SIT and education | 49 | May–July sport · Sept–Oct SIT · Sept–Oct sport | 3.5 | Sept–Oct = Fish River/Aardklop | 47, 55 | ☑ |
+| 30.1 | Why province of myths and legends? | Rain Queen Modjadji, Lobedu | 49 | Makapansgat relics · Comrades · Roaring sands | 3.2 | Limpopo archaeology · KZN · Witsand | 49–55 | ☑ |
+| 30.2 | Mapungubwe? | Gold and ivory trading centre to AD 1300 | 49 | Diamond rush town · Goldfield monument · Fossil skull site | 3.2 | Kimberley · Pilgrim's Rest · Cradle | 47–55 | ☑ |
+| 30.3 | Oldest, largest cycads? | Modjadji, Limpopo | 49 | Kirstenbosch · Walter Sisulu · Maloti-Drakensberg TFCA | 3.1 | Botanical gardens · Drakensberg cycad | 57–59 | ☑ |
+| 30.4 | Kruger facts? | 2 million ha; 500+ bird species | 58 | 350 birds · 3,6 million ha | 3.4, 3.5 | Pilanesberg · Ivory Route | 49, 55 | ☑ |
+| 30.5 | African Ivory Route? | 2 000 km route, five cultural camps | 49 | Panorama Route · 109 km cycle · Wine regions | 3.2 | Mpumalanga · Argus · Cape wine routes | 55–56 | ☑ |
+| 31.1 | Late-1800s goldfield, now monument? | Pilgrim's Rest | 55 | Kimberley · Mapungubwe · Gold Reef City | 3.1 | Diamond town · kingdom · mine theme park | 47–55 | ☑ |
+| 31.2 | Bourke's Luck Potholes formed by? | Water erosion | 55 | Meteorite · Hand-digging · Wind-blown sand | 3.2 | Vredefort · Big Hole · made up | 47, 55 | ☑ |
+| 31.3 | Blyde River Canyon facts? | Third largest canyon; 25 000 ha | 55 | 55 000 ha · Third largest park · Largest canyon | 3.4, 3.5 | Augrabies · Addo | 58 | ☑ |
+| 31.4 | Why God's Window? | Panoramic view of Lowveld and rainforest | 55 | 360° cable cars · Telescope · Place of Great Noise | 3.2 | Table Mountain · SALT · Augrabies | 55–58 | ☑ |
+| 31.5 | Correct province matches? | Great Fish River – EC; SALT – NC | 47, 55 | Swapped · SALT – WC · Cango – MP | 3.5 | Matching exercise answers | 60 | ☑ |
+| 32.1 | Big Hole size? | 1,6 km wide, 215 m deep | 55 | 216 m · 380 km wide · 16 km deep | 3.4, 3.5 | Bloukrans · Vredefort crater | 47 | ☑ |
+| 32.2 | Why 'roaring' sands? | Sand particles rubbing in hot, dry weather | 55 | Wind in caves · Water erosion · Porcupines and aardwolves | 3.2 | Made up · Bourke's · Witsand night drives | 55 | ☑ |
+| 32.3 | Namaqualand when + species? | Aug–Sept; 3 500 | 55 | 1 000 · Dec–Jan | 3.4, 3.5 | Namaqua NP endemics; made-up months | 58 | ☑ |
+| 32.4 | SALT? | Largest telescope in Southern Hemisphere | 55 | Largest in the world · Hand-dug hole · Impact site | 3.2 | Overstated · Big Hole · Vredefort | 47, 55 | ☑ |
+| 32.5 | NC Transfrontier Parks? | /Ai-/Ais-Richtersveld and Kgalagadi | 59–60 | + Great Limpopo · + Maloti · Great Limpopo + Limpopo-Shashe | 3.1 | Limpopo TFP · TFCAs | 59 | ☑ |
+| 33.1 | Sun City known as? | 'Las Vegas' of SA | 55 | Place of Great Noise · Roaring sands · Myths and legends | 3.1 | Augrabies · Witsand · Limpopo | 49–58 | ☑ |
+| 33.2 | Lesedi meaning + villages? | 'Light' in Sesotho; five | 55 | seven · 'Rain' | 3.5 | Made up (province not asked: guide ambiguity) | 55 | ☑ |
+| 33.3 | Pilanesberg? | Big Five, 350 birds, white rhino | 55 | 400 birds, seven habitats · 500 birds, largest · Own airstrip | 3.2 | Phinda · Kruger · Madikwe | 57–58 | ☑ |
+| 33.4 | Aardklop where + length? | Potchefstroom; five days Sept/Oct | 55 | Oudtshoorn · June/July · Grahamstown | 3.5 | Klein Karoo · National Arts Festival | 47, 56 | ☑ |
+| 33.5 | NW reserve with airstrip? | Madikwe | 57 | Shamwari · Phinda · Sabi Sabi | 3.1 | Other private reserves | 57 | ☑ |
+| 34.1 | Only on Table Mountain? | Ghost frog | 56 | Knysna seahorse · Cape mountain zebra · Pygmy falcon | 3.1 | Garden Route NP · Mountain Zebra NP · Kgalagadi | 58–59 | ☑ |
+| 34.2 | Robben Island sites? | Kramat Shrine, lepers' graveyard, Sobukwe House | 56 | Aquarium, galleries · 48 buildings, Eureka · 22 exhibition areas | 3.2 | V&A · Big Hole · Apartheid Museum | 48–56 | ☑ |
+| 34.3 | Garden Route from–to? | Mossel Bay to Storms River | 56 | → Port Elizabeth · Cape Town → · Knysna → PE | 3.5 | Made-up endpoints | 56 | ☑ |
+| 34.4 | Cape Argus facts? | 109 km, March, largest timed cycling | 56 | 90 km · oldest ultra-marathon · June | 3.4, 3.5 | Comrades | 49 | ☑ |
+| 34.5 | Cango Caves town + festival? | Oudtshoorn; Klein Karoo NAF | 56 | + National Arts Festival · Potchefstroom · Grahamstown + Aardklop | 3.5 | Grahamstown · Aardklop town | 47, 55 | ☑ |
+| 35.1 | Roads, houses, dams? | Man-made environment | 56 | Natural · Physical · Cultural | 3.1 | Other environments | 56 | ☑ |
+| 35.2 | Born Free Big Cat Sanctuary? | Shamwari | 57 | Madikwe · Phinda · Sabi Sabi | 3.1 | Other private reserves | 57 | ☑ |
+| 35.3 | Northern KZN, seven habitats, 400 birds? | Phinda | 57 | Sabi Sabi · Shamwari · Madikwe | 3.1 | Other private reserves | 57 | ☑ |
+| 35.4 | Elefun offers? | Arts, crafts, junior rangers | 57 | Field guide training · Canoe trips · Education courses and bowls | 3.2 | Shamwari · Phinda · Golden Gate | 47, 57 | ☑ |
+| 35.5 | Who runs gardens + Table Mountain garden? | SANBI; Kirstenbosch | 57 | SANBI Walter Sisulu · SANParks Kirstenbosch · SANParks Walter Sisulu | 3.5 | Roodepoort · national parks | 57–58 | ☑ |
+| 36.1 | Khoi name for Augrabies? | 'Place of Great Noise' | 58 | Roaring sands · God's Window · Place of Light | 3.1 | Witsand · MP · Lesedi | 55 | ☑ |
+| 36.2 | Addo largest / second largest? | Cape gannet; African penguin | 58 | Swapped · bearded vulture · bontebok | 3.5 | Golden Gate · Bontebok NP | 58 | ☑ |
+| 36.3 | Mountain Zebra NP why + number? | Cape mountain zebra; about 300 | 58 | Hartmann's · over 3 000 · bontebok | 3.5, 3.4 | /Ai-/Ais · Bontebok NP | 58–59 | ☑ |
+| 36.4 | Vulture restaurant? | Golden Gate Highlands NP | 58 | West Coast NP · Bontebok NP · Maloti-Drakensberg TFCA | 3.1 | Other parks; Maloti has bearded vultures but no restaurant | 58–59 | ☑ |
+| 36.5 | Namaqua NP known for? | Spring daisies; 3 500+ species, 1 000 endemic | 58 | Bontebok · Knysna seahorse · 56 m waterfall | 3.2 | Bontebok NP · Garden Route NP · Augrabies | 58 | ☑ |
 | 37.1 | Which statement about Transfrontier Parks is correct? | Extend across international borders; formed with Namibia | 59, 96 (8.13) | Extend across international borders; formed with Lesotho | 3.5 | Lesotho: Maloti-Drakensberg TFCA, not a TFP partner | 59, 96 | ☑ |
 | 37.1 | … | … | | Managed by SANParks alone; formed with Namibia | 3.5 | Kgalagadi managed by both countries; /Ai-/Ais with Nama | 59 | ☑ |
 | 37.1 | … | … | | Managed by SANParks alone; formed with Lesotho | 3.5 | Both halves wrong (as above) | 59 | ☑ |
