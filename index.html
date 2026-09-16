@@ -1,0 +1,2495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Passport Tourism Sim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --void:#0B0805;
+  --panel:#120D07;
+  --panel-2:#1A1309;
+  --edge:#3A2A12;
+  --amber:#E9A73C;
+  --amber-hi:#FFD79A;
+  --amber-dim:#9A7130;
+  --amber-ghost:#6B4F22;
+  --red:#E8514A;
+  --red-dim:#7C2C29;
+  --green:#6FC98A;
+  --crt:"VT323",monospace;
+  --mono:"IBM Plex Mono",Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--void);
+  color:var(--amber);
+  font-family:var(--mono);
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(ellipse at 50% 40%, #1A1208 0%, #0B0805 72%);
+  min-height:100vh;
+}
+.wrap{max-width:880px;margin:0 auto;padding-inline:16px;padding-block:22px 60px}
+
+/* ---------- terminal shell ---------- */
+.shell{
+  border:1px solid var(--edge);
+  background:var(--panel);
+  box-shadow:0 0 0 1px #000 inset, 0 24px 70px -30px #000;
+  position:relative;
+  overflow:hidden;
+}
+.shell::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(to bottom, rgba(255,255,255,.022) 0 1px, transparent 1px 3px);
+  mix-blend-mode:screen;
+}
+.bar{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  background:var(--panel-2);border-bottom:1px solid var(--edge);
+  padding:7px 12px;font-size:12px;letter-spacing:.06em;color:var(--amber-dim);
+}
+.bar .dot{width:8px;height:8px;border-radius:50%;background:var(--amber-ghost);flex:0 0 auto}
+.bar .dot.live{background:var(--amber);box-shadow:0 0 7px var(--amber)}
+.hc .bar .dot.live{background:var(--red);box-shadow:0 0 7px var(--red)}
+.bar .name{color:var(--amber);letter-spacing:.12em;text-transform:uppercase}
+.bar .right{margin-left:auto;display:flex;gap:14px;flex-wrap:wrap}
+.bar b{color:var(--amber-hi);font-weight:500;font-variant-numeric:tabular-nums}
+.bar b.hcl{color:var(--red)}
+
+/* ---------- hud ---------- */
+.hud{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));
+  border-bottom:1px solid var(--edge);
+}
+.hud > div{padding:9px 12px;border-right:1px solid var(--edge)}
+.hud > div:last-child{border-right:0}
+.hud .k{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber-ghost)}
+.hud .v{font-family:var(--crt);font-size:25px;line-height:1.05;color:var(--amber-hi);margin-top:1px;font-variant-numeric:tabular-nums}
+.hud .v.bad{color:var(--red)}
+.hud .v.small{font-size:17px;letter-spacing:.04em;margin-top:5px}
+
+/* ---------- journey progress ---------- */
+.journey{padding:10px 12px 12px;border-bottom:1px solid var(--edge)}
+.jtop{display:flex;align-items:baseline;gap:6px 12px;flex-wrap:wrap;margin-bottom:7px}
+.jtop .k{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber-ghost)}
+.jnow{font-size:12px;color:var(--amber-dim);letter-spacing:.04em}
+.jpct{margin-left:auto;font-family:var(--crt);font-size:22px;line-height:1;color:var(--amber-hi);font-variant-numeric:tabular-nums}
+.track{position:relative;height:14px;border:1px solid var(--edge);background:var(--panel-2);overflow:hidden}
+.track i{position:absolute;inset:0 auto 0 0;width:0;background:repeating-linear-gradient(90deg, var(--amber) 0 6px, #C98A2A 6px 8px);transition:width .45s ease}
+.track b{position:absolute;top:0;bottom:0;width:2px;background:var(--void);opacity:.85}
+.jlegend{display:flex;justify-content:space-between;gap:8px;margin-top:5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber-ghost)}
+
+/* ---------- screen ---------- */
+.screen{padding:18px 18px 6px;min-height:340px}
+.line{white-space:pre-wrap;word-break:break-word}
+.sys{color:var(--amber-ghost)}
+.loc{font-family:var(--crt);font-size:30px;line-height:1.08;color:var(--amber-hi);letter-spacing:.02em;margin-top:16px}
+.loc .no{color:var(--amber-dim)}
+.narr{color:var(--amber);margin-top:6px}
+.prompt{color:var(--amber-hi);margin-top:16px}
+.prompt::before{content:"?> ";color:var(--amber-dim)}
+.gain{color:var(--green);margin-top:10px}
+.gain::before{content:"+ ";}
+.dead{color:var(--red);margin-top:12px;font-family:var(--crt);font-size:28px;line-height:1.1}
+.deadwhy{color:var(--red);opacity:.92;margin-top:4px}
+.rule{border-top:1px dashed var(--edge);margin-block:16px}
+.tag{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber-ghost)}
+.ach{margin-top:12px;border:1px solid var(--amber-dim);background:var(--panel-2);padding:8px 12px;color:var(--amber-hi)}
+.ach .t{font-family:var(--crt);font-size:22px;line-height:1.1;letter-spacing:.03em;color:var(--amber-hi)}
+.ach .t::before{content:"★ ";color:var(--amber)}
+.ach .d{font-size:13px;color:var(--amber-dim)}
+.modeinfo{color:var(--amber);margin-top:6px}
+.modeinfo em{font-style:normal;color:var(--red)}
+
+/* ---------- choices ---------- */
+.choices{display:flex;flex-direction:column;gap:5px;margin-top:14px;padding:0 18px 4px}
+.ch{
+  display:flex;gap:11px;align-items:flex-start;text-align:left;width:100%;
+  background:transparent;border:1px solid transparent;color:var(--amber);
+  font-family:var(--mono);font-size:14.5px;line-height:1.5;padding:7px 10px;cursor:pointer;
+}
+.ch:hover:not(:disabled){border-color:var(--edge);background:var(--panel-2);color:var(--amber-hi)}
+.ch:focus-visible{outline:1px solid var(--amber);outline-offset:1px}
+.ch .n{color:var(--amber-dim);flex:0 0 auto}
+.ch:hover:not(:disabled) .n{color:var(--amber-hi)}
+.ch:disabled{cursor:default;opacity:.45}
+.ch.wasright{color:var(--green);opacity:1}
+.ch.wasright .n{color:var(--green)}
+.ch.waswrong{color:var(--red);opacity:1}
+.ch.waswrong .n{color:var(--red)}
+.ch.danger{color:var(--red)}
+.ch.danger .n{color:var(--red-dim)}
+
+/* ---------- input ---------- */
+.inputrow{display:flex;align-items:center;gap:8px;border-top:1px solid var(--edge);padding:10px 18px;background:var(--panel-2)}
+.inputrow span{color:var(--amber-dim);flex:0 0 auto}
+input[type=text]{
+  flex:1 1 auto;min-width:0;background:transparent;border:0;color:var(--amber-hi);
+  font-family:var(--mono);font-size:15px;padding:2px 0;
+}
+input[type=text]:focus{outline:none}
+.caret{width:9px;height:17px;background:var(--amber);animation:blink 1.05s steps(1) infinite;flex:0 0 auto}
+@keyframes blink{50%{opacity:0}}
+
+/* ---------- buttons ---------- */
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn{
+  font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+  padding:8px 14px;background:transparent;border:1px solid var(--edge);color:var(--amber-dim);cursor:pointer;
+}
+.btn:hover{border-color:var(--amber);color:var(--amber-hi)}
+.btn:focus-visible{outline:1px solid var(--amber);outline-offset:2px}
+.btn.warn{border-color:var(--red-dim);color:var(--red)}
+
+/* ---------- report ---------- */
+.report{margin-top:22px;border:1px solid var(--edge);background:var(--panel)}
+.report h2{font-family:var(--crt);font-size:34px;line-height:1.05;color:var(--amber-hi);margin:0;padding:16px 18px 4px;letter-spacing:.02em}
+.report .sub{padding:0 18px 16px;color:var(--amber-dim);font-size:14px;margin:0}
+.rsec{border-top:1px solid var(--edge);padding:16px 18px}
+.rsec h3{font-family:var(--crt);font-size:24px;color:var(--amber);margin:0 0 10px;letter-spacing:.03em}
+.strands{display:flex;flex-direction:column;gap:9px}
+.strand{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:baseline}
+.strand .nm{font-size:14px}
+.strand .fig{font-size:13px;color:var(--amber-dim);font-variant-numeric:tabular-nums;white-space:nowrap}
+.meter{grid-column:1 / -1;height:9px;background:var(--panel-2);border:1px solid var(--edge);display:flex}
+.meter i{display:block;height:100%}
+.meter i.ok{background:var(--amber)}
+.meter i.no{background:var(--red-dim)}
+.badge{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;border:1px solid currentColor;padding:1px 6px;margin-left:8px}
+.badge.best{color:var(--green)}
+.badge.worst{color:var(--red)}
+.deathlist{display:flex;flex-direction:column;gap:12px}
+.dl{border-left:2px solid var(--red-dim);padding-left:12px}
+.dl .q{font-size:14px;color:var(--amber-hi)}
+.dl .meta{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber-ghost);margin-bottom:3px}
+.dl .a{font-size:13.5px;color:var(--amber-dim);margin-top:5px}
+.dl .a b{color:var(--green);font-weight:500}
+.todo{display:flex;flex-direction:column;gap:8px;font-size:14px}
+.todo div::before{content:"› ";color:var(--amber-dim)}
+.note{color:var(--amber-dim);font-size:13px;margin-top:14px}
+.awards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.aw{border:1px solid var(--edge);padding:8px 10px;background:var(--panel-2)}
+.aw .t{font-family:var(--crt);font-size:20px;line-height:1.1;letter-spacing:.03em;color:var(--amber-ghost)}
+.aw .d{font-size:12.5px;color:var(--amber-ghost);line-height:1.45;margin-top:2px}
+.aw.on{border-color:var(--amber-dim)}
+.aw.on .t{color:var(--amber-hi)}
+.aw.on .t::before{content:"★ ";color:var(--amber)}
+.aw.on .d{color:var(--amber-dim)}
+
+footer{color:var(--amber-ghost);font-size:12px;margin-top:26px;line-height:1.7}
+
+@media (max-width:520px){
+  body{font-size:14px}
+  .screen{padding:14px 13px 4px;min-height:300px}
+  .choices{padding-inline:13px}
+  .inputrow{padding-inline:13px}
+  .loc{font-size:25px}
+  .strand{grid-template-columns:1fr}
+  .strand .fig{white-space:normal}
+  .jlegend{display:none}
+}
+@media (prefers-reduced-motion:reduce){.caret{animation:none}.track i{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+<div class="shell">
+  <div class="bar">
+    <span class="dot live" aria-hidden="true"></span>
+    <span class="name">passport.sim</span>
+    <span>tourism gr10 // full-year run</span>
+    <span class="right"><span>mode <b id="modeLbl">—</b></span><span>run <b id="runNo">1</b></span></span>
+  </div>
+
+  <div class="hud">
+    <div><div class="k">Gate</div><div class="v" id="hudCh">1/53</div></div>
+    <div><div class="k">Stage</div><div class="v" id="hudSt">1/5</div></div>
+    <div><div class="k">Deaths</div><div class="v bad" id="hudDe">0</div></div>
+    <div><div class="k">Streak</div><div class="v" id="hudStreak">0</div></div>
+    <div><div class="k">Awards</div><div class="v" id="hudAw">0</div></div>
+    <div><div class="k">Status</div><div class="v small" id="hudStatus">EXCURSIONIST</div></div>
+  </div>
+
+  <div class="journey">
+    <div class="jtop">
+      <span class="k">Journey</span>
+      <span class="jnow" id="jNow">Gate 01 · Term 1 · Tourism sectors</span>
+      <span class="jpct" id="jPct">0% · 0/265</span>
+    </div>
+    <div class="track" id="track" role="progressbar" aria-label="Journey progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="prog"></i></div>
+    <div class="jlegend" aria-hidden="true"><span>Term 1</span><span>Term 2</span><span>Term 3</span><span>Term 4</span><span>Tour guide</span></div>
+  </div>
+
+  <div class="screen" id="screen" aria-live="polite"></div>
+  <div class="choices" id="choices"></div>
+
+  <div class="inputrow">
+    <span>tourist@gr10:~$</span>
+    <input type="text" id="cmd" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Type a choice number or a command">
+    <span class="caret" aria-hidden="true"></span>
+  </div>
+</div>
+
+<div class="btnrow">
+  <button class="btn" type="button" id="helpBtn">Help</button>
+  <button class="btn" type="button" id="mapBtn">Map</button>
+  <button class="btn" type="button" id="statsBtn">Stats</button>
+  <button class="btn" type="button" id="awardsBtn">Achievements</button>
+  <button class="btn" type="button" id="reportBtn">End run &amp; report</button>
+  <button class="btn" type="button" id="newBtn">New run</button>
+  <button class="btn" type="button" id="resetBtn">Wipe everything</button>
+</div>
+
+<div id="reportArea"></div>
+
+<footer>
+  Fifty-three gates across all eight Grade 10 Tourism topics, five stages each. Standard mode: a wrong answer strands you and you retry that stage. Hardcore mode: one wrong answer wipes the whole run and you start again from Gate 01.<br>
+  Achievements carry over between runs. "New run" lets you pick a mode again; "Wipe everything" also clears achievements. Answer order shuffles every attempt. Progress saves in this browser. Content from the Via Afrika Tourism Grade 10 Study Guide.
+</footer>
+
+</div>
+
+<script>
+/* ============================================================
+   STRANDS  (one per study-guide topic)
+   ============================================================ */
+var STRAND = {
+  sec:{name:"Term 1 · Tourism sectors", short:"Sectors"},
+  map:{name:"Term 2 · Map work and tour planning", short:"Map work"},
+  dom:{name:"Term 2 · Domestic, regional and international tourism", short:"Domestic"},
+  att:{name:"Term 3 · Tourist attractions in South Africa", short:"Attractions"},
+  sus:{name:"Term 3 · Sustainable and responsible tourism", short:"Sustainable"},
+  mkt:{name:"Term 3 · Marketing", short:"Marketing"},
+  cul:{name:"Term 4 · Culture and heritage", short:"Heritage"},
+  com:{name:"Term 4 · Communication and customer care", short:"Comms"}
+};
+
+/* ============================================================
+   THE GATES
+   ============================================================ */
+var CHAMBERS = [
+/* ===== TERM 1 · TOURISM SECTORS ===== */
+{
+  id:1, strand:"sec", name:"DEPARTURES HALL",
+  intro:"Fluorescent light, rolling suitcases, a departures board that keeps changing its mind. A guide clips a lanyard around your neck. Nobody goes home until the tour is finished.",
+  steps:[
+    {n:"The board flickers. Under the word TOURISM, the definition has been scratched out.",
+     q:"What is tourism?",
+     o:["The study of activities, services and industries that provide a travel experience","The business of selling airline tickets","Any movement of people away from home, including moving house","The government department that issues visas"],
+     g:"TOURISM: the study of activities, services and industries that provide a travel experience. Its sectors include tourist profiles, transport, hospitality, support services and attractions.",
+     w:"Tourism is the study of activities, services and industries that provide a travel experience — not just ticket sales."},
+    {n:"Two queues. One of Germans arriving in South Africa. One of South Africans leaving for Brazil.",
+     q:"The South Africans leaving for Brazil are what kind of tourists?",
+     o:["Outbound","Inbound","Domestic","Excursionists"],
+     g:"OUTBOUND: tourists travel out of their home country to visit another country. INBOUND: tourists travel into a country from another country.",
+     w:"Outbound — they are leaving their home country. The Germans arriving are inbound."},
+    {n:"The Jones family from Durban is heading to Kimberley for the weekend.",
+     q:"What type of tourism is this?",
+     o:["Domestic","Regional","International","Outbound"],
+     g:"DOMESTIC: travelling within your own country. REGIONAL: travelling in a specific geographical area. INTERNATIONAL: crossing an international border with passport control.",
+     w:"Domestic. Durban to Kimberley never leaves South Africa."},
+    {n:"Aimee from South Africa is visiting her grandmother in Zimbabwe.",
+     q:"According to the model answers, what type of tourism is this?",
+     o:["Regional","Domestic","Inbound","Excursion"],
+     g:"REGIONAL: travel within a specific geographical area, like Southern Africa. John from Durban going to New York as an exchange student is INTERNATIONAL.",
+     w:"Regional — Zimbabwe is in the same geographical region as South Africa."},
+    {n:"A man steps off the ferry with a day-pack, looks around, and books the last boat back the same evening.",
+     q:"What is he?",
+     o:["An excursionist","A tourist","An inbound tourist","A backpacker"],
+     g:"EXCURSIONIST: arrives at and departs from a destination on the same day. TOURIST: travels away from home for longer than a day but less than a year.",
+     w:"An excursionist — same-day arrival and departure. A tourist stays longer than a day but less than a year."}
+  ]
+},
+{
+  id:2, strand:"sec", name:"THE PASSENGER MANIFEST",
+  intro:"A long counter with a clipboard for every traveller. Every form asks the same two questions: who are you, and why are you here?",
+  steps:[
+    {n:"A woman explains she only started travelling once her rent, food and safety were sorted out.",
+     q:"Once basic needs are met, which higher-level needs can tourism help satisfy?",
+     o:["Achievement, status, personal growth and fulfilment","Air, food, shelter and warmth","Law, limits, order and stability","Family, work and protection"],
+     g:"WHY PEOPLE TRAVEL: once basic needs (air, food, shelter, security, family, work) are satisfied, people seek higher needs — achievement, status, responsibility, reputation, personal growth and fulfilment.",
+     w:"Achievement, status, personal growth and fulfilment. The other options are all basic needs."},
+    {n:"The clipboard lists categories of tourist. One entry has been slipped in by a prankster.",
+     q:"Which category does NOT describe a type of tourist?",
+     o:["Bicycles","Visiting friends and relatives (VFR)","Incentive","Special interest tourist (SIT)"],
+     g:"TYPES OF TOURISTS: business and professional, leisure and holiday, VFR, youth travel, adventure, eco, cultural, religion, sport and recreation, SIT, incentive, health.",
+     w:"Bicycles are an extraordinary mode of transport, not a type of tourist."},
+    {n:"A gap-year student with a huge rucksack and a tiny budget signs in.",
+     q:"Which type of tourist is she?",
+     o:["Youth travel","Business and professional","Incentive","Health"],
+     g:"YOUTH TRAVEL covers backpackers and gap-year travellers.",
+     w:"Youth travel — backpackers and gap-year travellers."},
+    {n:"The agent pulls out a blank form headed TOURIST PROFILE.",
+     q:"What is a tourist profile?",
+     o:["A summary of what tourists want and expect","A passport photograph","A list of attractions in an area","A review written after the trip"],
+     g:"TOURIST PROFILE: a summary of what tourists want and expect.",
+     w:"A summary of what tourists want and expect."},
+    {n:"The profile form has eight fields. The agent swears one of these is fake.",
+     q:"Which is NOT part of a tourist profile?",
+     o:["The star grading of their home","Nationality","Specific requirements (accommodation, food, transport)","Arrival and departure dates"],
+     g:"PROFILE FIELDS: name, nationality, age, contact details, occupation, needs and preferences, specific requirements, arrival and departure dates.",
+     w:"Star grading has nothing to do with the tourist. The eight fields: name, nationality, age, contact details, occupation, needs and preferences, specific requirements, arrival and departure dates."}
+  ]
+},
+{
+  id:3, strand:"sec", name:"THE ROAD DEPOT",
+  intro:"Diesel fumes and hooters. Coaches, taxis, a shuttle idling at the kerb, and far above, something small and noisy circling the airfield.",
+  steps:[
+    {n:"A hostel owner points to a bus with surfboards strapped to its roof.",
+     q:"Which bus service is aimed at backpackers?",
+     o:["The Baz Bus","Greyhound","Intercape","Metrorail"],
+     g:"THE BAZ BUS is for backpackers. Greyhound and Intercape are coach companies. Coaches follow set timetables and fixed routes; tour groups use chartered buses.",
+     w:"The Baz Bus. Greyhound and Intercape are general coach companies; Metrorail is a train."},
+    {n:"A taxi driver taps the little box on his dashboard.",
+     q:"How do metered taxis charge?",
+     o:["Rates for the distance travelled","A fixed fee per passenger","They wait until full, then split the fare","A weekly subscription"],
+     g:"METERED TAXIS charge rates for the distance travelled. MINIBUS TAXIS don't have timetables or fixed pick-up and drop-off points.",
+     w:"By the distance travelled. Waiting until full is a minibus taxi habit."},
+    {n:"A flimsy aircraft with a sail-like wing buzzes overhead — one pilot, one very excited passenger.",
+     q:"Which statement about microlights is correct?",
+     o:["They carry only one or two people and appeal to adventure tourists","They carry large tour groups between major centres","They are chartered by business executives","They fly on fixed timetables"],
+     g:"MICROLIGHTS carry only one or two people and appeal to adventure tourists. HELICOPTERS fly from small airfields and are a popular (expensive) way to view attractions.",
+     w:"One or two people, adventure appeal. Executives charter smaller aircraft, not microlights."},
+    {n:"Arrivals hall. A tourist has landed — but the city is still 30 km away.",
+     q:"Which is a disadvantage of travelling by aeroplane?",
+     o:["Airports are usually outside city limits, so another mode of transport is needed","It is the slowest mode of transport","It has a very low carrying capacity","There are no flights to smaller towns"],
+     g:"AEROPLANES: fastest, safe, reliable, high capacity, cabin crew. Disadvantages: fixed routes and timetables, luggage limits, airports outside cities, cramped seats, jet lag across time zones.",
+     w:"Airports sit outside city limits. Planes are the FASTEST mode, and fly between all main centres and several smaller towns."},
+    {n:"A minibus with AIRPORT on its side pulls up at the harbour.",
+     q:"What do shuttle buses do?",
+     o:["Provide transport to and from airports, harbours and terminals","Run township tours","Tow caravans and trailers","Only carry chartered tour groups"],
+     g:"SHUTTLE BUSES: to and from airports, harbours and terminals. CARS: sedans for private travel, 4x4s off-road, can tow caravans; hired cars for small groups. MOTORBIKES can be hired for self-drive trips.",
+     w:"Airports, harbours and terminals. Chartered buses are the tour-group option."}
+  ]
+},
+{
+  id:4, strand:"sec", name:"PLATFORM NINE",
+  intro:"Steel rails humming. A bullet train slides in under the airport, a blue luxury carriage waits on the far line, and beyond the station, the harbour.",
+  steps:[
+    {n:"A sleek train arrives every few minutes from beneath OR Tambo.",
+     q:"Which service links OR Tambo International Airport with Johannesburg and Pretoria?",
+     o:["The Gautrain","Shosholoza Meyl","The Blue Train","Rovos Rail"],
+     g:"GAUTRAIN: rapid transit 'bullet train' linking OR Tambo, Johannesburg and Pretoria. SHOSHOLOZA MEYL: city-to-city routes. METRORAIL: commuter service.",
+     w:"The Gautrain. Shosholoza Meyl is city-to-city; the Blue Train and Rovos Rail are luxury services."},
+    {n:"White linen, silver cutlery, a carriage painted deep blue.",
+     q:"What is the Blue Train?",
+     o:["A luxury train that runs weekly on the Cape Town–Pretoria route","A commuter service","A privately run luxury service that crosses into other countries","The tram in Kimberley"],
+     g:"BLUE TRAIN: luxury, weekly, Cape Town–Pretoria. ROVOS RAIL: privately run luxury service within SA and to other countries. The Kimberley TRAM takes tourists to the Big Hole.",
+     w:"Luxury, weekly, Cape Town–Pretoria. The private one that crosses borders is Rovos Rail."},
+    {n:"A commuter checks his watch. The station is right in the middle of town.",
+     q:"Which is an advantage of rail travel?",
+     o:["Stations are usually situated in town and city centres","Completely flexible schedules","Commuter trains are never crowded","It drops you at your exact door"],
+     g:"RAIL: relatively inexpensive and fast, stations in town and city centres, energy efficient, relaxing, good for scenery. Disadvantages: fixed timetables, overcrowding at peak times.",
+     w:"Stations in town and city centres. Rail is inflexible, and commuter trains get overcrowded at peak periods."},
+    {n:"At the harbour: a cruise liner, a few yachts, and a small boat with a painted whale on its side.",
+     q:"What are boats popular for, according to the guide?",
+     o:["Harbour cruises, fishing trips and whale watching","Travelling from Cape Town to Pretoria","Airport transfers","Game drives"],
+     g:"BOATS: harbour cruises, fishing trips, whale watching. YACHTS: private cruising. CRUISE LINERS: tourists embark and disembark at SA ports. Cape Town to Pretoria is by road or rail.",
+     w:"Harbour cruises, fishing and whale watching. Pretoria is inland — there is no sea route."},
+    {n:"A sign reads EXTRAORDINARY TRANSPORT. Four options are parked behind it.",
+     q:"Which is an extraordinary mode of transport?",
+     o:["Hot air balloon","Minibus taxi","Metrorail","Coach"],
+     g:"EXTRAORDINARY MODES: camels, donkey carts, hot air balloons, bicycles. (A tourist who wants comfort will not travel on a camel.)",
+     w:"Hot air balloon. The others on the list are camels, donkey carts and bicycles."}
+  ]
+},
+{
+  id:5, strand:"sec", name:"THE ROUTE PLANNER",
+  intro:"A big planning table, a road atlas, and four tourists who all want to leave today. Match each one to the right transport or their holiday falls apart.",
+  steps:[
+    {n:"A family of four wants to spend four days at Addo Elephant National Park.",
+     q:"Which set are ALL factors in choosing a mode of transport?",
+     o:["Cost, safety, reliability, distance and time","Star grading, room type, meal plan","Market share, competitive edge, niche market","Heritage category, plaque, grade"],
+     g:"TRANSPORT FACTORS: transport available, cost, safety, reliability, flexibility of schedule, number of people, distance and time, personal preferences, accessibility, level of comfort.",
+     w:"Cost, safety, reliability, distance and time — plus availability, flexibility, number of people, preferences, accessibility and comfort."},
+    {n:"Tourist two wants to stop wherever they like and arrive at the exact door of their guest house.",
+     q:"Which mode's big advantage is flexibility?",
+     o:["Car","Bus or coach","Aeroplane","Train"],
+     g:"CAR: convenient, quick, comfortable, flexible, exact destination. Disadvantages: driver fatigue, low carrying capacity, toll fees, congestion and road works, maintenance costs.",
+     w:"The car. Buses, planes and trains all run to fixed schedules and routes."},
+    {n:"Tourist three is on a coach, stuck behind road works, watching the clock.",
+     q:"Which is a disadvantage of bus or coach travel?",
+     o:["Fixed schedules and routes make it inflexible","Low carrying capacity","Jet lag","Sea-sickness"],
+     g:"BUS/COACH: relatively cheap, high capacity, relaxing, air-conditioned, reaches all major towns. Disadvantages: fixed schedules and routes, getting to and from the depot, congestion and road works.",
+     w:"Fixed schedules and routes. Low capacity is the car; jet lag the plane; sea-sickness the cruise liner."},
+    {n:"A minibus taxi has been parked at the rank for forty minutes. Nobody is going anywhere.",
+     q:"Why the delay?",
+     o:["Drivers wait until the vehicle is full before departing","It follows a strict timetable","It is waiting for cabin crew","Toll fees must be paid first"],
+     g:"MINIBUS TAXI: inexpensive, drops passengers at their destination, reaches areas other public transport doesn't. Disadvantages: waits until full, overloading, poor maintenance, strike action.",
+     w:"They wait until full. Overloading, poor maintenance and strikes are the other disadvantages."},
+    {n:"Tourist four has plenty of time, a very big suitcase, and wants one fare that covers everything.",
+     q:"Which mode does the guide call the safest, with a fare that includes accommodation, meals and entertainment?",
+     o:["Cruise liner","Aeroplane","Train","Coach"],
+     g:"CRUISE LINER: reliable, relaxing, energy efficient, safest mode, generous luggage allowance, all-inclusive fare. Disadvantages: time consuming, sea-sickness, extra transport to the port.",
+     w:"The cruise liner. The aeroplane is the fastest mode; it is not all-inclusive."}
+  ]
+},
+{
+  id:6, strand:"sec", name:"THE CHECK-IN DESK",
+  intro:"A marble counter, a bell, and a concierge who knows every kind of bed in the country — hotels and guest houses in the private sector, National Parks rest camps in the public sector.",
+  steps:[
+    {n:"The concierge asks what made you choose this place.",
+     q:"Which factor influences the type of establishment a tourist chooses?",
+     o:["Budget","The colour of the walls","How efficient the transport is","Dishwashing facilities in a luxury lodge"],
+     g:"CHOICE FACTORS: type of accommodation required, quality required, location, availability, the tourist's budget.",
+     w:"Budget. Type, quality, location and availability are the other factors."},
+    {n:"Valet parking, room service, a gym, a conference room and a manager in a suit.",
+     q:"Which accommodation type requires all of these?",
+     o:["Formal service accommodation","Guest accommodation","Self-catering accommodation","Backpackers"],
+     g:"FORMAL SERVICE: manager, receptionist, all meals, room service, valet, laundry, shuttle, wake-up calls, 24-hour security, en suite rooms, gym, pool, gift shops, conference room, parking.",
+     w:"Formal service accommodation — the full hotel model."},
+    {n:"A cottage with a kitchen, a braai area and nobody cooking for you.",
+     q:"What must self-catering accommodation provide?",
+     o:["A cooking or kitchen area, a living and dining area, and at least one bedroom","Room service and valet parking","Dormitory rooms","All meals and a 24-hour receptionist"],
+     g:"SELF-CATERING costs less: at least one bedroom, living/dining area, bathroom, kitchen, management available, cleaning, linen, towels, cooking equipment, TV, braai area.",
+     w:"A kitchen area — that is the point of self-catering."},
+    {n:"Tents, a caretaker's hut and rows of wash lines.",
+     q:"Caravan and camping establishments require:",
+     o:["Braai areas","Room service","A shuttle service","Private en suite rooms"],
+     g:"CARAVAN AND CAMPING (inexpensive): caretaker, electrical power, bathrooms, braai areas, refuse removal, laundry, shop, telephone, running water, dishwashing, wash lines, recreation.",
+     w:"Braai areas. Room service, shuttles and en suite rooms belong to formal accommodation."},
+    {n:"A small place with fresh scones, a friendly dog and the owners' family photos in the hallway.",
+     q:"Which description matches guest accommodation?",
+     o:["Owner run, with a family atmosphere","Dormitory rooms and communal bathrooms","Privately owned, in or near a game reserve, like a small luxury hotel","A caretaker and wash lines"],
+     g:"GUEST ACCOMMODATION: owner run, family atmosphere, meals by arrangement. BACKPACKERS: single or dorm rooms, shared living areas, communal bathrooms. GAME LODGES: privately owned, high standard, in or near game reserves.",
+     w:"Owner run with a family atmosphere. Dorms = backpackers; near a reserve = game lodge."}
+  ]
+},
+{
+  id:7, strand:"sec", name:"THE STAR CHAMBER",
+  intro:"Brass plaques line the walls, each with a row of stars. An assessor with a clipboard and a camera is waiting for you.",
+  steps:[
+    {n:"A plaque reads: GRADED BY THE COUNCIL. Which council?",
+     q:"Who is responsible for grading and quality assurance of accommodation establishments?",
+     o:["TGCSA","SATSA","SAHRA","ASATA"],
+     g:"TGCSA — Tourism Grading Council of South Africa. The Star Grading System evaluates or grades establishments and awards stars.",
+     w:"The TGCSA. SAHRA handles heritage; ASATA is travel agents; SATSA is tourism services."},
+    {n:"The assessor lists what the council does.",
+     q:"Which is a role of the TGCSA?",
+     o:["Training assessors and supplying grading plaques","Issuing passports","Setting airline fares","Publishing arrival statistics"],
+     g:"TGCSA ROLE: trains assessors, approves or rejects assessors' findings, grades establishments, supplies plaques, runs a customer feedback system, does regular checks.",
+     w:"Training assessors and supplying plaques. Passports are Home Affairs; statistics are StatsSA."},
+    {n:"A guest house owner asks why she should bother.",
+     q:"How does grading benefit an establishment?",
+     o:["It is listed on the TGCSA website and can use its stars in advertising","It no longer needs a liquor licence","It pays no tax","It is guaranteed full occupancy"],
+     g:"FOR ESTABLISHMENTS: TGCSA website listing, can advertise in the SAT booklet, can use stars in advertising. FOR TOURISTS: know what to expect, make an informed choice, use the feedback system.",
+     w:"Website listing and stars in advertising. Tourists benefit by knowing what to expect."},
+    {n:"The grading checklist has been shuffled.",
+     q:"In the grading procedure, what does the ASSESSOR do?",
+     o:["Visits, discusses the assessment with the owner, and sends recommendations with photos to the TGCSA","Applies for grading","Chooses an assessor from a list","Buys the plaque"],
+     g:"OWNER: reads requirements, chooses an assessor, applies, makes an appointment. ASSESSOR: visits, discusses, recommends with photos. TGCSA approves or rejects; owners can appeal.",
+     w:"The assessor visits, discusses and reports with photos. Applying and choosing an assessor are the owner's steps."},
+    {n:"The plaque on the wall has a date on it.",
+     q:"How long is a star grading valid?",
+     o:["One year","Six months","Three years","For life"],
+     g:"Grading is valid for ONE YEAR. The plaque shows type and stars, a number, and a statement letting the council remove it. Owners also need provincial registration, tax clearance, public liability insurance, a liquor licence if needed and BEE compliance.",
+     w:"One year. After that it must be renewed."}
+  ]
+},
+{
+  id:8, strand:"sec", name:"THE RATE CARD",
+  intro:"A laminated card on the reception desk, full of abbreviations. Misread one and the bill will ruin you.",
+  steps:[
+    {n:"Room 12 has a door leading straight into its own bathroom.",
+     q:"A bedroom with a private bathroom attached to it is described as:",
+     o:["En suite","A suite","A twin room","A penthouse"],
+     g:"EN SUITE: bedroom with a private bathroom attached. SUITE: two rooms, or one room divided into living and sleeping areas. TWIN ROOM: two beds for two people.",
+     w:"En suite. A suite is a separate living and sleeping area."},
+    {n:"The lift only goes to the top floor with a special key.",
+     q:"A luxurious apartment on the top floor of a hotel is a:",
+     o:["Penthouse","Family room","Double room","Suite"],
+     g:"PENTHOUSE: luxurious top-floor apartment. FAMILY ROOM: a double or two singles for parents plus beds for children. DOUBLE ROOM: suitable for two people.",
+     w:"Penthouse."},
+    {n:"A solo traveller books a double room and finds an extra line on her bill.",
+     q:"What is that extra charge called?",
+     o:["Single supplement","Fully inclusive rate","Per person sharing","Room service"],
+     g:"SINGLE SUPPLEMENT: extra charge for single occupancy of a double room. FULLY INCLUSIVE: price covers accommodation, meals and activities.",
+     w:"The single supplement."},
+    {n:"The card says R950 pppn.",
+     q:"What does pppn stand for?",
+     o:["Per person per night","Per person sharing","Per person per day","Price per package night"],
+     g:"pp = per person · pps = per person sharing · pppn = per person per night · pppd = per person per day.",
+     w:"Per person per night. pps is per person sharing; pppd is per person per day."},
+    {n:"Breakfast arrives: bread rolls, coffee and a glass of juice. Nothing cooked.",
+     q:"Which meal is this?",
+     o:["Continental breakfast","English breakfast","Buffet","A la carte"],
+     g:"CONTINENTAL: light — bread/toast, tea or coffee, juice. ENGLISH: full — cereal, bacon and eggs, sausage, tomato, mushrooms. BUFFET: guests serve themselves. A LA CARTE: items priced separately. ROOM SERVICE: delivered to the room.",
+     w:"Continental — the light one. English breakfast is the full cooked version."}
+  ]
+},
+{
+  id:9, strand:"sec", name:"THE SMART ROOM",
+  intro:"The door unlocks itself. The curtains open on command. The TV already knows your name. Every gadget in this room has a job.",
+  steps:[
+    {n:"The hotel spent millions on in-room technology.",
+     q:"Why do hotels invest in it?",
+     o:["Leisure guests expect entertainment and business guests expect to work from their rooms","It is required for any star grading","It replaces reception staff","It is cheaper than housekeeping"],
+     g:"Leisure guests expect to be ENTERTAINED; business guests expect to CONDUCT BUSINESS from their rooms.",
+     w:"Entertainment for leisure guests, work for business guests."},
+    {n:"A guest views the menu, checks the weather and sets a wake-up call on the TV.",
+     q:"Which category of in-room technology is this?",
+     o:["Information","Comfort","Safety","Environmental responsibility"],
+     g:"INFORMATION (interactive TV): facilities and services, menus, interactive maps, news and weather, email, wake-up calls, housekeeping and laundry requests.",
+     w:"Information — interactive TV for menus, maps, weather and wake-up calls."},
+    {n:"A 'green hotel' wants to cut its electricity and water use.",
+     q:"Which in-room technology supports environmental responsibility?",
+     o:["An electronic key card that saves electricity, and shower heads that use less water","A programmable electronic safe","Satellite channels","Heated towel rails"],
+     g:"ENVIRONMENTAL: electronic key card, digitally controlled showers, water-saving shower heads, energy-saving lights, occupancy sensor lights.",
+     w:"Key cards and water-saving shower heads. A safe is safety; heated towel rails are comfort."},
+    {n:"A guest wants to know nobody can get into her room.",
+     q:"Which is technology for SAFETY?",
+     o:["An electronic door lock and a sensor system that records when people enter and leave","Soundproofing","A mini-bar","A Wi-Fi network"],
+     g:"SAFETY: electronic safe, electronic door lock and key, entry sensor system. COMFORT: lighting, temperature, soundproofing, electronic toilets, sensor taps, remote-controlled curtains, mini-bar.",
+     w:"Door locks and entry sensors. Soundproofing and mini-bars are comfort; Wi-Fi is work."},
+    {n:"A business traveller has a presentation due by morning.",
+     q:"Which list is technology for WORK?",
+     o:["Hot-spot Internet, Wi-Fi, international multi-plug and chargers, cordless telephone","Games, music and movies","Heated towel rails and extractor fans","Occupancy sensor lights"],
+     g:"WORK: hot-spot Internet, Wi-Fi, interactive TV, international multi-power plug and chargers, broadband, cordless or long-cord phone. ENTERTAINMENT: programme guide, satellite channels, games, music, movies.",
+     w:"Internet, Wi-Fi, plugs and phones. Games and movies are entertainment."}
+  ]
+},
+{
+  id:10, strand:"sec", name:"THE FOOD COURT",
+  intro:"Smoke from a braai stand, a coffee machine hissing, a neon burger sign. You are hungry, and every counter wants you to name it correctly first.",
+  steps:[
+    {n:"A steakhouse with kids' menus and balloons.",
+     q:"Spur and Ocean Basket are examples of:",
+     o:["Family restaurants","Fine dining restaurants","Fast food outlets","Coffee shops"],
+     g:"FULL SERVICE RESTAURANTS: fine dining (formal menu, wide variety, more expensive) and family (informal, less expensive — Spur, Ocean Basket).",
+     w:"Family restaurants — informal full service."},
+    {n:"A queue, a tray, and your number called in under four minutes.",
+     q:"Nando's, Wimpy and KFC are examples of:",
+     o:["Fast food and quick service","Taverns","Fine dining","Street stalls"],
+     g:"FAST FOOD: prepared and served quickly, take-away, some seating, appeals to limited budgets.",
+     w:"Fast food and quick service."},
+    {n:"In a township: home-brewed beer, traditional food and live music.",
+     q:"What is this establishment, and who is it gaining popularity with?",
+     o:["A tavern or shebeen — 'adventurous' tourists","A pub — business tourists","A coffee shop — shoppers","An ice cream store — families"],
+     g:"TAVERNS AND SHEBEENS: in townships, traditional African food, home-brewed beer, meeting places, music; popular with adventurous tourists who want local culture.",
+     w:"Taverns and shebeens — adventurous tourists after local culture."},
+    {n:"Rugby on a big screen, a short menu, and a band setting up in the corner.",
+     q:"Which describes pubs and bars?",
+     o:["Informal meals with a limited menu, drinks, sometimes live entertainment and TV for sport","A formal menu and expensive","Soft serve, sorbet and frozen yogurt","Stalls that move between festivals"],
+     g:"PUBS/BARS: informal meals, limited menu, alcoholic and non-alcoholic drinks, live entertainment, TV for sport. ICE CREAM STORES: speciality outlets at malls and beachfronts. COFFEE SHOPS: malls, hotels, airports, attractions.",
+     w:"Limited menu, drinks, entertainment and sport on TV."},
+    {n:"At a festival, a woman fries vetkoek at a folding table.",
+     q:"Street stalls, kiosks and markets are characterised by:",
+     o:["Being found at festivals and special events, often reflecting cultural traditions","Permanent indoor premises only","A formal wine list","Being located only in hotels"],
+     g:"STREET STALLS, KIOSKS AND MARKETS: specific foods, cultural traditions, may be moved and outdoors, at festivals and events, food prepared on site.",
+     w:"Festivals and events, often cultural, and not permanent."}
+  ]
+},
+{
+  id:11, strand:"sec", name:"THE ATTRACTION FLOOR",
+  intro:"A giant hall of brochures. Mountains, casinos, stadiums, whales. The whole reason anyone travels is on this floor.",
+  steps:[
+    {n:"A brochure rack is labelled ATTRACTIONS.",
+     q:"Which statement is part of what makes something a tourist attraction?",
+     o:["It is a place of interest visited for amusement, education or entertainment","It must be government owned","It must charge an entrance fee","It must be a World Heritage Site"],
+     g:"ATTRACTIONS: places of interest; visited for amusement, education, entertainment; natural or constructed beauty; cultural or historical significance; the main reason for tourism; should be accessible.",
+     w:"A place of interest for amusement, education or entertainment."},
+    {n:"Five doors lead off the floor.",
+     q:"Which are the five attraction sub-sectors?",
+     o:["Gaming and lotteries, leisure, conservation, sport and recreation, events and conferences","Natural, constructed, primary, secondary, cultural","Planet, people, profit, place, price","Product, price, place, promotion, people"],
+     g:"FIVE SUB-SECTORS: gaming and lotteries (casinos), leisure (resorts, theme parks), conservation, sport and recreation (Comrades), events and conferences.",
+     w:"Gaming and lotteries, leisure, conservation, sport and recreation, events and conferences."},
+    {n:"The events door has four letters painted on it.",
+     q:"What does MICE stand for?",
+     o:["Meetings, incentives, conferences, exhibitions","Marketing, investment, culture, events","Museums, inns, casinos, entertainment","Money, infrastructure, conservation, ecology"],
+     g:"MICE: meetings, incentives, conferences, exhibitions. Special events like the Grahamstown National Arts Festival boost the economy.",
+     w:"Meetings, incentives, conferences, exhibitions."},
+    {n:"Two posters: Table Mountain, and a football stadium.",
+     q:"Table Mountain is a ___ attraction; a stadium is a ___ attraction.",
+     o:["natural / constructed","constructed / natural","primary / secondary","secondary / primary"],
+     g:"NATURAL: mountains, snow, animals and plants, scenic beauty sites. CONSTRUCTED: churches, museums, monuments, parks, historic city centres, zoos, aquariums, stadiums.",
+     w:"Natural, then constructed."},
+    {n:"A family drives to Kruger. On the way they stop at God's Window for an hour.",
+     q:"For this family, God's Window is a:",
+     o:["Secondary attraction","Primary attraction","Constructed attraction","Gaming attraction"],
+     g:"PRIMARY: the main reason for visiting; gives the destination character. SECONDARY: visited on the way to or from the primary; lengthens stays and increases spending. The tourist's interests decide which is which.",
+     w:"Secondary — visited on the way to the primary attraction, Kruger."}
+  ]
+},
+{
+  id:12, strand:"sec", name:"THE MATCHMAKER",
+  intro:"A travel agent with a wall map covered in pins. Each tourist who walks in must be sent to exactly the right place.",
+  steps:[
+    {n:"A history teacher wants to see where political prisoners were held.",
+     q:"Robben Island appeals to tourists interested in:",
+     o:["Culture and education","Games","Leisure","Sport"],
+     g:"ROBBEN ISLAND: scenic beauty and political history — ecotourist, cultural, education, SIT.",
+     w:"Culture and education — it is about political history."},
+    {n:"A surfer asks where to go.",
+     q:"Which tourist types does Durban (beaches, surfing, uShaka Marine World) attract?",
+     o:["Leisure, adventure, sport and recreation","Business and shopping only","Religion and health","Cultural and backpacking only"],
+     g:"DURBAN: beaches, sea, surfing, uShaka Marine World — leisure, adventure, sport, recreation.",
+     w:"Leisure, adventure, sport and recreation."},
+    {n:"A backpacker wants township tours and historic buildings.",
+     q:"Soweto attracts which tourists?",
+     o:["Cultural, SIT and backpacking","Sport and recreation","Health","Gaming"],
+     g:"SOWETO: township and cultural tours, historic sites — cultural, SIT, backpacking. JOHANNESBURG: shopping, entertainment, township tours — business, shopping, cultural, SIT.",
+     w:"Cultural, SIT and backpacking."},
+    {n:"A family wants to watch clay pot making and woodcarving, then join a dance.",
+     q:"Where should they go?",
+     o:["A cultural village","A theme park","A beach","A tourist route"],
+     g:"CULTURAL VILLAGES: guided tours, exhibitions, clay pots, woodcarving, music and dance. THEME PARKS: rollercoasters, games, picnics. TOURIST ROUTES: wine tasting, historical tours.",
+     w:"A cultural village — you won't see cultural activities at a theme park."},
+    {n:"Someone wants bungee jumping, river rafting and forests.",
+     q:"The Garden Route appeals to which tourists?",
+     o:["Leisure, adventure, ecotourist and SIT","Business only","Religion","Gaming"],
+     g:"GARDEN ROUTE: scenic beauty, flora, bungee and rafting — leisure, adventure, ecotourist, SIT. BLYDE RIVER CANYON: scenery and hikes — ecotourist, sport and recreation, health.",
+     w:"Leisure, adventure, ecotourist and SIT."}
+  ]
+},
+{
+  id:13, strand:"sec", name:"THE MINISTRY",
+  intro:"Government buildings, long corridors, official stamps. The public sector runs from a national office down to a tiny local desk.",
+  steps:[
+    {n:"A framed mission statement hangs in the NDT foyer.",
+     q:"What is the mission of the National Department of Tourism?",
+     o:["To promote responsible and sustainable tourism for the benefit of all South Africans","To grade accommodation establishments","To issue visas","To market South Africa to the youth"],
+     g:"NDT VISION: for the country to be recognised as a world leader in tourism excellence. MISSION: promote responsible and sustainable tourism for the benefit of all South Africans.",
+     w:"Responsible and sustainable tourism for the benefit of all South Africans."},
+    {n:"A whale-watching operator needs a permit before the season opens.",
+     q:"Who issues permits to tour operators?",
+     o:["Provincial tourism authorities","Statistics SA","Local Tourism Organisations","The TGCSA"],
+     g:"PROVINCIAL TOURISM AUTHORITIES: the regulating offices run by tourism departments; issue permits (hunting, whale watching).",
+     w:"Provincial tourism authorities."},
+    {n:"An org chart has fallen off the wall.",
+     q:"Which order runs from the largest to the smallest?",
+     o:["NDT → provincial → regional marketing → District/Municipal (DMO) → Local (LTO)","LTO → DMO → provincial → NDT","NDT → LTO → provincial → DMO","Provincial → NDT → LTO → DMO"],
+     g:"PUBLIC SECTOR: NDT, provincial departments and authorities, regional destination marketing organisations, District or Municipal Organisations, Local Tourism Organisations (the smallest).",
+     w:"NDT at the top, LTOs at the bottom — the smallest organisations, promoting local attractions."},
+    {n:"A clerk insists LTOs are private businesses.",
+     q:"Are Local Tourism Organisations part of the public sector?",
+     o:["Yes — LTOs are the smallest public sector organisations","No — they are private businesses","No — they are NGOs","No — they are parastatals"],
+     g:"LTOs: the smallest organisations, focus on specific areas, promote local attractions and businesses. They are PUBLIC sector.",
+     w:"Yes. LTOs are public sector — the smallest level of the structure."},
+    {n:"A poster: 'West Coast and Namaqualand — wild flowers in spring.'",
+     q:"Which is an example of public and private sectors combining to market a region?",
+     o:["The Convention Bureau marketing Cape Town and the Western Cape","SAA selling flights","A souvenir shop","Home Affairs issuing passports"],
+     g:"REGIONS have a particular climate, landscape and attractions. Public and private sectors combine to market them, e.g. the Convention Bureau. The 2010 FIFA World Cup was a major marketing event.",
+     w:"The Convention Bureau."}
+  ]
+},
+{
+  id:14, strand:"sec", name:"THE GOVERNMENT CORRIDOR",
+  intro:"Six doors, six departments. None of them is called Tourism, but all of them keep tourism running.",
+  steps:[
+    {n:"Door one: a queue of people holding photographs and application forms.",
+     q:"Which department issues passports and controls immigration?",
+     o:["Department of Home Affairs (DHA)","DIRC","DTI","Department of Transport"],
+     g:"DHA: issues passports, controls immigration, plays a role in national security, promotes good international relations.",
+     w:"Home Affairs."},
+    {n:"Door two: maps of SADC and a draft of a single visa.",
+     q:"Which department issues visas and is developing a Univisa for SADC?",
+     o:["DIRC — International Relations and Co-operation","DHA","StatsSA","NDT"],
+     g:"DIRC: international relations and foreign policy, issues visas, developing the SADC Univisa, helped develop Transfrontier Parks.",
+     w:"DIRC — visas, the Univisa and Transfrontier Parks."},
+    {n:"Door three: small business owners with loan applications.",
+     q:"Which is a function of the DTI?",
+     o:["Supporting the establishment of SMMEs","Running PRASA","Publishing arrival statistics","Issuing passports"],
+     g:"DTI: guides economic policy, works with Tourism, promotes products for export and tourism, helps South Africans start or grow businesses, supports SMMEs.",
+     w:"Supporting SMMEs. PRASA is Transport; statistics are StatsSA."},
+    {n:"Door four: train timetables and road safety posters.",
+     q:"Which department wants competitive transport costs, improved safety, and runs PRASA?",
+     o:["Department of Transport","Department of Sports and Recreation","DTI","DIRC"],
+     g:"DEPARTMENT OF TRANSPORT: competitive transport costs, improved access, improved safety and security; runs the Passenger Rail Agency of South Africa (PRASA).",
+     w:"The Department of Transport."},
+    {n:"Door five: spreadsheets and survey forms.",
+     q:"Who publishes statistics on arrivals, departures and reasons for travel?",
+     o:["Statistics SA","SANParks","TBCSA","ASATA"],
+     g:"STATSSA: surveys and reports — arrivals and departures, citizens travelling, transport, reasons, foreign visitors, accommodation. SPORTS AND RECREATION: international and local sporting events (with committees like the IOC).",
+     w:"Statistics SA."}
+  ]
+},
+{
+  id:15, strand:"sec", name:"STATE HOLDINGS",
+  intro:"A boardroom where government and business sit at the same table. The trick is knowing who owns what.",
+  steps:[
+    {n:"Three logos on the wall: an airline, a rail and port company, a power utility.",
+     q:"SAA, Transnet and Eskom are:",
+     o:["State-owned enterprises (parastatals)","Public entities","Partly state-owned agencies","NGOs"],
+     g:"PARASTATALS: owned by government, run like businesses, aim to make profits — SAA, Transnet, Eskom.",
+     w:"Parastatals — state-owned enterprises."},
+    {n:"A partnership agreement, half signed by government, half by private companies.",
+     q:"Which organisations are shared between government and the private sector and managed like private businesses?",
+     o:["Partly state-owned agencies","Parastatals","Public entities","LTOs"],
+     g:"PARTLY STATE-OWNED AGENCIES: partly owned by government, shared with private companies, managed like private businesses.",
+     w:"Partly state-owned agencies. (Parastatals are wholly government owned.)"},
+    {n:"A small tour operator thanks an agency for helping her get started.",
+     q:"What does the Tourism Enterprise Partnership (TEP) do?",
+     o:["Helps develop small businesses in the tourism industry, with funding from the NDT","Grades hotels","Runs trains","Awards heritage plaques"],
+     g:"TEP: a partly state-owned agency that helps develop small tourism businesses; the NDT provides its funding.",
+     w:"Develops small tourism businesses, funded by the NDT."},
+    {n:"SANParks, SAHRA and ACSA each have one job.",
+     q:"These organisations are:",
+     o:["Public entities — small government departments with one specific function","Parastatals","Professional associations","Product owners"],
+     g:"PUBLIC ENTITIES: small departments with one function — SANParks, South African Tourism, NGB, SAHRA, ACSA, CATHSSETA.",
+     w:"Public entities."},
+    {n:"An acronym on an airport sign.",
+     q:"What does ACSA stand for?",
+     o:["Airports Company of South Africa","Accommodation Council of South Africa","Association of Cape Safari Agents","African Conservation Society Agency"],
+     g:"ACSA: Airports Company of South Africa. NGB: National Gambling Board. SAHRA: South African Heritage Resources Agency. CATHSSETA: Culture, Arts, Tourism, Hospitality, Sport SETA.",
+     w:"Airports Company of South Africa."}
+  ]
+},
+{
+  id:16, strand:"sec", name:"THE PRIVATE SECTOR",
+  intro:"Tour operators, souvenir sellers, community campsites and a dozen associations with long acronyms. This is where tourism makes its money.",
+  steps:[
+    {n:"A souvenir shop owner counts the day's takings.",
+     q:"What is a product owner?",
+     o:["Any business that makes a profit through tourism","A government department","A tourist who buys souvenirs","A non-profit organisation"],
+     g:"PRODUCT OWNERS: tour operators, travel agents, conference organisers, travel publications, travel insurance companies, souvenir shops, restaurants.",
+     w:"Any business that makes a profit through tourism — a souvenir shop counts."},
+    {n:"A village runs its own campsite on its own land.",
+     q:"How are community tourism profits spent?",
+     o:["Improving facilities such as roads, schools and clinics","Paying Home Affairs","Buying shares in SAA","They are sent overseas"],
+     g:"LOCAL COMMUNITIES: run businesses, build facilities like campsites if they own the land, create jobs, spend profits on roads, schools and clinics.",
+     w:"Roads, schools and clinics."},
+    {n:"A community-based organisation introduces a village to a tour operator.",
+     q:"How do NGOs and CBOs help?",
+     o:["They link communities with tourism operators and assist with training and funding","They issue permits","They grade guest houses","They set exchange rates"],
+     g:"NGOs (non-government organisations) and CBOs (community based organisations): support tourism enterprises, assist with training and funding, link communities with operators. Professional associations help entrepreneurs start and maintain service excellence.",
+     w:"Linking communities with operators, plus training and funding."},
+    {n:"An association negotiates with government for hotels and restaurants.",
+     q:"Which association is the official voice of the private sector in the hospitality industry?",
+     o:["FEDHASA","SAVRALA","SAYTC","SAACI"],
+     g:"FEDHASA: sustainable hospitality, negotiates with government. SAVRALA: vehicle rental. SAYTC: youth travel. SAACI: conference industry. TBCSA: represents private sector travel and tourism to government.",
+     w:"FEDHASA — Federated Hospitality Association of South Africa."},
+    {n:"A sticker on a lodge door: money spent here stays here.",
+     q:"Which association promotes tourism so that as much money as possible stays in the local economy?",
+     o:["FTTSA — Fair Trade in Tourism SA","ASATA","TBCSA","SATSA"],
+     g:"FTTSA: fair and sustainable tourism, money stays local, Fair Trade packages sold in Switzerland and Europe. ASATA: regulates member travel agents. SATSA: checks members' standards.",
+     w:"Fair Trade in Tourism South Africa."}
+  ]
+},
+{
+  id:17, strand:"sec", name:"THE WORLD STAGE",
+  intro:"Flags of every nation. The international community watches South African tourism from Madrid, from boardrooms, and from the forests.",
+  steps:[
+    {n:"A blue flag with a globe hangs above the entrance.",
+     q:"What does UNWTO stand for?",
+     o:["United Nations World Tourism Organisation","Universal Network of World Travel Operators","United Nations Wildlife and Tourism Office","Union of National World Tourism Offices"],
+     g:"UNWTO: United Nations World Tourism Organisation, based in MADRID, SPAIN. It compiles rankings and statistics and represents public sector tourism bodies.",
+     w:"United Nations World Tourism Organisation, based in Madrid."},
+    {n:"The UNWTO delegate states her organisation's goal.",
+     q:"What does the UNWTO aim to do?",
+     o:["Reduce poverty through sustainable tourism development","Grade hotels worldwide","Sell airline tickets","Issue international visas"],
+     g:"UNWTO: deals with tourism worldwide, publishes data comparing flow and growth of tourism, promotes responsible tourism, aims to reduce poverty through sustainable tourism development.",
+     w:"Reduce poverty through sustainable tourism development."},
+    {n:"A room full of CEOs from airlines and hotel chains.",
+     q:"Who are the members of the WTTC?",
+     o:["Tourism business leaders from all over the world","Government tourism ministers","Conservation scientists","South African travel agents"],
+     g:"WTTC: World Travel and Tourism Council — business leaders raising awareness of travel and tourism as one of the world's largest industries.",
+     w:"Tourism business leaders from all over the world."},
+    {n:"A panda logo on a conservation poster.",
+     q:"Which is true of the WWF?",
+     o:["Established in 1961, one of the largest environmental organisations, with 1300+ projects","It is the smallest environmental organisation in the world","It is based in Madrid","It was founded by SADC"],
+     g:"WWF: est. 1961, 1300+ projects. MISSION: stop the degradation of the planet's natural environment and build a future where humans live in harmony with nature — biodiversity, sustainable resources, less pollution.",
+     w:"Established 1961 and one of the LARGEST environmental organisations in the world."},
+    {n:"A map of Southern Africa with every border highlighted.",
+     q:"How does SADC promote economic growth and development?",
+     o:["Co-operation between member countries and maintaining peace and security","Issuing South African passports","Grading hotels","Running Transnet"],
+     g:"SADC: co-operation and peace and security — making the region competitive, safer to visit, and helping tourism grow.",
+     w:"Co-operation between members and maintaining peace and security."}
+  ]
+},
+{
+  id:18, strand:"sec", name:"THE PAY COUNTER",
+  intro:"Tills beeping, cards tapping, a very old cheque book on the counter. Pay the wrong way and you're stranded.",
+  steps:[
+    {n:"A tourist books a lodge online three months ahead.",
+     q:"Which is a disadvantage of Internet payments?",
+     o:["Banks can take two days to transfer money if the payer's and receiver's banks are different","You cannot pay in advance","No PINs or passwords are used","You cannot spread payments over time"],
+     g:"INTERNET: book and pay in advance, both need Internet banking, PINs and passwords. Pros: booking assured, budget, spread payments. Cons: need Internet access, two-day transfers between different banks. CELLPHONE PAYMENTS work the same way, anywhere with reception.",
+     w:"Transfers can take two days between different banks. Being able to pay in advance is an ADVANTAGE."},
+    {n:"A tourist types the wrong PIN. Again. And again.",
+     q:"What happens after three incorrect PINs in a row at an ATM?",
+     o:["The machine keeps the card","The account is closed","The bank phones you","Nothing happens"],
+     g:"ATM: withdraw, deposit, transfer; relatively safe; confidential PIN; keeps the card after three wrong PINs — notify the bank immediately; open 24 hours.",
+     w:"The machine keeps the card, and you must notify the bank immediately."},
+    {n:"A waiter brings the card machine to the table.",
+     q:"Why are portable speed point machines useful?",
+     o:["The client keeps the card in sight so it isn't copied or used for fraud","They don't need a PIN","They dispense cash","They avoid bank commission"],
+     g:"SPEED POINTS: used by most retailers, card swiped, PIN entered, slip signed; usually cabled to the till but can be portable.",
+     w:"The card stays in sight, so it can't be copied or used for fraud."},
+    {n:"A small craft stall has a sign: CASH ONLY.",
+     q:"Which is a disadvantage of credit cards?",
+     o:["Smaller businesses may not have facilities, and banks charge providers commission","They have no security chip","They can't hold a reservation","Money leaves the account immediately by EFT"],
+     g:"CREDIT CARDS: most popular; withdraw money, pay, hold a reservation, guarantee payment; chip; credit limit. Visa, MasterCard, Diners Club, American Express. DEBIT CARDS: money leaves immediately by EFT — very secure.",
+     w:"No facilities at small businesses, and commission for providers. Immediate EFT is a debit card feature."},
+    {n:"A guest house refuses a personal cheque.",
+     q:"Why might a business refuse a personal cheque, and what is the safer option?",
+     o:["It could bounce if there isn't enough money — a bank-guaranteed cheque is more secure","Cheques only work online","Cheques don't need a signature","Cheques are limited to R100"],
+     g:"PERSONAL CHEQUES must be signed and may bounce. BANK-GUARANTEED CHEQUES: payment guaranteed by the bank for a fee; you pay the bank first, then the cheque is issued.",
+     w:"A personal cheque can bounce. A bank-guaranteed cheque is more secure."}
+  ]
+},
+/* ===== TERM 2 · MAP WORK AND TOUR PLANNING ===== */
+{
+  id:19, strand:"map", name:"THE CHART ROOM",
+  intro:"Paper maps pinned to every surface, a brass compass on the table, a ruler and a pencil. No GPS in here.",
+  steps:[
+    {n:"Tiny pictures cover the hotel map: a swimming pool, a car, a wheelchair.",
+     q:"Where are map symbols explained?",
+     o:["In the legend","In the scale bar","On the compass rose","In the grid reference"],
+     g:"MAP SYMBOLS help interpret information and are shown in a LEGEND — e.g. car park, restaurant, lift, conference room, facilities for the disabled.",
+     w:"In the legend."},
+    {n:"The map's corner reads 1:50 000.",
+     q:"On a 1:50 000 map, 1 cm represents:",
+     o:["0,5 km","5 km","50 km","50 m"],
+     g:"SCALE: ratio of distance on the map to actual distance on the ground. 1:50 000 → 1 cm = 50 000 cm = 0,5 km. Used to calculate distances when planning a tour.",
+     w:"0,5 km — 50 000 cm is 500 m."},
+    {n:"The compass rose has more points than you expected.",
+     q:"How many compass points are there, and which are the cardinal points?",
+     o:["Sixteen; N, S, E, W","Eight; N, S, E, W","Sixteen; NE, NW, SE, SW","Four; N, NE, E, SE"],
+     g:"DIRECTION: compass directions show the position of one place relative to another. 16 compass points; the four main cardinal points are N, S, E, W.",
+     w:"Sixteen points; the cardinal points are N, S, E and W."},
+    {n:"Letters run across the top of the map, numbers down the side.",
+     q:"What is a grid reference used for?",
+     o:["Locating a place or feature on a map","Measuring time differences","Showing the scale","Explaining map symbols"],
+     g:"GRID REFERENCES: a co-ordinate system of vertical and horizontal lines. A numbered square grid is most common on tourist maps; intersecting latitude and longitude give co-ordinates.",
+     w:"Locating a place or feature on a map."},
+    {n:"Small red numbers sit beside the roads between towns.",
+     q:"What are these numbers?",
+     o:["Distance indicators","Road names","Altitude in metres","Speed limits"],
+     g:"DISTANCE INDICATORS: red or black numbers on routes showing the distance between towns.",
+     w:"Distance indicators — kilometres between towns."}
+  ]
+},
+{
+  id:20, strand:"map", name:"THE MERIDIAN",
+  intro:"Clocks on the wall show London, Cape Town and New York. None of them agree. A line of brass runs across the floor from pole to pole.",
+  steps:[
+    {n:"Vertical lines on the globe, evenly spaced.",
+     q:"Lines of longitude are at what interval, and how many time zones do they create?",
+     o:["15° intervals; 24 time zones","10° intervals; 36 time zones","15° intervals; 12 time zones","30° intervals; 24 time zones"],
+     g:"LONGITUDE: meridians run from N pole to S pole at 15° intervals, dividing the world into 24 time zones. Earth rotates 360° in 24 hours: 360 ÷ 24 = 15° per hour.",
+     w:"15° apart, 24 time zones. (Latitude lines are NOT at 15° intervals — longitude lines are.)"},
+    {n:"The brass line on the floor is marked 0°.",
+     q:"What is the 0° line of longitude called?",
+     o:["The Greenwich Meridian","The Equator","The International Date Line","The Tropic of Capricorn"],
+     g:"GREENWICH MERIDIAN: 0° longitude, through Greenwich, London; divides east and west hemispheres. EQUATOR: 0° latitude; latitude lines run parallel to it and it divides N and S hemispheres.",
+     w:"The Greenwich Meridian. The Equator is 0° latitude."},
+    {n:"The London clock reads 12:00.",
+     q:"What time is it in Cape Town (about 30° E)?",
+     o:["14:00","10:00","12:00","17:00"],
+     g:"30° ÷ 15° = 2 hours. Places EAST of 0° are later than UTC, so Cape Town is UTC+2 → 14:00. South Africa Standard Time is set by the 30° E line. SA has one time zone.",
+     w:"14:00. East of Greenwich is later: 30 ÷ 15 = 2 hours ahead."},
+    {n:"London still reads 12:00.",
+     q:"What time is it in New York (75° W)?",
+     o:["07:00","17:00","09:00","05:00"],
+     g:"75° ÷ 15° = 5 hours. Places WEST of 0° are earlier, so New York is UTC−5 → 07:00. UTC is based on the local standard time of the 0° meridian.",
+     w:"07:00. West of Greenwich is earlier: 75 ÷ 15 = 5 hours behind."},
+    {n:"On the far side of the globe, a jagged line runs through the Pacific.",
+     q:"At what longitude is the International Date Line?",
+     o:["180°","0°","90°","30° E"],
+     g:"INTERNATIONAL DATE LINE: 180° longitude. Crossing it changes the date by one day. A country's time zone is based on the line of longitude through roughly its centre.",
+     w:"180° — directly opposite the Greenwich Meridian."}
+  ]
+},
+{
+  id:21, strand:"map", name:"THE MAP LIBRARY",
+  intro:"Drawers and drawers of maps. Every tourist who walks in needs a different one, and hands them the wrong map means they get lost.",
+  steps:[
+    {n:"A student needs to see where one province ends and the next begins.",
+     q:"Which map shows the location and borders of countries, states or provinces?",
+     o:["Political map","Physical map","Street map","Road map"],
+     g:"POLITICAL MAPS: location and borders of countries, states or provinces. GENERAL REFERENCE MAPS: a continent, country or region with roads, rivers, mountains, towns.",
+     w:"A political map."},
+    {n:"A map coloured blue, green, yellow, orange and brown.",
+     q:"On a physical map, orange and brown show:",
+     o:["High elevations","Water","Low elevations","Provincial borders"],
+     g:"PHYSICAL MAPS: natural and constructed features — mountains, rivers, vegetation, dams. Blue = water; green and yellow = low elevations; orange and brown = high elevations.",
+     w:"High elevations. Blue is water; green and yellow are low."},
+    {n:"A tourist wants to fly to each major city in South Africa.",
+     q:"Which map shows the location of airports?",
+     o:["A specialist map","A street map","A political map","A tourist attraction map"],
+     g:"SPECIALIST MAPS: specialised information — climate, airports, railway lines, geology, vegetation, rainfall.",
+     w:"A specialist map."},
+    {n:"A group wants to find attractions within walking distance of their hotel.",
+     q:"Which map is most suitable?",
+     o:["A street map or tourist information map","A political map","A physical map","A rainfall map"],
+     g:"STREET MAPS: town street plans, parks, shopping centres. TOURIST INFORMATION MAPS: parks, heritage sites, accommodation, restaurants. ROAD MAPS: roads, distances and travel time — with a general reference map, ideal for a self-drive route.",
+     w:"A street map or tourist information map."},
+    {n:"A parent wants to know which facilities at the Kgalagadi Transfrontier Park suit children.",
+     q:"Which map focuses on the layout and facilities of one specific attraction?",
+     o:["A tourist attraction map","A general reference map","A political map","A road map"],
+     g:"TOURIST ATTRACTION MAPS focus on specific attractions, e.g. the Kgalagadi TFP map. The SANParks map is a tourist information map showing where the national parks are.",
+     w:"A tourist attraction map (an interactive map also works)."}
+  ]
+},
+{
+  id:22, strand:"map", name:"THE SATELLITE LINK",
+  intro:"Screens glow. A voice from a dashboard says 'turn left in 200 metres'. Somewhere far above, satellites are listening.",
+  steps:[
+    {n:"A small device suction-cupped to a windscreen.",
+     q:"How does a GPS work?",
+     o:["It receives data from satellites to generate maps showing latitude, longitude and altitude","It reads a paper grid","It measures time zones","It connects through a landline"],
+     g:"GPS: receives satellite data; destinations keyed in as an address, co-ordinates (degrees/minutes/seconds or decimal) or a name. Advanced systems speak directions; some cellphones have GPS.",
+     w:"Satellite data turned into maps with latitude, longitude and altitude."},
+    {n:"The device's label is half rubbed off.",
+     q:"What does GPS stand for?",
+     o:["Global Positioning System","General Positioning System","Global Position System","General Position Systems"],
+     g:"GPS: Global Positioning System.",
+     w:"Global Positioning System."},
+    {n:"A first-time visitor wants to see what the street outside her guest house actually looks like.",
+     q:"Which tool lets her take a virtual walk?",
+     o:["Google Street View","A distance table","A political map","A map legend"],
+     g:"GOOGLE EARTH: satellite pictures of anywhere in 3D. STREET VIEW: street-level images, virtual walks, landmarks, road names, rotate the view, preview a destination. GOOGLE STREET MAPS: street maps and route planners.",
+     w:"Google Street View."},
+    {n:"A family plans a whole holiday from the couch.",
+     q:"Why is the Internet important to tourists?",
+     o:["Up-to-date information, holiday planning, and providers promote and sell products","It replaces passports","It grades hotels","It removes the need for any maps"],
+     g:"INTERNET: up-to-date information; service providers promote and sell products and services; tourists plan holidays. Other ICT: radio, TV, cellphones, computers, satellite systems.",
+     w:"Up-to-date information, planning, and buying products and services."},
+    {n:"An interactive map on www.saexplorer.co.za.",
+     q:"How do you find specific information on it?",
+     o:["Click a province, then a town, then an attraction","Type a grid reference","Measure with a ruler","Read the legend"],
+     g:"INTERACTIVE MAPS on travel websites: click a province, then a town, then an attraction to drill down to specific information.",
+     w:"Province → town → attraction."}
+  ]
+},
+{
+  id:23, strand:"map", name:"THE ATLAS",
+  intro:"A giant map of South Africa painted on the floor. Nine provinces, nine capitals, six neighbours. Step on the wrong one and it gives way.",
+  steps:[
+    {n:"Capital names have been swapped between provinces.",
+     q:"Which province–capital pair is correct according to the study guide?",
+     o:["Mpumalanga – Nelspruit","Limpopo – Mafikeng","Free State – Kimberley","North West – Polokwane"],
+     g:"CAPITALS: Limpopo–Polokwane · North West–Mafikeng · Gauteng–Johannesburg · Mpumalanga–Nelspruit · Northern Cape–Kimberley · Western Cape–Cape Town · Eastern Cape–Bisho · Free State–Bloemfontein · KZN–Pietermaritzburg. (Now also spelt Mahikeng, Mbombela and Bhisho.)",
+     w:"Mpumalanga – Nelspruit. Mafikeng is North West, Kimberley is Northern Cape, Polokwane is Limpopo."},
+    {n:"You land on the province with the Golden Mile.",
+     q:"What is the capital of KwaZulu-Natal?",
+     o:["Pietermaritzburg","Durban","Bisho","Bloemfontein"],
+     g:"KZN – Pietermaritzburg. Durban is the biggest city, not the capital.",
+     w:"Pietermaritzburg."},
+    {n:"The painted borders show South Africa's neighbours.",
+     q:"Which countries neighbour South Africa?",
+     o:["Namibia, Botswana, Zimbabwe, Lesotho, Mozambique, Swaziland","Zambia, Tanzania, Kenya, Malawi","Angola, Namibia, Zambia, Madagascar","Botswana, Kenya, Egypt, Lesotho"],
+     g:"NEIGHBOURING SADC COUNTRIES: Namibia, Botswana, Zimbabwe, Lesotho, Mozambique, Swaziland (now Eswatini).",
+     w:"Namibia, Botswana, Zimbabwe, Lesotho, Mozambique and Swaziland."},
+    {n:"Aeroplanes and ships drawn at the edges of provinces.",
+     q:"What are the tourism 'gateways' to the provinces?",
+     o:["Airports and harbours","National highways","Border posts only","Tourist information offices"],
+     g:"GATEWAYS: airports and harbours. International airports: OR Tambo, Cape Town International, King Shaka International. Johannesburg's international airport is OR Tambo.",
+     w:"Airports and harbours."},
+    {n:"You zoom out to the whole world.",
+     q:"How many oceans surround South Africa, and how many continents are there?",
+     o:["Two oceans (Atlantic and Indian); seven continents","Four oceans; seven continents","Two oceans; five continents","Three oceans; six continents"],
+     g:"OCEANS: Atlantic and Indian. CONTINENTS: Africa, Antarctica, Asia, Australasia, Europe, North America, South America. Near-continent islands: Greenland, Madagascar.",
+     w:"Two oceans and seven continents."}
+  ]
+},
+{
+  id:24, strand:"map", name:"THE LANDMARKS",
+  intro:"Pins stuck into the floor map: harbours, mountains, parks, heritage sites. Some of the pins are lying.",
+  steps:[
+    {n:"A row of gold pins marks World Heritage Sites.",
+     q:"How many World Heritage Sites does the study guide list for South Africa?",
+     o:["Eight","Nine","Six","Twelve"],
+     g:"EIGHT WHS: Mapungubwe, Robben Island, iSimangaliso, Vredefort Dome, Cape Floral Region, Cradle of Humankind, uKhahlamba-Drakensberg, Richtersveld.",
+     w:"Eight."},
+    {n:"One gold pin is fake.",
+     q:"Which is NOT a South African World Heritage Site?",
+     o:["Modjadji Cycad Reserve","Vredefort Dome","Cape Floral Region","Mapungubwe Cultural Landscape"],
+     g:"The Modjadji Cycad Reserve is an attraction, but NOT a World Heritage Site.",
+     w:"Modjadji Cycad Reserve is not a WHS."},
+    {n:"Blue anchors along the coast.",
+     q:"Which list contains only South African harbours?",
+     o:["Durban, Mossel Bay, Saldanha, Richards Bay","Lanseria, George, Upington","Gariep, Vaal, Hartebeespoort","Magaliesberg, Waterberg, Pilanesberg"],
+     g:"HARBOURS: Durban, Port Elizabeth (Algoa Bay), Ngqura, Cape Town, Mossel Bay, Simon's Town, Port Nolloth, Hout Bay, Saldanha, Richards Bay, Knysna. Lanseria, George and Upington are domestic airports.",
+     w:"Durban, Mossel Bay, Saldanha, Richards Bay. The second list is airports; the third dams; the fourth mountains."},
+    {n:"Green pins on the borders.",
+     q:"Which is a Transfrontier PARK on South Africa's map?",
+     o:["Kgalagadi TFP","Maloti-Drakensberg","Addo","Table Mountain"],
+     g:"TRANSFRONTIER PARKS: /Ai-/Ais-Richtersveld, Kgalagadi, Great Limpopo. TRANSFRONTIER CONSERVATION AREAS: Limpopo-Shashe, Maloti-Drakensberg.",
+     w:"Kgalagadi. Maloti-Drakensberg is a Transfrontier Conservation AREA, not a park."},
+    {n:"Brown triangles for mountains.",
+     q:"Which are all major South African mountains?",
+     o:["Drakensberg, Magaliesberg, Soutpansberg","Gariep, Breede, Tugela","Vaal, Hartebeespoort, Gariep","Addo, Karoo, Mokala"],
+     g:"MOUNTAINS: Drakensberg, Magaliesberg, Table Mountain, Waterberg, Soutpansberg, Pilanesberg. RIVERS: Gariep (Orange), Limpopo, Breede, Tugela. DAMS: Vaal, Hartebeespoort, Gariep.",
+     w:"Drakensberg, Magaliesberg, Soutpansberg. Gariep, Breede and Tugela are rivers."}
+  ]
+},
+{
+  id:25, strand:"map", name:"THE ODOMETER",
+  intro:"A car dashboard, a distance table and a long empty road. You need to know how far, and how long.",
+  steps:[
+    {n:"A grid of numbers in the back of a road atlas.",
+     q:"What are distance tables used for?",
+     o:["Planning self-drive tours and working out distances between towns","Converting currency","Calculating time zones","Grading hotels"],
+     g:"DISTANCE TABLES: in map books and brochures, rows and columns; used to plan self-drive tours and routes. They help tourists work out how far they can travel in a day.",
+     w:"Planning self-drive routes and distances between towns."},
+    {n:"The guide gives one speed for all calculations.",
+     q:"What average driving speed does the study guide use to calculate travel time?",
+     o:["100 km/h","80 km/h","120 km/h","60 km/h"],
+     g:"TRAVEL TIME = distance ÷ speed, using an average of 100 km per hour.",
+     w:"100 km per hour."},
+    {n:"The route is 581 km.",
+     q:"What is the driving time?",
+     o:["5,81 hours","58,1 hours","4,5 hours","6,81 hours"],
+     g:"581 km ÷ 100 km/h = 5,81 hours.",
+     w:"5,81 hours: 581 ÷ 100."},
+    {n:"A longer route: 1 400 km.",
+     q:"Using the guide's average speed, how long is the drive?",
+     o:["14 hours","1,4 hours","140 hours","10 hours"],
+     g:"1 400 km ÷ 100 km/h = 14 hours of driving — before any stops.",
+     w:"14 hours: 1 400 ÷ 100."},
+    {n:"Someone says driving time depends only on the weather.",
+     q:"What else affects driving time?",
+     o:["Number of stops, legal speed limit and road conditions","Only the colour of the car","Only the time zone","Nothing else"],
+     g:"DRIVING TIME also depends on how many stops are made, the legal speed limit, road conditions and weather conditions.",
+     w:"Stops, speed limits and road conditions — not just the weather."}
+  ]
+},
+/* ===== TERM 2 · DOMESTIC, REGIONAL AND INTERNATIONAL TOURISM ===== */
+{
+  id:26, strand:"dom", name:"HOME GROUND",
+  intro:"A minibus taxi rank. A driver yells 'Sho't left!' and a dozen South Africans climb in for a weekend away without ever leaving the country.",
+  steps:[
+    {n:"Domestic tourism has grown over twenty years, but some things still hold it back.",
+     q:"Which is a negative influence on domestic tourism?",
+     o:["Unemployment and high interest and inflation rates","More attractions being publicised","The Sho't Left campaign","Discounts and specials"],
+     g:"NEGATIVE INFLUENCES: unemployment, high interest and inflation rates, less spending money, high cost of living, tourism being a new concept in SA culture.",
+     w:"Unemployment and high interest and inflation. Unemployment has a NEGATIVE effect on domestic tourism."},
+    {n:"A town mayor lists what local tourists bring.",
+     q:"Which is a benefit of domestic tourism for PEOPLE?",
+     o:["It is labour intensive, so it creates jobs and small-business opportunities","It raises inflation","It sends money overseas","It reduces awareness of conservation"],
+     g:"ECONOMY: money spent locally pays for facilities and infrastructure. PEOPLE: jobs, variety of skills, small business, supports local business, learn about own country. ENVIRONMENT: awareness of conservation, income pays for it, pollution monitoring.",
+     w:"Jobs and small-business opportunities — tourism is labour intensive."},
+    {n:"A marketing team brainstorms ways to get more South Africans travelling.",
+     q:"Which is a way to grow domestic tourism?",
+     o:["Promote short breaks and group travel, and offer discounts and specials","Raise prices","Reduce advertising","Close attractions in the off-season"],
+     g:"GROWING TOURISM: encourage travel to all parts of SA, marketing, short breaks and group travel, improved advertising, longer stays, a holiday travel culture, more attractions, discounts and specials.",
+     w:"Short breaks, group travel, discounts and specials."},
+    {n:"The taxi driver grins at the slogan painted on his door.",
+     q:"Where does the name 'Sho't Left' come from?",
+     o:["Taxi language: 'I want to jump off just around the corner'","A Zulu word for holiday","A cricket term","A Cape Town suburb"],
+     g:"SHO'T LEFT: from taxi language meaning 'I want to jump off just around the corner' — adapted to mean a short trip or quick getaway.",
+     w:"Taxi language for 'I want to jump off just around the corner'."},
+    {n:"The campaign website is full of night life and adventure.",
+     q:"Who does Sho't Left target, and which association does it work with?",
+     o:["The youth; ASATA","Pensioners; FEDHASA","Business travellers; SATSA","International tourists; UNWTO"],
+     g:"SHO'T LEFT: promotes SA as fun and affordable; entertainment, adventure, night life; bookable online. The Sho't Left Enterprise Programme trains previously disadvantaged South Africans as travel agents selling domestic packages.",
+     w:"It targets the youth and works with ASATA."}
+  ]
+},
+{
+  id:27, strand:"dom", name:"THE STATISTICS OFFICE",
+  intro:"Bar graphs, pie charts and a whiteboard full of percentages. Somebody needs to explain where South Africans actually go.",
+  steps:[
+    {n:"A report lands on the desk.",
+     q:"What are statistics, and who collects tourism data in SA?",
+     o:["Numerical data obtained from research; Statistics SA and SAT","Tourists' opinions; TGCSA","Maps; SANParks","Heritage records; SAHRA"],
+     g:"STATISTICS: numerical data from research. Statistics SA and South African Tourism collect data and compile tables and graphs. Reports help identify travel patterns.",
+     w:"Numerical data from research, collected by Statistics SA and SAT."},
+    {n:"A pie chart: 60% one colour, 40% the other.",
+     q:"Travel WITHIN a province is called ___ and makes up about ___ of tourists.",
+     o:["intra-provincial; 60%","inter-provincial; 60%","intra-provincial; 40%","inter-provincial; 90%"],
+     g:"INTRA-provincial = within a province (about 60%). INTER-provincial = from one province to another (about 40%); Gauteng and North West have the most inter-provincial tourists.",
+     w:"Intra-provincial, about 60%. Inter-provincial is about 40%."},
+    {n:"Arrows on a map of SA show where tourists come from and where they go.",
+     q:"Which are the major DESTINATION provinces for domestic tourists?",
+     o:["KwaZulu-Natal and Eastern Cape","Gauteng and North West","Western Cape and Northern Cape","Free State and Limpopo"],
+     g:"MAJOR SOURCES: Gauteng and KZN. MAJOR DESTINATIONS: KZN and Eastern Cape. SEASONALITY: most travel happens during school holidays. Purposes: VFR, holiday, business, religious events, medical.",
+     w:"KZN and the Eastern Cape. Gauteng and KZN are the main sources."},
+    {n:"A 2009 table of nights per trip.",
+     q:"How long is the average business trip?",
+     o:["7 nights","4,5 nights","5 nights","3,6 nights"],
+     g:"2009: average domestic trip 4,5 nights · business trip 7 nights · holiday 5 nights. Limpopo has the longest stays (5,2), North West the shortest (3,5).",
+     w:"7 nights. 4,5 is the average domestic trip overall."},
+    {n:"The last slide: money and activities.",
+     q:"What was the average spend per domestic tourist per trip in 2009, and which activities are most popular?",
+     o:["R730; social activities, shopping, night life and nature-based","R7 300; casinos","R73; hiking","R730; conferences"],
+     g:"AVERAGE EXPENDITURE: R730 per trip (2009). MOST POPULAR ACTIVITIES: social activities, shopping, night life, nature-based.",
+     w:"R730 per trip; social activities, shopping, night life and nature-based activities."}
+  ]
+},
+/* ===== TERM 3 · TOURIST ATTRACTIONS IN SOUTH AFRICA ===== */
+{
+  id:28, strand:"att", name:"EASTERN CAPE, FREE STATE, GAUTENG",
+  intro:"Road trip, leg one. From a bridge above a gorge, across a meteorite crater, into the caves where humanity began.",
+  steps:[
+    {n:"You stand on a concrete arch 216 m above the river, a bungee cord around your ankles.",
+     q:"According to the study guide, the Bloukrans Bridge is in:",
+     o:["The Eastern Cape","The Free State","Gauteng","KwaZulu-Natal"],
+     g:"BLOUKRANS BRIDGE: 216 m, Tsitsikamma, on the EC/WC border; highest bridge in Africa, third highest in the world, largest single-span concrete arch, highest bungee jump in the world. (Guide's answer: Eastern Cape.)",
+     w:"The Eastern Cape. The guide's answer key places it there."},
+    {n:"Grahamstown fills with dancers, opera singers and market stalls.",
+     q:"When is the National Arts Festival, the largest arts festival in the country?",
+     o:["June/July","September/October","March","December"],
+     g:"NATIONAL ARTS FESTIVAL: Grahamstown, June/July. GREAT FISH RIVER CANOE MARATHON: Sept/Oct. ADDO ELEPHANT NATIONAL PARK: game drives, hiking, horse riding, 4x4 trails. The EC has 800 km of coastline and malaria-free reserves.",
+     w:"June/July. The Fish River canoe marathon is September/October."},
+    {n:"Near Parys, a ring of hills 380 km wide.",
+     q:"What is the Vredefort Dome?",
+     o:["The impact site of a huge meteorite","A mountain","Golden sandstone cliffs","The Cradle of Humankind"],
+     g:"VREDEFORT DOME: meteorite the size of Table Mountain, 2 billion years ago; oldest and largest impact site in the world; WHS. GOLDEN GATE HIGHLANDS: golden sandstone cliffs, Brandwag Rock, bearded vulture.",
+     w:"A meteorite impact site. Golden sandstone cliffs are Golden Gate."},
+    {n:"A skull in a glass case, about 2,8 million years old.",
+     q:"'Mrs Ples' and 'Little Foot' were discovered at the:",
+     o:["Cradle of Humankind","Big Hole","Mapungubwe","Vredefort Dome"],
+     g:"CRADLE OF HUMANKIND (Gauteng, WHS): fossil sites at Sterkfontein, Swartkrans, Kromdraai. Mrs Ples — first hominid skull found, ~2,8 million years. Little Foot — 4 million year old ape-man skeleton.",
+     w:"The Cradle of Humankind, Gauteng."},
+    {n:"Two entrances marked WHITES and NON-WHITES, kept as a reminder.",
+     q:"What does the Apartheid Museum at Gold Reef City show?",
+     o:["The history of apartheid from 1948 to 1994","Gold mining techniques","Meteorite fossils","Zulu royal history"],
+     g:"APARTHEID MUSEUM: opened 2001, history of apartheid 1948–1994, 22 exhibition areas, a symbol of hope. GOLD REEF CITY: old gold mine turned theme park — Golden Loop, casino, deepest gold mine tour, gold poured into ingots.",
+     w:"The history of apartheid, 1948 to 1994."}
+  ]
+},
+{
+  id:29, strand:"att", name:"KWAZULU-NATAL",
+  intro:"Warm Indian Ocean, Zulu Kingdom heritage, battlefields and mountains. The most popular domestic destination in the country.",
+  steps:[
+    {n:"Estuaries, coral reefs, dunes and hippos in the lake.",
+     q:"Which was South Africa's FIRST World Heritage Site?",
+     o:["iSimangaliso (Great St Lucia) Wetland Park","Robben Island","Vredefort Dome","Table Mountain"],
+     g:"iSIMANGALISO: SA's first WHS, largest estuarine system in Africa — forests, coral reefs, dunes, wetlands. Activities: fishing, snorkelling, diving, bird watching, game viewing.",
+     w:"iSimangaliso Wetland Park."},
+    {n:"An adventure tourist wants to climb and see ancient rock paintings.",
+     q:"Where should she go?",
+     o:["uKhahlamba/Drakensberg Park, KZN","Mapungubwe, Limpopo","The Golden Mile, KZN","Gold Reef City, Gauteng"],
+     g:"uKHAHLAMBA-DRAKENSBERG: SA's highest mountain range, caves and rock shelters, the largest group of rock paintings in Africa, WHS. Activities: rock climbing, hiking, trout fishing, rafting.",
+     w:"uKhahlamba/Drakensberg Park."},
+    {n:"On Durban's Golden Mile, a huge ship-shaped building.",
+     q:"What are uShaka Marine World's three sections?",
+     o:["Sea World, Wet 'n Wild, Village Walk","Aquarium, Casino, Golf Course","Sea World, Valley of Waves, Superbowl","Wet 'n Wild, Golden Loop, Two Oceans"],
+     g:"uSHAKA: Sea World (aquarium), Wet 'n Wild (water park), Village Walk (shopping). The GOLDEN MILE / MARINE PARADE also has Suncoast Casino and amusement parks. The Golden Mile is in Durban, not Gauteng.",
+     w:"Sea World, Wet 'n Wild and Village Walk."},
+    {n:"Thousands of runners between two cities before dawn.",
+     q:"What is the Comrades Marathon?",
+     o:["The world's largest and oldest ultra-marathon — 90 km between Pietermaritzburg and Durban","A 109 km cycle race in Cape Town","A canoe race on the Great Fish River","A 42 km race in Soweto"],
+     g:"COMRADES: world's largest and oldest ultra-marathon, 90 km, Pietermaritzburg–Durban; direction alternates each year; attracts local and international sport tourists.",
+     w:"The 90 km ultra-marathon between Pietermaritzburg and Durban."},
+    {n:"The sea turns silver. Gannets dive, dolphins chase.",
+     q:"When is the Sardine Run, and who does it attract?",
+     o:["May/June/July; SIT and education tourists","December; beach tourists","September; wine tourists","March; cyclists"],
+     g:"SARDINE RUN: May–July, millions of sardines move up the KZN coast, attracting Cape gannets, whales, sharks and dolphins — and SIT and education tourists.",
+     w:"May to July, attracting SIT and education tourists."}
+  ]
+},
+{
+  id:30, strand:"att", name:"LIMPOPO",
+  intro:"The province of myths and legends. Iron Age kingdoms, ancient cycads, and a route of ivory running through the bush.",
+  steps:[
+    {n:"A local guide lowers her voice to tell a story about rain.",
+     q:"Why is Limpopo known as the province of myths and legends?",
+     o:["Queen Modjadji, the Rain Queen, lived in the Lobedu District","It has the Big Hole","It hosts the Comrades Marathon","It is home to Robben Island"],
+     g:"LIMPOPO: popular ecotourism destination, rich history and archaeology. Queen Modjadji, the Rain Queen, lived in the Lobedu District; no successor has been named yet.",
+     w:"Queen Modjadji, the Rain Queen of the Lobedu."},
+    {n:"A golden rhino figurine on a hilltop.",
+     q:"What was Mapungubwe?",
+     o:["A gold and ivory trading centre until AD 1300, trading with China, India and Egypt","A diamond mine","A Voortrekker settlement","A meteorite crater"],
+     g:"MAPUNGUBWE: largest kingdom in SA until the 14th century, Iron Age civilisation, WHS. MAKAPANSGAT VALLEY holds Stone Age and Iron Age relics.",
+     w:"A gold and ivory trading kingdom until AD 1300."},
+    {n:"A student wants to see the oldest and largest cycad specimens on Earth.",
+     q:"Where should the student go?",
+     o:["Modjadji Cycad Reserve, Limpopo","Kirstenbosch, Western Cape","Golden Gate, Free State","Witsand, Northern Cape"],
+     g:"MODJADJI CYCAD RESERVE: in Lebowa, oldest and largest cycads on Earth; hiking, bird watching. It is NOT a World Heritage Site.",
+     w:"Modjadji Cycad Reserve."},
+    {n:"An ecotourist wants the largest game reserve in South Africa.",
+     q:"Which statement about Kruger National Park is true?",
+     o:["More mammal species than any reserve in Africa and 500+ bird species","It is the smallest national park","It is only in the Northern Cape","It is a TFCA in Lesotho"],
+     g:"KRUGER: largest game reserve in SA, more mammal species than any reserve in Africa, 500+ bird species, private reserves and lodges inside. Game viewing, safaris, hiking, camping.",
+     w:"More mammal species than any reserve in Africa, and over 500 bird species."},
+    {n:"A 2 000 km route through parks and villages.",
+     q:"What is the African Ivory Route?",
+     o:["An ecotourism route through 3,6 million ha of parks, with five cultural camps in villages","A railway line","A gold route in Gauteng","A wine route"],
+     g:"AFRICAN IVORY ROUTE: 2 000 km, 3,6 million ha of parks, reserves and game farms; Big Five, 4x4, abseiling; traditional dance, music, storytelling and food in five cultural camps.",
+     w:"A 2 000 km ecotourism route with five village cultural camps."}
+  ]
+},
+{
+  id:31, strand:"att", name:"MPUMALANGA",
+  intro:"The Panorama Route. Old gold towns, rock swirled into potholes, and a canyon so deep the clouds sit inside it.",
+  steps:[
+    {n:"Tin-roofed buildings from the 1800s, a gold pan for hire.",
+     q:"Which old gold-mining town is now a national monument?",
+     o:["Pilgrim's Rest","Kimberley","Parys","Sutherland"],
+     g:"PILGRIM'S REST: a goldfield in the late 1800s, now a national monument. Hiking, trout fishing, mountain biking, gold panning. The PANORAMA ROUTE: cultural heritage and scenic landscapes.",
+     w:"Pilgrim's Rest."},
+    {n:"Perfectly round holes carved into yellow rock.",
+     q:"What formed Bourke's Luck Potholes?",
+     o:["Water erosion","A meteorite","Gold miners","Volcanic eruptions"],
+     g:"BOURKE'S LUCK POTHOLES: round formations caused by water erosion. Hiking, picnics, museum visits, road-stall shopping.",
+     w:"Water erosion."},
+    {n:"You lean over the rail above a vast green gorge.",
+     q:"Blyde River Canyon is:",
+     o:["The third largest canyon in the world, 25 000 ha","The deepest hand-dug hole in the world","A World Heritage Site in KZN","The largest estuary in Africa"],
+     g:"BLYDE RIVER CANYON: third largest in the world, 25 000 ha, a scenic wonder. Hot air ballooning, game drives, horse riding, abseiling, river rafting, boat trips.",
+     w:"The third largest canyon in the world."},
+    {n:"A lookout point, a sea of mist, forest far below.",
+     q:"Why is it called God's Window?",
+     o:["It gives a panoramic view of the Lowveld, looking down into indigenous rainforest","It is a church","It has stained glass windows","It faces the ocean"],
+     g:"GOD'S WINDOW: panoramic view of the Lowveld — rainforest, canyons, rock formations, waterfalls. Hiking trails and look-out points.",
+     w:"The panoramic view over the Lowveld and down into the rainforest."},
+    {n:"A matching exercise from the exam paper.",
+     q:"God's Window, the Great Fish River, SALT and the Cango Caves — which one is in Mpumalanga?",
+     o:["God's Window","Great Fish River","SALT","Cango Caves"],
+     g:"MATCHING: God's Window – Mpumalanga · Great Fish River – Eastern Cape · SALT – Northern Cape · Cango Caves – Western Cape · African Ivory Route – Limpopo.",
+     w:"God's Window. Fish River is EC, SALT is NC, Cango Caves is WC."}
+  ]
+},
+{
+  id:32, strand:"att", name:"NORTHERN CAPE",
+  intro:"Diamonds, dunes that sing, desert flowers and a telescope pointed at a billion galaxies.",
+  steps:[
+    {n:"You stand at a viewing platform above a flooded, impossibly wide pit.",
+     q:"What is the Big Hole in Kimberley?",
+     o:["The largest hand-dug hole in the world — 1,6 km wide, 215 m deep","A meteorite crater","A natural cave system","A canyon carved by a river"],
+     g:"BIG HOLE AND MINE MUSEUM: remains of a late-1800s mine; 48 restored buildings from the diamond rush; the 'Eureka' (21,25 carats), the first diamond found in the area. Mine tour, viewing platform.",
+     w:"The largest hand-dug hole in the world."},
+    {n:"On a hot afternoon, the dunes start to hum.",
+     q:"Why are Witsand's sands called 'roaring' sands?",
+     o:["Sand particles rub together in hot, dry weather and make a humming sound","Lions roar nearby","Wind blows through caves","Waves crash below"],
+     g:"WITSAND NATURE RESERVE: 'roaring' sands; night drives for porcupine, aardwolf, owls and Cape fox; game drives, 4x4 routes, hiking, cycling, dune surfing.",
+     w:"Sand particles rubbing together in hot, dry weather."},
+    {n:"A photographer plans a trip to Namaqualand.",
+     q:"When is the best time to see the flowers?",
+     o:["August and September","December and January","May and June","March"],
+     g:"NAMAQUALAND FLORAL BEAUTY: best in August–September; 3 500 plant species; self-drives, tours, photography.",
+     w:"August and September."},
+    {n:"A white dome on a hill near Sutherland.",
+     q:"What is SALT?",
+     o:["The largest telescope in the Southern Hemisphere","A salt pan","A seabird colony","A diamond mine"],
+     g:"SALT (South African Large Telescope): largest in the Southern Hemisphere, records stars and galaxies a billion times too small to see with the naked eye. Telescope tours, stargazing evenings.",
+     w:"The South African Large Telescope — the largest in the Southern Hemisphere."},
+    {n:"A park ranger mentions two parks that cross the border.",
+     q:"Which Transfrontier Parks do the model answers place in the Northern Cape?",
+     o:["/Ai-/Ais-Richtersveld and Kgalagadi","Great Limpopo","Maloti-Drakensberg","Limpopo-Shashe"],
+     g:"NORTHERN CAPE TFPs: /Ai-/Ais-Richtersveld and Kgalagadi. Great Limpopo TFP is in Limpopo.",
+     w:"/Ai-/Ais-Richtersveld and Kgalagadi."}
+  ]
+},
+{
+  id:33, strand:"att", name:"NORTH WEST",
+  intro:"Slot machines and a wave pool in the bush, a cultural village of five nations, and a volcano crater full of rhino.",
+  steps:[
+    {n:"Neon lights and a golf course in the middle of the bushveld.",
+     q:"Sun City is known as:",
+     o:["The 'Las Vegas' of South Africa","The Rainbow Nation","The Place of Great Noise","The province of myths and legends"],
+     g:"SUN CITY AND LOST CITY: one of the world's largest entertainment centres; casino, golf (Nedbank Golf Challenge), Superbowl concerts, Valley of Waves wave pool.",
+     w:"The 'Las Vegas' of South Africa."},
+    {n:"A sign at a cultural village translates its name.",
+     q:"What does 'Lesedi' mean?",
+     o:["Light, in Sesotho","Rain, in Zulu","Home, in Xhosa","Welcome, in Pedi"],
+     g:"LESEDI CULTURAL VILLAGE: 'light' in Sesotho; five villages — Pedi, Zulu, Xhosa, Basotho, Ndebele; stay overnight, traditional food, Lesedi beer called 'mamba juice'.",
+     w:"Light, in Sesotho."},
+    {n:"A game drive in an ancient volcanic crater.",
+     q:"Pilanesberg Game Reserve is known for:",
+     o:["The Big Five, 350 bird species and a large white rhino population","The oldest cycads on Earth","Africa's largest group of rock paintings","A vulture restaurant"],
+     g:"PILANESBERG: Big Five, 350 bird species, large white rhino population; picnics, bird hides, environmental education centre. It is in North West Province.",
+     w:"The Big Five, 350 bird species and lots of white rhino."},
+    {n:"Theatre, poetry and circus tents in Potchefstroom.",
+     q:"What is Aardklop?",
+     o:["A five-day arts festival in Potchefstroom in September/October","A festival in Oudtshoorn to promote Afrikaans","The festival in Grahamstown in June/July","A cycle race"],
+     g:"AARDKLOP ARTS FESTIVAL: five days, September/October, Potchefstroom; theatre, music, art, circus, poetry, curio stalls.",
+     w:"The five-day Potchefstroom festival in September/October."},
+    {n:"A light aircraft lands right at the lodge.",
+     q:"Which luxury private game reserve in North West has its own airstrip?",
+     o:["Madikwe","Shamwari","Phinda","Sabi Sabi"],
+     g:"MADIKWE: North West; thatched lodges, own airstrip, wedding and conference facilities, Big Five, wilderness walks and bird watching.",
+     w:"Madikwe."}
+  ]
+},
+{
+  id:34, strand:"att", name:"WESTERN CAPE",
+  intro:"The second most popular destination. A flat-topped mountain, an island prison, wine valleys and a coastline called a garden.",
+  steps:[
+    {n:"A tiny frog in a mountain stream that lives nowhere else.",
+     q:"Which species is found only on Table Mountain?",
+     o:["The ghost frog","The pygmy falcon","The bearded vulture","The Knysna seahorse"],
+     g:"TABLE MOUNTAIN: world-famous landmark, ghost frog and ~200 plant species found only here; aerial cableway with windows giving 360° views. The CAPE FLORAL REGION is one of the richest plant areas in the world, a WHS.",
+     w:"The ghost frog. The pygmy falcon is Kgalagadi; the bearded vulture Golden Gate."},
+    {n:"A ferry from the V&A Waterfront, past the Two Oceans Aquarium, out to the island.",
+     q:"Which historic sites are on Robben Island?",
+     o:["The Kramat Shrine, the lepers' graveyard and Robert Sobukwe House","The Big Hole and Mine Museum","The Apartheid Museum","Two Oceans Aquarium"],
+     g:"ROBBEN ISLAND: prison for political prisoners, especially Nelson Mandela; WHS; Kramat Shrine (Muslim pilgrimage), lepers' graveyard, Robert Sobukwe House. V&A WATERFRONT: hotels, Two Oceans Aquarium, boat trips.",
+     w:"The Kramat Shrine, lepers' graveyard and Robert Sobukwe House."},
+    {n:"A scenic coastal road through forests and seaside towns.",
+     q:"The Garden Route runs from:",
+     o:["Mossel Bay to Storms River","Cape Town to Durban","Knysna to Port Elizabeth","Oudtshoorn to George"],
+     g:"GARDEN ROUTE: Mossel Bay to Storms River, through the Tsitsikamma Forest; whale and dolphin watching, hiking, safaris. CAPE WINE ROUTES: four regions — Breede River valley, Little Karoo, western coastal area, Olifants River.",
+     w:"Mossel Bay to Storms River."},
+    {n:"Thirty thousand cyclists in March wind.",
+     q:"What is the Cape Argus Cycle Tour?",
+     o:["An annual 109 km race — the largest timed cycling event in the world","A 90 km ultra-marathon","A canoe marathon","A wine festival"],
+     g:"CAPE ARGUS CYCLE TOUR: 109 km, Cape Town, March; most scenic route; largest timed cycling event in the world; non-profit — money goes to charities.",
+     w:"The 109 km March cycle race, the largest timed cycling event in the world."},
+    {n:"Dripstone caverns, and down the road, ostriches racing.",
+     q:"The Cango Caves are near which town, and which festival started there?",
+     o:["Oudtshoorn; the Klein Karoo National Arts Festival","Parys; Aardklop","Grahamstown; the National Arts Festival","Potchefstroom; the Jazz Festival"],
+     g:"CANGO CAVES near Oudtshoorn: dripstone formations, guided tours, ostrich riding and races. KLEIN KAROO NATIONAL ARTS FESTIVAL started in Oudtshoorn to promote and preserve Afrikaans culture.",
+     w:"Oudtshoorn — home of the Klein Karoo National Arts Festival."}
+  ]
+},
+{
+  id:35, strand:"att", name:"THE WILD RESERVES",
+  intro:"Thatched lodges, rangers with rifles, and botanical gardens where every plant has a label. Fauna and flora are an attraction in their own right.",
+  steps:[
+    {n:"A ranger sorts the world into four environments.",
+     q:"Roads, houses and dams belong to which environment?",
+     o:["Man-made environment","Natural environment","Physical environment","Cultural environment"],
+     g:"NATURAL: plants, animals, insects, birds. MAN-MADE: everything built or changed by humans. PHYSICAL: rocks, soil, weather, water. CULTURAL: heritage, traditions, beliefs, art forms.",
+     w:"Man-made. Rocks, soil and weather are the physical environment."},
+    {n:"Orphaned lions recovering in an enclosure near Port Elizabeth.",
+     q:"Which luxury reserve runs the Born Free Big Cat Sanctuary?",
+     o:["Shamwari, Eastern Cape","Madikwe, North West","Phinda, KZN","Sabi Sabi, southern Kruger"],
+     g:"SHAMWARI: less than an hour from Port Elizabeth; seven lodges with own guides; Born Free Big Cat Sanctuary; Big Five; field guide courses and volunteer programme. BIG FIVE: lion, rhino, buffalo, elephant, leopard.",
+     w:"Shamwari."},
+    {n:"A canoe on the Mzinene River, six eco-lodges each with its own pool.",
+     q:"Which reserve in northern KwaZulu-Natal has seven habitats and 400 bird species?",
+     o:["Phinda","Sabi Sabi","Shamwari","Pilanesberg"],
+     g:"PHINDA: northern KZN, seven habitats, Big Five, 400 bird species, six eco-lodges, game drives, guided walks, canoe trips on the Mzinene River.",
+     w:"Phinda."},
+    {n:"Children in little khaki uniforms learning to track.",
+     q:"What does Sabi Sabi's Elefun centre offer?",
+     o:["Arts, crafts and a junior ranger programme for children","Casino games","Golf lessons","Cable car rides"],
+     g:"SABI SABI: southern Kruger; Big Five; two bush camps and two lodges; spa; photography courses, themed dinners, tours to Shangaan communities; Elefun centre for children.",
+     w:"Arts, crafts and a junior ranger programme."},
+    {n:"A garden on the slopes of a mountain, full of threatened species.",
+     q:"Who runs South Africa's botanical gardens, and which one is on Table Mountain's slopes?",
+     o:["SANBI; Kirstenbosch","SANParks; Walter Sisulu","SAHRA; Kirstenbosch","TGCSA; Free State National Botanical Garden"],
+     g:"SANBI runs the gardens (display, scientific study, conservation and education). KIRSTENBOSCH: Table Mountain, wheelchair-friendly, concerts. WALTER SISULU: Roodepoort, bird hide. FREE STATE NBG: outside Bloemfontein, ancient fossilised tree.",
+     w:"SANBI runs them; Kirstenbosch is on Table Mountain."}
+  ]
+},
+{
+  id:36, strand:"att", name:"SANPARKS",
+  intro:"A green-and-gold boom gate. Behind it, parks for elephants, zebras, penguins, vultures and fields of daisies.",
+  steps:[
+    {n:"A 56 m waterfall thundering into a granite gorge on the Gariep.",
+     q:"What did the Khoi call the Augrabies Falls?",
+     o:["The 'Place of Great Noise'","The Roaring Sands","God's Window","The Place of Light"],
+     g:"AUGRABIES FALLS NP: 55 000 ha on the Gariep (Orange) River; 56 m waterfall; succulents, klipspringer, black eagle, fish eagle, Broadley's flat lizard, quiver trees.",
+     w:"The 'Place of Great Noise'."},
+    {n:"Offshore from Addo, two island groups white with birds.",
+     q:"Addo Elephant National Park has the world's largest breeding population of:",
+     o:["Cape gannet","Bontebok","Bearded vulture","Knysna seahorse"],
+     g:"ADDO: third largest park in SA; includes Bird and St Croix Islands (marine protected area); largest breeding population of Cape gannet, second largest of African penguin.",
+     w:"The Cape gannet."},
+    {n:"A park named after an animal that was nearly extinct.",
+     q:"Why was Mountain Zebra National Park established?",
+     o:["To protect the Cape mountain zebra from extinction","To breed cheetahs for export","To host sporting events","To protect cycads"],
+     g:"MOUNTAIN ZEBRA NP: established to protect the Cape mountain zebra — now about 300 in the park — plus cheetah and black rhino.",
+     w:"To save the Cape mountain zebra from extinction."},
+    {n:"Carcasses laid out on a rocky ledge while a hide full of photographers waits.",
+     q:"Which park has a vulture 'restaurant' for the rare bearded vulture?",
+     o:["Golden Gate Highlands National Park","West Coast National Park","Bontebok National Park","Kruger National Park"],
+     g:"GOLDEN GATE: vulture restaurant, bearded vulture and bald ibis. WEST COAST NP: wetland for migrating waders, flamingos, Cape gannet breeding. BONTEBOK NP: fynbos, renosterveld, over 3 000 bontebok.",
+     w:"Golden Gate Highlands National Park."},
+    {n:"In spring, the ground turns orange and white.",
+     q:"What is Namaqua National Park famous for?",
+     o:["Its fields of daisies and wild flowers in spring","Its 56 m waterfall","The Big Five","Rock paintings"],
+     g:"NAMAQUA NP: daisies and wild flowers in spring; 3 500+ plant species, 1 000 endemic. GARDEN ROUTE NP: Wilderness, Tsitsikamma, Knysna Lakes, endangered Knysna seahorse. KRUGER: 2 million ha, 140+ mammal species.",
+     w:"Fields of daisies and wild flowers in spring."}
+  ]
+},
+{
+  id:37, strand:"att", name:"THE BORDERLANDS",
+  intro:"The fence has been taken down. Animals walk from one country into another without a passport.",
+  steps:[
+    {n:"A park sign in two countries' colours.",
+     q:"What is a Transfrontier Park?",
+     o:["A game reserve that extends across international borders into two or more countries","A park on a provincial border","A private game reserve","A marine reserve"],
+     g:"TRANSFRONTIER PARK: a game reserve crossing international borders into two or more countries. SA has formed them with Namibia, Botswana, Mozambique and Zimbabwe.",
+     w:"A game reserve that crosses international borders."},
+    {n:"Red dunes, a black-maned lion, and a haystack-sized bird nest in a tree.",
+     q:"Which was Africa's first Transfrontier Park?",
+     o:["Kgalagadi (2000)","Great Limpopo","/Ai-/Ais-Richtersveld (2003)","Maloti-Drakensberg"],
+     g:"KGALAGADI: Kalahari Gemsbok (SA) + Gemsbok Park (Botswana), joined in 2000; 38 000 km²; black-maned lion, sociable weaver, pygmy falcon (Africa's smallest falcon).",
+     w:"Kgalagadi, in 2000."},
+    {n:"Nama herders move goats between rocky hills and halfmens trees.",
+     q:"The /Ai-/Ais-Richtersveld Transfrontier Park is jointly managed by SANParks and:",
+     o:["The local Nama people","The Zulu Kingdom","Botswana","Lesotho"],
+     g:"/AI-/AIS-RICHTERSVELD: Richtersveld, /Ai-/Ais and Fish River Canyon joined in 2003; protects Nama heritage, rock hyrax, Hartmann's mountain zebra, the 'halfmens' tree.",
+     w:"The local Nama people."},
+    {n:"A proposed park where wild dogs cross three borders.",
+     q:"The Great Limpopo Transfrontier Park will link South Africa with:",
+     o:["Mozambique and Zimbabwe","Namibia and Botswana","Lesotho","Swaziland"],
+     g:"GREAT LIMPOPO TFP: SA, Mozambique, Zimbabwe; wild dog, black and white rhino; roan, sable, tsessebe; 49 fish species including killifish and lungfish.",
+     w:"Mozambique and Zimbabwe."},
+    {n:"High mountains, Cape vultures, and 4 000-year-old San paintings.",
+     q:"Maloti-Drakensberg is a Transfrontier Conservation Area shared by:",
+     o:["Lesotho and South Africa","Botswana and Zimbabwe","Namibia and South Africa","Mozambique and Zimbabwe"],
+     g:"MALOTI-DRAKENSBERG TFCA: Lesotho and SA; 119 threatened species — Drakensberg cycad, orchids, bearded and Cape vultures; 4 000-year-old San rock paintings. LIMPOPO-SHASHE TFCA: SA, Botswana, Zimbabwe — includes Mapungubwe, baobabs, mlala palms.",
+     w:"Lesotho and South Africa."}
+  ]
+},
+/* ===== TERM 3 · SUSTAINABLE AND RESPONSIBLE TOURISM ===== */
+{
+  id:38, strand:"sus", name:"THE THREE PILLARS",
+  intro:"Three stone columns hold up the roof: PLANET, PEOPLE, PROFIT. Crack one and the whole building comes down.",
+  steps:[
+    {n:"An inscription at the base of the first pillar.",
+     q:"What is the aim of sustainable tourism?",
+     o:["To protect and preserve resources for future generations","To attract as many tourists as possible","To build more hotels","To keep tourists out of national parks"],
+     g:"SUSTAINABLE TOURISM: protects and preserves resources for future generations; concerned with the well-being of environment, people and economy. All stakeholders share the responsibility.",
+     w:"To protect and preserve resources for future generations."},
+    {n:"The pillars' names are carved in capitals.",
+     q:"The three pillars of sustainable tourism are:",
+     o:["Planet, people, profit","Pollution, people, profit","Packaging, people, planet","Pressure on resources, planet, profit"],
+     g:"THREE PILLARS: environmental (planet), social (people), economic (profit). Good management reduces negative and increases positive impacts.",
+     w:"Planet, people, profit — environmental, social, economic."},
+    {n:"A concrete hotel block ruins the view of the bay.",
+     q:"Unsightly buildings are an example of:",
+     o:["Visual pollution","Noise pollution","Liquid waste","Congestion"],
+     g:"NEGATIVE ENVIRONMENTAL: air, noise, visual pollution, solid waste and litter, liquid waste, fauna and flora degradation (feeding baboons), pressure on resources, loss of habitat, congestion, vandalism.",
+     w:"Visual pollution."},
+    {n:"Not every environmental impact is bad.",
+     q:"Which is a POSITIVE environmental impact of tourism?",
+     o:["The three Rs: reduce, re-use, recycle","Loss of natural habitat","Vandalism and graffiti","Feeding baboons"],
+     g:"POSITIVE ENVIRONMENTAL: conservation funded by tourist income, biodiversity, improved built environment (CBD projects), environmental management systems, the three Rs.",
+     w:"The three Rs. The others are negative impacts."},
+    {n:"A sacred site is fenced off for a tour group while locals are turned away.",
+     q:"Which is a NEGATIVE social impact of tourism?",
+     o:["Locals denied access to culturally significant places","Cultural pride is promoted","Cultural heritage is preserved","Understanding of cultures grows"],
+     g:"NEGATIVE SOCIAL: crime and violence, cultural changes, income not returning to the community, tensions (locals denied access, invasion of sacred sites, exploitation of ceremonies), disrespect, drunkenness. POSITIVE: awareness, understanding, new ideas, heritage preserved, pride, education.",
+     w:"Locals being denied access. The others are positive social impacts."}
+  ]
+},
+{
+  id:39, strand:"sus", name:"THE COMMUNITY LEDGER",
+  intro:"A village treasurer with a ledger. Money flows in with the tourists — the question is how much of it stays.",
+  steps:[
+    {n:"The lodge's owners live overseas, and all its furniture was imported.",
+     q:"Profits and spending flowing out of the area is called:",
+     o:["Leakage","Inflation","External costs","Balance of payments"],
+     g:"LEAKAGE: owners take profits out of the area, and imported goods and services send money out.",
+     w:"Leakage."},
+    {n:"Since the tourists arrived, bread costs twice as much in the village shop.",
+     q:"Prices rising because of increased demand is called:",
+     o:["Inflation","Leakage","Investment","Overdependence"],
+     g:"INFLATION: prices of goods and services increase because there is more demand.",
+     w:"Inflation."},
+    {n:"The tourists stopped coming, and the town has no other industry.",
+     q:"This is a result of:",
+     o:["Overdependence on tourism","External costs","Leakage","Market share"],
+     g:"OVERDEPENDENCE: if tourism decreases, the economy has no other industries to rely on. EXTERNAL COSTS: extra electricity supply and waste removal caused by tourism.",
+     w:"Overdependence on tourism."},
+    {n:"The treasurer finally finds some good news.",
+     q:"Which is a POSITIVE economic impact of tourism?",
+     o:["It affects the balance of payments by bringing money into the country","Extra costs for electricity and waste removal","Inflation","Leakage"],
+     g:"POSITIVE ECONOMIC: income generator, creates employment, balance of payments (money comes in), generates investment from private and public sectors.",
+     w:"Bringing money in — the balance of payments. The rest are negatives."},
+    {n:"The lodge manager asks how to do better.",
+     q:"How can tourism businesses reduce negative economic impacts?",
+     o:["Employ locals, buy from local suppliers and promote local arts and crafts","Import all goods","Hire only foreign staff","Raise prices"],
+     g:"REDUCE NEGATIVES: employ locals, buy from local suppliers, support local entrepreneurs, include local content in products, promote local arts and crafts.",
+     w:"Go local: staff, suppliers, entrepreneurs, content, arts and crafts."}
+  ]
+},
+{
+  id:40, strand:"sus", name:"THE RESPONSIBLE TRAVELLER",
+  intro:"A hiking trail with a sign at the start. Tourists are stakeholders too, and everything you do out here counts.",
+  steps:[
+    {n:"The sign at the trailhead has a single line of advice.",
+     q:"Which rule should tourists follow in the natural environment?",
+     o:["'Leave nothing but footprints'","Pick one flower as a souvenir","Collect shells from the beach","Feed the animals"],
+     g:"RULES: leave nothing but footprints; take away rubbish; don't remove anything (shells, flowers); don't harm or kill any living thing.",
+     w:"'Leave nothing but footprints.'"},
+    {n:"Your lodge bathroom has a card on the towel rail.",
+     q:"How should tourists conserve water?",
+     o:["Shower instead of bath and re-use towels","Bath instead of shower","Ask for fresh towels every day","Always buy bottled water"],
+     g:"CONSERVING WATER: shower instead of bath, re-use towels, refillable containers, tap water where suitable, turn taps off properly.",
+     w:"Shower, don't bath — and re-use towels."},
+    {n:"A picnic site at the end of the trail.",
+     q:"Which is good litter control?",
+     o:["Clearly visible bins, separate recycling bins and a recycling company to collect","Burning rubbish on site","One hidden bin","Burying litter"],
+     g:"LITTER CONTROL: bins at sites, clearly visible, separate bins for recycling, a recycling company to collect. CONSERVING ENERGY: switch off appliances, use public transport, walk or cycle, switch off engines.",
+     w:"Visible bins, recycling bins and a collection company."},
+    {n:"A roadside stall sells ivory bangles and a restaurant offers pangolin.",
+     q:"How do tourists conserve other scarce resources?",
+     o:["Don't buy endangered species products or support restaurants that serve them","Buy them to support locals","Only buy small items","Report it later"],
+     g:"SCARCE RESOURCES: don't buy endangered species products, don't support restaurants that serve endangered species, support businesses that support conservation.",
+     w:"Don't buy endangered species products — and don't eat them either."},
+    {n:"The ranger explains why any of this matters to the industry.",
+     q:"What is the benefit of good environmental practices for tourism?",
+     o:["Attractions are conserved and human impact on the environment is limited","More litter-picking jobs","Lower prices","Fewer tourists"],
+     g:"BENEFITS: conserves attractions and limits the impact of human activities on natural and man-made environments.",
+     w:"Attractions are conserved and human impact is limited."}
+  ]
+},
+{
+  id:41, strand:"sus", name:"THE GREENHOUSE",
+  intro:"The air is thick and warm. Glass walls trap the heat. Outside, the ice is melting and the sea is rising.",
+  steps:[
+    {n:"A thermometer on the wall creeps upward.",
+     q:"What causes global warming?",
+     o:["An increase in pollution — greenhouse gases like CO2 trap heat in the atmosphere","Planting trees","The Earth moving closer to the sun","Too much rain"],
+     g:"GLOBAL WARMING: average temperatures rising due to pollution; CO2 from exhaust fumes, coal power plants, wood fires, gas heaters forms a blanket that traps heat. Melting ice raises sea levels.",
+     w:"Pollution — greenhouse gases trap heat. Cutting down trees makes it worse; planting them doesn't cause it."},
+    {n:"A household report card: 12,81 tons per year.",
+     q:"What is a carbon footprint?",
+     o:["The amount of tons of CO2 emitted","A footprint left on a hiking trail","A tax on carbon","The coal used by a train"],
+     g:"CARBON FOOTPRINT: amount of tons of CO2 emitted. The average South African household emits 12,81 tons per year.",
+     w:"The amount of tons of CO2 emitted."},
+    {n:"A hotel advertises its 'green tourism practices'.",
+     q:"What are green tourism practices?",
+     o:["Actions that reduce the environmental impact of tourism businesses","Actions that increase environmental impact","Painting the hotel green","Building golf courses"],
+     g:"GREEN TOURISM PRACTICES: actions that REDUCE the environmental impact of tourism businesses.",
+     w:"Actions that reduce the environmental impact of tourism businesses."},
+    {n:"Smoke rises from a cleared forest.",
+     q:"How does deforestation add to global warming?",
+     o:["Fewer plants absorb CO2, and burning trees (50% carbon) releases CO2","Growing trees release CO2","It cools the planet","It only affects rainfall"],
+     g:"DEFORESTATION: plants absorb CO2 and make oxygen; trees are 50% carbon and release CO2 when burned. Deforestation = 25% of human CO2 emissions — about what the USA, the largest polluter, produces.",
+     w:"Fewer plants to absorb CO2, and burning trees releases it."},
+    {n:"Namaqualand had a very dry winter.",
+     q:"What is the consequence for tourism?",
+     o:["Fewer wild flowers bloom in spring, so fewer tourists visit","More flowers than usual","No effect on tourism","Lower airport taxes"],
+     g:"CLIMATE CHANGE CONSEQUENCES: coastal destinations could flood, seasons change (Namaqualand flowers), emissions tax on vehicles, environmental departure tax at airports, extinctions affecting national parks, unstable weather disrupting travel.",
+     w:"Fewer spring flowers, so fewer tourists."}
+  ]
+},
+{
+  id:42, strand:"sus", name:"THE CARBON CUTTERS",
+  intro:"A lodge's engine room: geysers, light switches, recycling bins. Every switch you flip here changes the footprint.",
+  steps:[
+    {n:"The lodge manager points at the power station on the horizon.",
+     q:"Why does saving electricity reduce emissions in South Africa?",
+     o:["We burn coal to generate electricity, releasing CO2","Our electricity comes from wind","It only saves water","It lowers room prices"],
+     g:"In SA, coal is burned to generate electricity, releasing large volumes of CO2 — so saving electricity reduces emissions.",
+     w:"Our electricity comes from burning coal."},
+    {n:"The maintenance list for the week.",
+     q:"How can an accommodation establishment save electricity?",
+     o:["Energy-efficient bulbs, efficient appliances, solar panels and solar geysers","Leave air-conditioners on all day","Buy older appliances","Heat empty rooms"],
+     g:"SAVE ELECTRICITY: energy-efficient bulbs, use appliances only when needed, keep them in good working order (fridge seals), buy efficient appliances, solar panels and geysers, use hot water sparingly.",
+     w:"Efficient bulbs and appliances, plus solar power."},
+    {n:"Bins labelled GLASS, PLASTIC, PAPER.",
+     q:"How do reduce, re-use and recycle cut CO2?",
+     o:["Factories produce fewer products, so less CO2 is released","Recycling itself creates CO2","It adds more waste","It only saves money"],
+     g:"3 Rs: fewer products need to be made, so less CO2. Establishments reduce electricity, re-use containers, and sort waste into bins for recycling.",
+     w:"Factories make fewer products, so less CO2 is released."},
+    {n:"A family is planning next year's holidays.",
+     q:"When planning holidays, how can tourists reduce their carbon footprint?",
+     o:["Take fewer, longer holidays closer to home","Take many short long-haul trips","Choose providers who ignore emissions","Avoid conservation projects"],
+     g:"PLANNING: fewer and longer holidays, closer to home, providers committed to reducing their footprint, support tree planting and conservation.",
+     w:"Fewer, longer holidays closer to home."},
+    {n:"Now they need to choose how to get there.",
+     q:"When selecting transport, tourists should:",
+     o:["Use trains and public transport and book direct flights","Hire a private jet","Book flights with several transfers","Drive alone in separate cars"],
+     g:"TRANSPORT: train and public transport, direct flights to avoid transfers, public transport at the destination. AT THE ACCOMMODATION: little electricity, warm water sparingly, laundry sparingly.",
+     w:"Public transport and direct flights."}
+  ]
+},
+/* ===== TERM 3 · MARKETING ===== */
+{
+  id:43, strand:"mkt", name:"THE PITCH ROOM",
+  intro:"A glass boardroom, a projector and a client who wants more bookings. Speak the language of marketing or get shown the door.",
+  steps:[
+    {n:"The first slide has a single definition.",
+     q:"What is marketing?",
+     o:["What organisations do to place their products and services in the hands of the target market","Only advertising on TV","Doing market research","Setting prices"],
+     g:"MARKETING: what organisations do to place products and services in the hands of the target market — which means identifying customers' needs and wants.",
+     w:"Placing products and services in the hands of the target market."},
+    {n:"Two columns on the whiteboard.",
+     q:"Holiday packages and cruises are ___; bookings and reservations are ___.",
+     o:["products; services","services; products","niche markets; core markets","promotion; place"],
+     g:"PRODUCTS: holiday packages, accommodation, cruises, flights, tours. SERVICES: bookings and reservations.",
+     w:"Products, then services."},
+    {n:"A statistic: July–September 2010, 48% of international tourists visited Gauteng.",
+     q:"This figure describes Gauteng's:",
+     o:["Market share","Competitive edge","Niche market","Marketing mix"],
+     g:"MARKET SHARE: the portion of the market controlled by a company or product — Gauteng had the largest share of inbound tourism. Useful for comparing with competitors.",
+     w:"Market share."},
+    {n:"A taxi company makes environmentally friendly transport its selling point.",
+     q:"The Green Cab's environmentally friendly transport is its:",
+     o:["Competitive edge","Market share","Core market","Research plan"],
+     g:"COMPETITIVE EDGE: offering customers something unique or special.",
+     w:"Competitive edge — something unique or special."},
+    {n:"A client only sells birdwatching tours.",
+     q:"What are niche markets?",
+     o:["Special interest groups (SIT)","Market segments that provide the most business","Offering customers something unique","Services"],
+     g:"NICHE MARKETS: special interest groups (SIT). CORE MARKETS: segments that provide the most business. The target market is made up of market segments.",
+     w:"Special interest groups. Core markets are the ones that bring the most business."}
+  ]
+},
+{
+  id:44, strand:"mkt", name:"THE RESEARCH DESK",
+  intro:"Questionnaires, competitor brochures and a budget spreadsheet. Good marketing decisions start with good information.",
+  steps:[
+    {n:"A sticky note lists what marketing is for.",
+     q:"Which is an aim of marketing?",
+     o:["To set an affordable and competitive price","To grade establishments","To issue permits","To reduce market share"],
+     g:"MARKETING AIMS: identify target market needs, develop products, set an affordable competitive price, choose channels, inform the market, ensure provider support, determine the competitive edge.",
+     w:"Setting an affordable and competitive price."},
+    {n:"Five blocks form the base of the marketing plan.",
+     q:"Which are the five Ps of the marketing mix?",
+     o:["Product, price, place, promotion, people","Planet, people, profit, price, place","Promptness, politeness, preparation, professionalism, product","Product, planet, promotion, profit, place"],
+     g:"MARKETING MIX (5 Ps): product, price, place, promotion, people.",
+     w:"Product, price, place, promotion, people."},
+    {n:"An air hostess smiles and offers drinks.",
+     q:"Which P of the marketing mix is this?",
+     o:["People","Place","Promotion","Product"],
+     g:"PEOPLE: good customer service and well-trained staff. PLACE: how it reaches the market (travel agency, Internet, direct). PROMOTION: advertising, sales promotions, sponsorships, PR. PRICE: cost of a tour, room or ticket.",
+     w:"People — service from trained staff."},
+    {n:"Two lodges split the bill for a joint survey.",
+     q:"When organisations share the cost of research, this is:",
+     o:["Co-operative research","Outsourcing","In-house research","A research plan"],
+     g:"OUTSOURCING: a market research company is called in. IN-HOUSE: the business does its own research. CO-OPERATIVE: organisations research jointly and share costs.",
+     w:"Co-operative research. Outsourcing means hiring a research company."},
+    {n:"A calendar with target dates circled.",
+     q:"When must a research plan be completed?",
+     o:["Before the information becomes outdated","At any time","After the product launches","Once a decade"],
+     g:"RESEARCH PLAN: a time frame with target and implementation dates, finished before information is outdated. Research covers the customer, competition, the broader market and financing (e.g. SA Tourism or TEP support).",
+     w:"Before the information becomes outdated."}
+  ]
+},
+/* ===== TERM 4 · CULTURE AND HERITAGE ===== */
+{
+  id:45, strand:"cul", name:"THE CULTURE HALL",
+  intro:"Beadwork on the walls, a gumboot dance in the courtyard, koeksisters on the table. Culture is the basis of national identity.",
+  steps:[
+    {n:"A plaque at the entrance defines the hall.",
+     q:"What is culture?",
+     o:["The values, attitudes, beliefs and practices of a particular group of people","Things that have survived from our past","A law that protects heritage sites","A type of tourist attraction"],
+     g:"CULTURE: values, attitudes, beliefs and practices of a group. HERITAGE: things that have survived from our past. Both are promoted as tourism products.",
+     w:"Values, attitudes, beliefs and practices of a group. 'Survived from our past' is heritage."},
+    {n:"A grandmother teaches her grandson a song in their home language.",
+     q:"Home language and traditions passed on through people are:",
+     o:["Living, intangible culture","Non-living, tangible culture","Natural heritage","A heritage plaque"],
+     g:"LIVING CULTURE is INTANGIBLE — passed on through people. NON-LIVING CULTURE is TANGIBLE — physical things preserved by society.",
+     w:"Living, intangible culture. Non-living culture is tangible."},
+    {n:"Lobola used to be paid in cattle. Today it is often paid in money.",
+     q:"What does this show about culture?",
+     o:["It is dynamic — it can change","It is based only on symbols","It is never shared","It never changes"],
+     g:"BELIEFS ABOUT CULTURE: based on symbols (wedding rings), learned and passed on (lobola), shared (bridal showers), dynamic (lobola in cattle, now money).",
+     w:"Culture is dynamic — it changes over time."},
+    {n:"Umngqusho, babotie and braaivleis on one menu.",
+     q:"These are examples of which element of culture?",
+     o:["Cuisine","Architecture and interiors","Literature and story-telling","Music and dance"],
+     g:"ELEMENTS: literature and story-telling; architecture (Cape Dutch houses, thatched huts); arts and crafts (San rock art); cuisine (umngqusho, babotie, braaivleis); music and dance (gumboot, indlamu, volkspele, kwela, choral).",
+     w:"Cuisine."},
+    {n:"A banner reads RAINBOW NATION.",
+     q:"Which fact about cultural diversity in SA is correct according to the guide?",
+     o:["Main influences are African, European and Asian; four major population groups and eleven languages","Two population groups and five languages","Only European influence","Heritage Day is on 16 June"],
+     g:"DIVERSITY: African, European, Asian influences; four population groups, eleven languages (as per the guide); beadwork, kwaito, Afro-fusion, frikkadelle, umvubo; Diwali, Mangaung African festival, Cape Town Jazz Festival. HERITAGE DAY: 24 September.",
+     w:"African, European and Asian influences; four groups, eleven languages. Heritage Day is 24 September."}
+  ]
+},
+{
+  id:46, strand:"cul", name:"THE HERITAGE VAULT",
+  intro:"A locked vault of fossils, graves, meteorites and old buildings. None of it can leave without permission.",
+  steps:[
+    {n:"A law book on a lectern.",
+     q:"What is the NHRA?",
+     o:["The National Heritage Resources Act — a law that protects our heritage","A category of heritage site","A heritage plaque","A monument"],
+     g:"NHRA: National Heritage Resources Act — the law that identifies, protects and manages South Africa's heritage.",
+     w:"The National Heritage Resources Act, a law."},
+    {n:"A sign on the vault door: NATIONAL ESTATE.",
+     q:"What does it mean that our heritage is a 'national estate'?",
+     o:["It belongs to South Africa and may not be removed without special permission","It can be sold to collectors","It belongs to each province separately","Only buildings are included"],
+     g:"NATIONAL ESTATE: heritage belongs to SA as a country; nothing in it (ancestral graves, historical buildings, military objects, artefacts, fossils, meteorites) may be removed without special permission.",
+     w:"It belongs to the country and may not be removed without permission."},
+    {n:"A heritage site employs forty people and earns income from tickets.",
+     q:"Which value of conserving heritage is this?",
+     o:["Economic value","Social value","Environmental value","Cultural diversity"],
+     g:"VALUES: SOCIAL — education, entertainment, beauty, community ownership, unity. ECONOMIC — employment and income. ENVIRONMENTAL — laws protect sites.",
+     w:"Economic value."},
+    {n:"A committee meets to decide if an old hall should be protected.",
+     q:"Which organisation has the criteria for determining a site's significance?",
+     o:["SAHRA","TGCSA","UNWTO","SANBI"],
+     g:"SAHRA (South African Heritage Resources Agency) sets the criteria. UNESCO encourages cultural and heritage sites worldwide.",
+     w:"SAHRA."},
+    {n:"A grave in Hankey, Eastern Cape.",
+     q:"Sarah Baartman's grave meets which heritage criterion?",
+     o:["It relates to the history of slavery","It shows great technical achievement","It contains rare plants","It is a natural feature"],
+     g:"CRITERIA: community history (old hall), rare features (King Protea), information (San cave paintings), technical achievement (Union Buildings), community association (Voortrekker Monument), a person's life (Mandela Museum), slavery (Sarah Baartman), beauty (Cape Floral Region).",
+     w:"The history of slavery."}
+  ]
+},
+{
+  id:47, strand:"cul", name:"THE HERITAGE REGISTER",
+  intro:"A huge book with four sections: World, National, Provincial, Local. Every protected place in the country is written in it.",
+  steps:[
+    {n:"Mountains with 4 000-year-old paintings in their caves.",
+     q:"The Drakensberg Mountains are which type of heritage site?",
+     o:["Mixed natural and cultural","Natural only","Cultural only","Local"],
+     g:"TYPES: CULTURAL (history, religion, art, architecture, archaeology, graves, story-telling), NATURAL (forests, coasts, waterfalls, caves, mountains), MIXED — natural places with cultural significance, like the Drakensberg.",
+     w:"Mixed natural and cultural."},
+    {n:"A rock arch with the sea crashing through it.",
+     q:"The Hole in the Wall in the Eastern Cape is an example of a ___ heritage site.",
+     o:["Natural","Cultural","Mixed","World"],
+     g:"NATURAL heritage sites are valued for natural beauty, scientific or educational significance — Vredefort Dome, Sterkfontein caves, Hole in the Wall.",
+     w:"Natural."},
+    {n:"The register's second section is labelled GRADE 1.",
+     q:"National Heritage Sites are:",
+     o:["Grade 1 sites","Grade 2 sites","Grade 3 sites","Grade 4 sites"],
+     g:"NATIONAL: Grade 1, significant to the whole country. PROVINCIAL: Grade 2, managed by provincial governments. LOCAL: Grade 3, managed by municipalities; the community must agree on significance.",
+     w:"Grade 1. Provincial is Grade 2; local is Grade 3."},
+    {n:"A page about the old battlefields of KwaZulu-Natal.",
+     q:"The Battlefields in KwaZulu-Natal are:",
+     o:["Provincial Heritage Sites","World Heritage Sites","Local Heritage Sites","Not heritage sites"],
+     g:"The Battlefields in KZN are PROVINCIAL heritage sites. SA's eight World Heritage Sites are iSimangaliso, Robben Island, Cradle of Humankind, uKhahlamba-Drakensberg, Mapungubwe, Cape Floral Region, Vredefort Dome, Richtersveld.",
+     w:"Provincial Heritage Sites."},
+    {n:"The last section lists small places that matter to one community.",
+     q:"Which qualifies as a local heritage site?",
+     o:["Rock art older than 100 years","Robben Island","The Cradle of Humankind","iSimangaliso Wetland Park"],
+     g:"LOCAL SITES: old buildings with cultural significance, traditional huts, significant trees, graves of important local people, rock art older than 100 years, military artefacts older than 75 years.",
+     w:"Rock art older than 100 years. The others are World Heritage Sites."}
+  ]
+},
+{
+  id:48, strand:"cul", name:"LOCAL LEGENDS",
+  intro:"A 6 000-year-old tree with a bar inside it, and three villages that tell the story of one extraordinary life.",
+  steps:[
+    {n:"A metal plate is unveiled on the wall of a newly declared site.",
+     q:"What is a heritage plaque?",
+     o:["An ornamental plate given to a site with National Heritage Status, usually carrying a message","A star grading sign","A tourism road sign","An entrance ticket"],
+     g:"HERITAGE PLAQUE: plate of metal, stone or wood; unveiled at the official opening of a National Heritage Site; usually carries a message in memory of the event. SAHRA awards plaques.",
+     w:"An ornamental plate for a National Heritage Site — and it usually DOES carry a message."},
+    {n:"A gigantic baobab on Sunland Farm, Modjadjiskloof.",
+     q:"How old is the Sunland Big Baobab?",
+     o:["About 6 000 years — older than the Pyramids of Giza","About 600 years","About 60 000 years","About 2 billion years"],
+     g:"SUNLAND BIG BAOBAB: Limpopo; natural, local site; radiocarbon dated to 6 000 years; the widest of its species in the world; spring blossoms; home to owls.",
+     w:"About 6 000 years old."},
+    {n:"You squeeze through a gap in the trunk and hear glasses clinking.",
+     q:"What is inside the Sunland Big Baobab?",
+     o:["A pub and wine cellar that holds about 60 people","A museum of gifts","A church","A cave with rock art"],
+     g:"In 1993 the Van Heerden family bought the farm, cleared the hollow and built a railway-sleeper pub and wine cellar for about 60 people. It is famous all over the world.",
+     w:"A pub and wine cellar for about 60 people."},
+    {n:"A small village in the Eastern Cape hills.",
+     q:"Where was Nelson Mandela born?",
+     o:["Mvezo","Qunu","Mthatha","Soweto"],
+     g:"NELSON MANDELA MUSEUM (cultural, three sites): Bhunga Building in Mthatha, Mvezo (born 1918), Qunu (where he grew up). Qunu is a living museum.",
+     w:"Mvezo, in 1918. He grew up in Qunu."},
+    {n:"Glass cases full of priceless gifts from other countries.",
+     q:"Which part of the Nelson Mandela Museum exhibits the gifts he received from around the world?",
+     o:["The Bhunga Building in Mthatha","Qunu Village","Mvezo Village","Robben Island"],
+     g:"BHUNGA BUILDING, Mthatha: gifts, memorabilia, photographs, paintings. The museum lets visitors walk in the footsteps of the Nobel Peace Prize laureate, and shows his love for children and respect for tradition.",
+     w:"The Bhunga Building in Mthatha."}
+  ]
+},
+/* ===== TERM 4 · COMMUNICATION AND CUSTOMER CARE ===== */
+{
+  id:49, strand:"com", name:"THE SWITCHBOARD",
+  intro:"A travel agency back office. Phones ringing, a fax machine screeching, the photocopier jammed again. Tourism is a high-tech industry.",
+  steps:[
+    {n:"A receptionist with a headset transfers a call to extension 204.",
+     q:"How does a switchboard work?",
+     o:["It connects a group of telephones; a receptionist redirects calls to extension numbers","It sends faxes overseas","It connects computers to the Internet","It records video calls"],
+     g:"LANDLINES: used inside an office, connected to a telephone line. A SWITCHBOARD connects a group of phones; calls are redirected via a receptionist to extensions.",
+     w:"It connects a group of telephones, and calls go through a receptionist to extensions."},
+    {n:"A guest's phone buzzes: 'Reminder: your shuttle leaves at 06:00.'",
+     q:"Why are SMSes useful in tourism?",
+     o:["For reminders, confirming reservations and promoting special offers","For sending signed contracts","For video meetings","For making photocopies"],
+     g:"CELLPHONES: call from anywhere, SMS for reminders, confirmations and special offers; instant, easy, worldwide. Disadvantages: networks fail, expensive, poor telephone skills = poor image, receiver unavailable.",
+     w:"Reminders, confirming reservations and special offers."},
+    {n:"The fax machine prints a page with sender and receiver details.",
+     q:"What is the first page of a fax called?",
+     o:["A fax cover sheet or letter","A signature page","An itinerary","A receipt"],
+     g:"FAX: sends paper documents over a phone line anywhere; cover sheet first. Disadvantages: needs power, both parties need a machine, extra phone line, expensive repairs, poor copy quality.",
+     w:"The fax cover sheet."},
+    {n:"Someone photocopies 400 itineraries — then notices a typo.",
+     q:"Which is a disadvantage of photocopiers?",
+     o:["Expensive to buy and maintain, and misuse leads to unnecessary copies","They are slow","They can't make exact copies","They need the Internet"],
+     g:"PHOTOCOPIERS: exact copies, simple, many copies fast. Disadvantages: expensive to buy and maintain, expensive chemicals, misuse, take up office space.",
+     w:"Expensive to buy and maintain, and easily misused."},
+    {n:"The printer is out of ink. Again.",
+     q:"Which is a disadvantage of printers?",
+     o:["Paper wasted on unnecessary prints, expensive ink, and time for ink to dry","They can't print in colour","They need a telephone line","They are always very large"],
+     g:"PRINTERS: connected to a computer; black and colour; vary in size, speed and cost; light and small. Disadvantages: wasted paper, expensive ink, drying time.",
+     w:"Wasted paper, expensive ink and drying time."}
+  ]
+},
+{
+  id:50, strand:"com", name:"THE NETWORK",
+  intro:"Rows of computers linked by cables. An email lands from Tokyo. A video call from London freezes mid-sentence.",
+  steps:[
+    {n:"A consultant's screen shows a booking system.",
+     q:"What are the main functions of computers in the tourism industry?",
+     o:["Store information, make bookings and reservations, and generate correspondence","Grade hotels","Issue visas","Print money"],
+     g:"COMPUTERS: store information, make bookings, generate correspondence; networked to share information. The Internet advertises, informs and lets tourists arrange entire trips.",
+     w:"Store information, make bookings and generate correspondence."},
+    {n:"Load-shedding hits and every screen goes black.",
+     q:"Which is a disadvantage of computers?",
+     o:["They need power, software upgrades are expensive and viruses are harmful","They can't store information","They are too slow for bookings","They can't be networked"],
+     g:"COMPUTER DISADVANTAGES: need power, expensive software upgrades, harmful viruses, expensive. INTERNET ADVANTAGES: information, saves time, provides documents, saves office space.",
+     w:"Power, expensive upgrades and viruses."},
+    {n:"An itinerary PDF is attached and sent in seconds.",
+     q:"Which is an advantage of email?",
+     o:["You can attach documents, and it is fast, cheap, simple and private","It needs no Internet","It needs no address","It can't carry viruses"],
+     g:"EMAIL: a computerised postal system; attachments, fast, cheap, simple, private. Disadvantages: need Internet and addresses; viruses can be transmitted.",
+     w:"Attachments, fast, cheap, simple and private."},
+    {n:"A conference call where everyone can see each other's faces.",
+     q:"What does video conferencing require?",
+     o:["A computer, webcam, microphone and Internet connection","A fax machine and landline","A printer and paper","A switchboard"],
+     g:"VIDEO CONFERENCING: see and hear in real time (e.g. Skype); share visuals; cut travel costs. Disadvantages: expensive, impersonal, needs technical skill, time differences.",
+     w:"A computer, webcam, microphone and Internet."},
+    {n:"The webcam breaks, but the meeting carries on.",
+     q:"How is teleconferencing different from video conferencing?",
+     o:["Participants can only hear each other, not see each other","Participants can see but not hear","It needs no telephone","It is always face to face"],
+     g:"TELECONFERENCING: participants can only HEAR, not see each other.",
+     w:"You can hear but not see each other."}
+  ]
+},
+{
+  id:51, strand:"com", name:"THE MESSAGE LINE",
+  intro:"A tour guide speaks, a tourist nods, a sign points the way. Every message has a sender, a receiver and something in between.",
+  steps:[
+    {n:"A booking agent explains a change of hotel to a tourist.",
+     q:"In the communication process, who is the sender?",
+     o:["The tour guide or booking agent","The tourist","The feedback","The message"],
+     g:"PROCESS: sender (guide or agent) → coding (verbal or non-verbal) → message (meaning) → code analysing (understanding) → receiver (tourist or agent) → feedback (response).",
+     w:"The tour guide or booking agent. The tourist is the receiver."},
+    {n:"A brown sign on the highway with a white symbol of a tent.",
+     q:"What do tourism road and information signs look like?",
+     o:["White words on a brown background","Brown words on a white background","Black words on yellow","White words on blue"],
+     g:"TOURISM ROAD SIGNS: non-verbal communication — white words on a brown background.",
+     w:"White words on a brown background."},
+    {n:"An inbox, a Facebook page and a pile of questionnaires.",
+     q:"Which are all forms of written communication?",
+     o:["Email, websites, SMS, social networks, faxes, memos and questionnaires","Phone calls and voice notes","Face-to-face conversations","Airport announcements"],
+     g:"WRITTEN COMMUNICATION: email, websites, SMS, social networks, faxes, memos, surveys, questionnaires. Must be professional; email uses correct 'netiquette'.",
+     w:"Email, websites, SMS, social networks, faxes, memos and questionnaires."},
+    {n:"A tourist is confused about her pick-up time.",
+     q:"When is verbal communication most effective?",
+     o:["Giving information, providing clear messages and correcting misunderstandings","Sending signed contracts","Reaching millions of people at once","Keeping permanent records"],
+     g:"VERBAL COMMUNICATION is most effective for giving information, providing clear messages and correcting misunderstandings.",
+     w:"Giving information, clear messages and correcting misunderstandings."},
+    {n:"A guide greets a group with a smile and open arms.",
+     q:"Face-to-face communication involves:",
+     o:["Spoken words, voice tone and body language","Only written words","Only road signs","Only telephones"],
+     g:"FACE-TO-FACE: spoken words, voice tone, body language.",
+     w:"Spoken words, voice tone and body language."}
+  ]
+},
+{
+  id:52, strand:"com", name:"THE ANNOUNCEMENT HALL",
+  intro:"An airport departure hall. A crackling speaker, a TV playing a travel show, and a phone ringing at the information desk.",
+  steps:[
+    {n:"A travel agent talks a tourist through a booking over the phone.",
+     q:"What type of communication is this?",
+     o:["Indirect interpersonal communication","Direct small group communication","Mass communication","Direct public communication"],
+     g:"INTERPERSONAL: between two people. DIRECT with eye contact and immediate feedback; INDIRECT over the telephone.",
+     w:"Interpersonal, and indirect because it's over the phone."},
+    {n:"The hotel manager's morning meeting with staff.",
+     q:"What type of communication is this?",
+     o:["Small group communication","Mass communication","Public communication","Written communication"],
+     g:"SMALL GROUP: people who work together (daily staff meeting) — direct, with eye contact and immediate feedback.",
+     w:"Small group communication."},
+    {n:"'Flight SA 342 is delayed.' Nobody can reply.",
+     q:"An airport announcement about a delay is:",
+     o:["Indirect public communication — there is no way of replying","Direct interpersonal communication","Small group communication","Written communication"],
+     g:"PUBLIC: in public places. Airport announcement = INDIRECT (no reply). An air hostess asking passengers what they'd like to drink = DIRECT (interaction).",
+     w:"Indirect public communication."},
+    {n:"A TV travel programme plays on a screen above the gate.",
+     q:"What type of communication is a TV travel programme?",
+     o:["Mass communication — feedback is delayed","Interpersonal communication","Small group communication","Face-to-face communication"],
+     g:"MASS COMMUNICATION: messages to a large audience; indirect because viewers can't respond immediately.",
+     w:"Mass communication."},
+    {n:"The phone at the information desk has been ringing for a while.",
+     q:"What are the four Ps of telephonic communication?",
+     o:["Promptness, politeness, preparation, professionalism","Product, price, place, promotion","Planet, people, profit, place","Patience, pride, punctuality, presentation"],
+     g:"FOUR Ps: PROMPTNESS — answer within 5–10 seconds (3 rings); POLITENESS — never rude; PREPARATION — know what to say; PROFESSIONALISM — know your job.",
+     w:"Promptness, politeness, preparation, professionalism. Product, price, place, promotion is marketing."}
+  ]
+},
+{
+  id:53, strand:"com", name:"SERVICE EXCELLENCE",
+  intro:"The final gate. A hotel lobby where every guest is watching how you treat them. Get this right and the whole industry wins.",
+  steps:[
+    {n:"A framed quote at the front desk.",
+     q:"What is service excellence?",
+     o:["The ability of a business to meet the needs and wants of customers","Having the most staff","Charging the lowest prices","Earning a five-star grading"],
+     g:"SERVICE EXCELLENCE: meeting customers' needs and wants, helping with the purchase, keeping customers satisfied, dealing with them thoughtfully, efficiently and appropriately.",
+     w:"Meeting the needs and wants of customers."},
+    {n:"The manager explains why she trains every new staff member herself.",
+     q:"Why is providing quality service important?",
+     o:["It attracts customers, increases profits and improves the company's image and competitiveness","It lets the business cut staff","It removes the need for marketing","It allows higher prices"],
+     g:"IMPORTANCE: attracts customers → profits → possibly higher salaries; better image and competitiveness; good customer relationships. Service is intangible, includes the provider, varies, and cannot be stored.",
+     w:"More customers and profit, a better image and competitiveness."},
+    {n:"A rival hotel with rude staff is half empty.",
+     q:"Which is a consequence of poor service delivery?",
+     o:["High staff turnover and higher marketing costs","Satisfied employees","Lower marketing costs","More repeat visitors"],
+     g:"POOR SERVICE: lost customers, less profit, higher advertising costs, money spent on training, poor image, unhappy employees who leave — high staff turnover.",
+     w:"High staff turnover and higher marketing costs."},
+    {n:"A happy tourist posts a five-star review and books again.",
+     q:"How does excellent service benefit South Africa's economy?",
+     o:["Tourists return and tell others, more money is spent, GDP increases and jobs are created","It lowers GDP","It reduces tourist numbers","It increases leakage"],
+     g:"ADVANTAGES: satisfied customers and employees, profits, lower marketing costs, competitive advantage; tourists return and tell others, more tourists, more spending, higher GDP, more jobs.",
+     w:"Return visits and word of mouth grow spending, GDP and jobs."},
+    {n:"The manager asks for your final recommendation.",
+     q:"Which is a recommendation for improving service delivery?",
+     o:["Customer service training, customer feedback, and vouchers to encourage future purchases","Hire unfriendly staff","Ignore customer feedback","Stop staff training"],
+     g:"IMPROVE SERVICE: outgoing, friendly employees; customer service training; let employees make good decisions (confidence); customer feedback; vouchers for future purchases.",
+     w:"Training, feedback, empowered friendly staff and vouchers."}
+  ]
+}
+
+];
+
+var NCH = CHAMBERS.length;
+var NST = CHAMBERS.reduce(function(a,c){ return a + c.steps.length; }, 0);
+
+/* ============================================================
+   ACHIEVEMENTS
+   ============================================================ */
+var ACH = [
+  {id:"board",    name:"BOARDING PASS",        d:"Answer your first question correctly."},
+  {id:"stamp",    name:"FIRST STAMP",          d:"Clear your first gate."},
+  {id:"stranded", name:"FIRST STRANDING",      d:"Get stranded for the first time. It happens to every traveller."},
+  {id:"comeback", name:"COMEBACK TRIP",        d:"Answer correctly straight after being stranded."},
+  {id:"streak10", name:"ON A ROLL",            d:"Get 10 answers right in a row."},
+  {id:"streak25", name:"NON-STOP FLIGHT",      d:"Get 25 answers right in a row."},
+  {id:"streak53", name:"LONG-HAUL",            d:"Get 53 answers right in a row."},
+  {id:"flawless", name:"FLAWLESS GATE",        d:"Clear a gate without dying in it."},
+  {id:"big5",     name:"THE BIG FIVE",         d:"Clear five gates flawlessly."},
+  {id:"half",     name:"HALFWAY THERE",        d:"Reach the halfway point of the journey."},
+  {id:"scholar",  name:"SCHOLAR",              d:"Hold 90% first-time accuracy after 50 or more stages."},
+  {id:"t_sec",    name:"SECTOR SPECIALIST",    d:"Clear every Tourism sectors gate."},
+  {id:"t_map",    name:"CARTOGRAPHER",         d:"Clear every Map work gate."},
+  {id:"t_dom",    name:"HOME-GROWN",           d:"Clear every Domestic tourism gate."},
+  {id:"t_att",    name:"SIGHTSEER",            d:"Clear every Tourist attractions gate."},
+  {id:"t_sus",    name:"GREEN GUIDE",          d:"Clear every Sustainable tourism gate."},
+  {id:"t_mkt",    name:"MARKET LEADER",        d:"Clear every Marketing gate."},
+  {id:"t_cul",    name:"HERITAGE KEEPER",      d:"Clear every Culture and heritage gate."},
+  {id:"t_com",    name:"FIVE-STAR SERVICE",    d:"Clear every Communication and customer care gate."},
+  {id:"guide",    name:"QUALIFIED TOUR GUIDE", d:"Clear all 53 gates in any mode."},
+  {id:"iron10",   name:"IRON PASSPORT",        d:"Clear 10 gates in a single hardcore run."},
+  {id:"iron25",   name:"DIPLOMATIC PASSPORT",  d:"Clear 25 gates in a single hardcore run."},
+  {id:"hcgrad",   name:"HARDCORE GRADUATE",    d:"Clear all 53 gates in hardcore mode. One life, no mistakes."},
+  {id:"flyer",    name:"FREQUENT FLYER",       d:"Start a fifth run."},
+  {id:"brochure", name:"READ THE BROCHURE",    d:"Open the help screen."},
+  {id:"mapread",  name:"MAP READER",           d:"Check the map."}
+];
+
+/* last gate index of each strand, for topic-complete achievements */
+var STRAND_LAST = {};
+CHAMBERS.forEach(function(c, i){ STRAND_LAST[c.strand] = i; });
+
+/* ============================================================
+   STATE
+   ============================================================ */
+var LS = "tourism10.passport.v1";
+function freshRun(keep){
+  keep = keep || {};
+  return {
+    ch:0, st:0, deaths:[], clean:{}, seen:{}, done:false,
+    mode:null, streak:0, justDied:false,
+    run: keep.run || 1,
+    ach: keep.ach || {},
+    flawless: keep.flawless || 0,
+    bestStreak: keep.bestStreak || 0,
+    hcBest: keep.hcBest || 0
+  };
+}
+var S = freshRun();
+try{
+  var r = localStorage.getItem(LS);
+  if(r){
+    var p = JSON.parse(r);
+    if(p && typeof p === "object"){
+      S = Object.assign(S, p);
+      /* saves from before modes existed carry on in standard mode */
+      if(!S.mode && (S.ch > 0 || S.st > 0 || (S.deaths && S.deaths.length))) S.mode = "standard";
+    }
+  }
+}catch(e){}
+if(S.ch > NCH){ S.ch = NCH; }
+if(S.ch < NCH && S.st >= CHAMBERS[S.ch].steps.length){ S.st = 0; }
+function save(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){} }
+
+var screenEl = document.getElementById("screen");
+var choicesEl = document.getElementById("choices");
+var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var typing = null;
+
+function out(html, cls){
+  var d = document.createElement("div");
+  d.className = "line " + (cls || "");
+  d.innerHTML = html;
+  screenEl.appendChild(d);
+  return d;
+}
+function clear(){ screenEl.innerHTML = ""; choicesEl.innerHTML = ""; }
+function pad(n){ return String(n).padStart(2,"0"); }
+
+function typeInto(el, text, done){
+  if(reduced){ el.innerHTML = text; if(done) done(); return; }
+  var i = 0;
+  el.innerHTML = "";
+  if(typing) clearInterval(typing);
+  typing = setInterval(function(){
+    i += 3;
+    el.textContent = text.slice(0, i);
+    if(i >= text.length){ clearInterval(typing); typing = null; el.innerHTML = text; if(done) done(); }
+  }, 8);
+}
+
+function shuffle(n){
+  var a = []; for(var i=0;i<n;i++) a.push(i);
+  for(var j=n-1;j>0;j--){ var k = Math.floor(Math.random()*(j+1)); var t=a[j]; a[j]=a[k]; a[k]=t; }
+  return a;
+}
+
+function stagesDone(){
+  var t = 0;
+  for(var i=0;i<Math.min(S.ch,NCH);i++) t += CHAMBERS[i].steps.length;
+  return t + (S.ch < NCH ? S.st : 0);
+}
+
+/* ---------- journey bar: tick marks where each topic begins ---------- */
+(function drawTicks(){
+  var track = document.getElementById("track");
+  var acc = 0, last = CHAMBERS[0].strand;
+  CHAMBERS.forEach(function(c){
+    if(c.strand !== last){
+      var b = document.createElement("b");
+      b.style.left = (acc / NST * 100) + "%";
+      b.title = STRAND[c.strand].name;
+      track.appendChild(b);
+      last = c.strand;
+    }
+    acc += c.steps.length;
+  });
+})();
+
+function hud(){
+  var c = CHAMBERS[Math.min(S.ch, NCH-1)];
+  document.getElementById("hudCh").textContent = (S.done ? NCH : Math.min(S.ch + 1, NCH)) + "/" + NCH;
+  document.getElementById("hudSt").textContent = (S.done ? c.steps.length : S.st + 1) + "/" + c.steps.length;
+  document.getElementById("hudDe").textContent = S.deaths.length;
+  document.getElementById("hudStreak").textContent = S.streak;
+  document.getElementById("hudAw").textContent = Object.keys(S.ach).length + "/" + ACH.length;
+  document.getElementById("runNo").textContent = S.run;
+
+  var ml = document.getElementById("modeLbl");
+  ml.textContent = S.mode === "hardcore" ? "HARDCORE" : S.mode === "standard" ? "STANDARD" : "—";
+  ml.className = S.mode === "hardcore" ? "hcl" : "";
+  document.body.classList.toggle("hc", S.mode === "hardcore");
+
+  var done = stagesDone();
+  var frac = S.done ? 1 : done / NST;
+  var pct = Math.floor(frac * 100);
+  var status = S.done ? "TOUR GUIDE" : frac >= .8 ? "GLOBETROTTER" : frac >= .5 ? "INTERNATIONAL" : frac >= .25 ? "REGIONAL" : frac >= .05 ? "DOMESTIC" : "EXCURSIONIST";
+  document.getElementById("hudStatus").textContent = status;
+
+  document.getElementById("prog").style.width = (frac * 100) + "%";
+  document.getElementById("track").setAttribute("aria-valuenow", pct);
+  document.getElementById("jPct").textContent = pct + "% · " + (S.done ? NST : done) + "/" + NST;
+  document.getElementById("jNow").textContent = S.done
+    ? "All gates cleared"
+    : "Gate " + pad(c.id) + " · " + STRAND[c.strand].name;
+}
+
+/* ============================================================
+   ACHIEVEMENT ENGINE
+   ============================================================ */
+function unlock(id){
+  if(S.ach[id]) return;
+  var a = ACH.find(function(x){ return x.id === id; });
+  if(!a) return;
+  S.ach[id] = Date.now();
+  var d = out('<div class="t">ACHIEVEMENT UNLOCKED — ' + a.name + '</div><div class="d">' + a.d + '</div>', "ach");
+  save(); hud();
+  return d;
+}
+
+function checkAfterCorrect(){
+  unlock("board");
+  if(S.justDied){ unlock("comeback"); S.justDied = false; }
+  if(S.streak >= 10) unlock("streak10");
+  if(S.streak >= 25) unlock("streak25");
+  if(S.streak >= 53) unlock("streak53");
+  if(stagesDone() >= NST / 2) unlock("half");
+  var seen = Object.keys(S.seen).length, clean = Object.keys(S.clean).length;
+  if(seen >= 50 && clean / seen >= .9) unlock("scholar");
+}
+
+function checkAfterGate(c, idx){
+  unlock("stamp");
+  var flawless = c.steps.every(function(_, si){ return S.clean[c.id + "." + si]; });
+  if(flawless){
+    S.flawless = (S.flawless || 0) + 1;
+    unlock("flawless");
+    if(S.flawless >= 5) unlock("big5");
+  }
+  if(STRAND_LAST[c.strand] === idx) unlock("t_" + c.strand);
+  if(S.mode === "hardcore"){
+    S.hcBest = Math.max(S.hcBest || 0, S.ch);
+    if(S.ch >= 10) unlock("iron10");
+    if(S.ch >= 25) unlock("iron25");
+  }
+  if(S.ch >= NCH){
+    unlock("guide");
+    if(S.mode === "hardcore") unlock("hcgrad");
+  }
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function boot(){
+  clear();
+  out("PASSPORT v2026.09 — grade 10 tourism survival simulator", "sys");
+  out("loading study guide corpus ... " + NCH + " gates, " + NST + " stages, 8 topics, " + ACH.length + " achievements ... ok", "sys");
+  out("type a number, or use the commands: help / look / map / stats / awards / report", "sys");
+  hud();
+  renderStage();
+}
+
+function renderModePick(){
+  hud();
+  out("", "rule");
+  out("CHOOSE YOUR TRAVEL MODE", "loc");
+  out("Standard — a wrong answer strands you, and you retry the stage that got you. Your progress is kept.", "modeinfo");
+  out("Hardcore — <em>one wrong answer wipes the whole run.</em> Back to Gate 01, every time. Some achievements can only be earned here.", "modeinfo");
+  out("Pick one to begin run " + S.run + ". You can switch later with New run.", "sys");
+  choicesEl.innerHTML = "";
+  [["standard","Standard — retry the stage after a death"],["hardcore","Hardcore — one death wipes all progress"]].forEach(function(m, i){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "ch" + (m[0] === "hardcore" ? " danger" : "");
+    b.dataset.idx = "mode";
+    b.innerHTML = '<span class="n">[' + (i+1) + ']</span><span>' + m[1] + '</span>';
+    b.addEventListener("click", function(){ chooseMode(m[0]); });
+    choicesEl.appendChild(b);
+  });
+}
+
+function chooseMode(m){
+  S.mode = m;
+  save(); hud();
+  out(m === "hardcore"
+    ? "HARDCORE selected. One life. Choose every answer carefully."
+    : "STANDARD selected. Deaths send you back to the start of the stage, not the start of the journey.", m === "hardcore" ? "deadwhy" : "gain");
+  renderStage();
+}
+
+function renderStage(){
+  if(!S.mode){ renderModePick(); return; }
+  if(S.ch >= NCH){ endGame(); return; }
+  var c = CHAMBERS[S.ch];
+  var s = c.steps[S.st];
+  hud();
+
+  while(screenEl.children.length > 110){ screenEl.removeChild(screenEl.firstChild); }
+
+  out("", "rule");
+  if(S.st === 0){
+    out('GATE <span class="no">' + pad(c.id) + ' /' + NCH + '</span> — ' + c.name, "loc");
+    out(STRAND[c.strand].name + (S.mode === "hardcore" ? " · hardcore" : ""), "tag");
+    out(c.intro, "narr");
+  } else {
+    out('GATE <span class="no">' + pad(c.id) + '</span> — ' + c.name + ' <span class="no">· stage ' + (S.st+1) + '/' + c.steps.length + '</span>', "tag");
+  }
+
+  out(s.n, "narr");
+  var p = out("", "prompt");
+  typeInto(p, s.q);
+
+  choicesEl.innerHTML = "";
+  var order = shuffle(s.o.length);
+  order.forEach(function(orig, pos){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "ch";
+    b.dataset.idx = orig;
+    b.innerHTML = '<span class="n">[' + (pos+1) + ']</span><span>' + s.o[orig] + '</span>';
+    b.addEventListener("click", function(){ answer(orig); });
+    choicesEl.appendChild(b);
+  });
+  choicesEl.scrollIntoView({block:"end", behavior: reduced ? "auto" : "smooth"});
+}
+
+function answer(i){
+  var c = CHAMBERS[S.ch];
+  var s = c.steps[S.st];
+  var correct = s.c || 0;
+  var key = c.id + "." + S.st;
+  var btns = choicesEl.querySelectorAll(".ch");
+  btns.forEach(function(b){
+    var bi = Number(b.dataset.idx);
+    b.disabled = true;
+    if(bi === correct) b.classList.add("wasright");
+    else if(bi === i) b.classList.add("waswrong");
+  });
+
+  if(i === correct){
+    if(!S.seen[key]) S.clean[key] = true;
+    S.seen[key] = true;
+    S.streak++;
+    S.bestStreak = Math.max(S.bestStreak || 0, S.streak);
+    out(s.g, "gain");
+    S.st++;
+    checkAfterCorrect();
+    if(S.st >= c.steps.length){
+      var idx = S.ch;
+      S.ch++; S.st = 0;
+      if(S.ch >= NCH){
+        S.done = true;
+        save(); hud();
+        out("", "rule");
+        out("GATE CLEARED. All " + NCH + " gates complete. Passport stamped" + (S.mode === "hardcore" ? " — in hardcore." : "."), "gain");
+        checkAfterGate(c, idx);
+        save(); hud();
+        setTimeout(endGame, 700);
+        return;
+      }
+      out("GATE CLEARED — " + c.name + ". Passport stamped. Boarding the next gate.", "gain");
+      checkAfterGate(c, idx);
+    }
+    save(); hud();
+    setTimeout(function(){ renderStage(); }, reduced ? 0 : 420);
+  } else {
+    S.seen[key] = true;
+    delete S.clean[key];
+    S.streak = 0;
+    S.justDied = true;
+    S.deaths.push({ch:c.id, chName:c.name, strand:c.strand, st:S.st, q:s.q, given:i, correct:correct, opts:s.o, why:s.w, t:Date.now(), mode:S.mode, run:S.run});
+    unlock("stranded");
+
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "ch";
+
+    if(S.mode === "hardcore"){
+      var cleared = S.ch;
+      S.hcBest = Math.max(S.hcBest || 0, cleared);
+      out("*** PASSPORT REVOKED ***", "dead");
+      out(s.w, "deadwhy");
+      out("Hardcore rule: one death wipes the run. You fell at gate " + c.id + ", stage " + (S.st+1) + " with " + cleared + " gate" + (cleared===1?"":"s") + " cleared. Best hardcore run: " + S.hcBest + " gates.", "sys");
+      out("All progress wiped. Run " + (S.run + 1) + " starts at Gate 01.", "sys");
+      S.ch = 0; S.st = 0; S.seen = {}; S.clean = {}; S.done = false;
+      S.run++;
+      if(S.run >= 5) unlock("flyer");
+      save(); hud();
+      b.innerHTML = '<span class="n">[r]</span><span>Start again from Gate 01</span>';
+    } else {
+      save(); hud();
+      out("*** STRANDED ***", "dead");
+      out(s.w, "deadwhy");
+      out("Your booking is cancelled. You re-queue at gate " + c.id + ", stage " + (S.st+1) + ".", "sys");
+      b.innerHTML = '<span class="n">[r]</span><span>Try this stage again</span>';
+    }
+    b.addEventListener("click", function(){ renderStage(); });
+    choicesEl.appendChild(b);
+    b.focus();
+  }
+}
+
+/* ============================================================
+   COMMANDS
+   ============================================================ */
+function cmdHelp(){
+  out("", "rule");
+  out("COMMANDS", "tag");
+  out("1-4        choose an answer\nr          retry after a death\nlook       re-read the current stage\nmap        show gate progress\nstats      show current run figures\nawards     list achievements\nmode       show the current mode\nreport     end the run and open the debrief\nnew        start a new run and pick a mode (keeps achievements)\nwipe       erase everything, including achievements", "sys");
+  unlock("brochure");
+}
+function cmdMap(){
+  out("", "rule");
+  out("MAP", "tag");
+  var last = "";
+  var lines = [];
+  CHAMBERS.forEach(function(c, i){
+    if(c.strand !== last){ lines.push("\n[ " + STRAND[c.strand].name.toUpperCase() + " ]"); last = c.strand; }
+    var state = i < S.ch ? "CLEARED " : i === S.ch ? "→ HERE  " : "sealed  ";
+    var dd = S.deaths.filter(function(d){ return d.ch === c.id; }).length;
+    lines.push(pad(c.id) + "  " + state + "  " + c.name + (dd ? "   (" + dd + " death" + (dd>1?"s":"") + ")" : ""));
+  });
+  out(lines.join("\n").replace(/^\n/, ""), "sys");
+  unlock("mapread");
+}
+function cmdStats(){
+  out("", "rule");
+  out("RUN STATS", "tag");
+  var attempted = Object.keys(S.seen).length;
+  var clean = Object.keys(S.clean).length;
+  var acc = attempted ? Math.round(clean / attempted * 100) : 0;
+  var pct = Math.floor((S.done ? 1 : stagesDone() / NST) * 100);
+  out("mode                " + (S.mode || "not chosen") + "\njourney             " + pct + "%  (" + stagesDone() + " of " + NST + " stages)\nstages reached      " + attempted + "\nfirst-time correct  " + clean + "  (" + acc + "%)\ndeaths              " + S.deaths.length + "\ngates cleared       " + Math.min(S.ch,NCH) + " of " + NCH + "\ncurrent streak      " + S.streak + "\nbest streak         " + (S.bestStreak||0) + "\nbest hardcore run   " + (S.hcBest||0) + " gates\nachievements        " + Object.keys(S.ach).length + " of " + ACH.length, "sys");
+}
+function cmdAwards(){
+  out("", "rule");
+  out("ACHIEVEMENTS — " + Object.keys(S.ach).length + " / " + ACH.length, "tag");
+  out(ACH.map(function(a){
+    return (S.ach[a.id] ? "[★] " : "[ ] ") + a.name + "\n    " + a.d;
+  }).join("\n"), "sys");
+}
+function cmdMode(){
+  out("", "rule");
+  out("MODE", "tag");
+  out(S.mode === "hardcore"
+    ? "You are in HARDCORE. One death wipes the run. Use New run to switch to standard."
+    : S.mode === "standard"
+      ? "You are in STANDARD. Deaths send you back to the stage. Use New run to switch to hardcore."
+      : "No mode chosen yet.", "sys");
+}
+
+function runCmd(raw){
+  var v = raw.trim().toLowerCase();
+  if(!v) return;
+  out("$ " + raw.replace(/</g,"&lt;"), "sys");
+  if(/^[1-9]$/.test(v)){
+    var btns = choicesEl.querySelectorAll(".ch:not(:disabled)");
+    var n = Number(v) - 1;
+    if(btns[n] && btns[n].dataset.idx !== undefined) btns[n].click();
+    else out("no such option right now.", "sys");
+    return;
+  }
+  if(v === "r" || v === "retry"){ renderStage(); return; }
+  if(v === "help" || v === "?" ){ cmdHelp(); return; }
+  if(v === "map"){ cmdMap(); return; }
+  if(v === "stats"){ cmdStats(); return; }
+  if(v === "awards" || v === "achievements"){ cmdAwards(); return; }
+  if(v === "mode"){ cmdMode(); return; }
+  if(v === "look" || v === "l"){ renderStage(); return; }
+  if(v === "report"){ endGame(); return; }
+  if(v === "new" || v === "new run"){ newRun(); return; }
+  if(v === "wipe" || v === "reset"){ askWipe(); return; }
+  out("unknown command: " + v.replace(/</g,"&lt;") + "   (try: help)", "sys");
+}
+
+document.getElementById("cmd").addEventListener("keydown", function(e){
+  if(e.key === "Enter"){ runCmd(this.value); this.value = ""; }
+});
+document.getElementById("helpBtn").addEventListener("click", cmdHelp);
+document.getElementById("mapBtn").addEventListener("click", cmdMap);
+document.getElementById("statsBtn").addEventListener("click", cmdStats);
+document.getElementById("awardsBtn").addEventListener("click", cmdAwards);
+document.getElementById("reportBtn").addEventListener("click", endGame);
+document.getElementById("newBtn").addEventListener("click", newRun);
+document.getElementById("resetBtn").addEventListener("click", askWipe);
+
+function newRun(){
+  S = freshRun({run:(S.run||1)+1, ach:S.ach, flawless:S.flawless, bestStreak:S.bestStreak, hcBest:S.hcBest});
+  save();
+  document.getElementById("reportArea").innerHTML = "";
+  boot();
+  if(S.run >= 5) unlock("flyer");
+}
+
+/* two-step confirm, no browser dialogs */
+var wipeArmed = null;
+function askWipe(){
+  var btn = document.getElementById("resetBtn");
+  if(wipeArmed){
+    clearTimeout(wipeArmed); wipeArmed = null;
+    btn.textContent = "Wipe everything"; btn.classList.remove("warn");
+    S = freshRun();
+    save();
+    document.getElementById("reportArea").innerHTML = "";
+    boot();
+    return;
+  }
+  btn.textContent = "Confirm: erase all + achievements"; btn.classList.add("warn");
+  out("", "rule");
+  out("Wipe everything erases your run AND all achievements. Press the button again (or type wipe) within 5 seconds to confirm.", "deadwhy");
+  wipeArmed = setTimeout(function(){ wipeArmed = null; btn.textContent = "Wipe everything"; btn.classList.remove("warn"); }, 5000);
+}
+
+/* ============================================================
+   DEBRIEF
+   ============================================================ */
+function endGame(){
+  S.done = S.ch >= NCH;
+  save(); hud();
+
+  var byStrand = {};
+  Object.keys(STRAND).forEach(function(k){ byStrand[k] = {clean:0, deaths:0, reached:0, total:0}; });
+  CHAMBERS.forEach(function(c){
+    c.steps.forEach(function(_, si){
+      var key = c.id + "." + si;
+      byStrand[c.strand].total++;
+      if(S.seen[key]) byStrand[c.strand].reached++;
+      if(S.clean[key]) byStrand[c.strand].clean++;
+    });
+  });
+  S.deaths.forEach(function(d){ if(byStrand[d.strand]) byStrand[d.strand].deaths++; });
+
+  var ranked = Object.keys(STRAND).map(function(k){
+    var b = byStrand[k];
+    return {k:k, b:b, rate: b.reached ? b.clean / b.reached : -1};
+  }).filter(function(x){ return x.b.reached > 0; });
+  ranked.sort(function(a,b){ return b.rate - a.rate; });
+
+  var best = ranked.length ? ranked[0] : null;
+  var worst = ranked.length ? ranked[ranked.length-1] : null;
+
+  var deathsByChamber = {};
+  S.deaths.forEach(function(d){ deathsByChamber[d.ch] = (deathsByChamber[d.ch] || 0) + 1; });
+  var worstChambers = Object.keys(deathsByChamber).map(function(k){
+    return {ch:Number(k), n:deathsByChamber[k], name:(CHAMBERS.find(function(c){return c.id===Number(k);})||{}).name};
+  }).sort(function(a,b){ return b.n - a.n; }).slice(0,3);
+
+  var attempted = Object.keys(S.seen).length;
+  var clean = Object.keys(S.clean).length;
+  var acc = attempted ? Math.round(clean / attempted * 100) : 0;
+  var pct = Math.floor((S.done ? 1 : stagesDone() / NST) * 100);
+
+  var strandHtml = ranked.map(function(x){
+    var p = Math.round(x.rate * 100);
+    var badge = "";
+    if(best && x.k === best.k && ranked.length > 1) badge = '<span class="badge best">strongest</span>';
+    if(worst && x.k === worst.k && ranked.length > 1) badge = '<span class="badge worst">weakest</span>';
+    return '<div class="strand"><div class="nm">' + STRAND[x.k].name + badge + '</div>'
+      + '<div class="fig">' + x.b.clean + '/' + x.b.reached + ' clean · ' + x.b.deaths + ' death' + (x.b.deaths===1?"":"s") + ' · ' + p + '%</div>'
+      + '<div class="meter"><i class="ok" style="width:' + p + '%"></i><i class="no" style="width:' + (100-p) + '%"></i></div></div>';
+  }).join("");
+  if(!strandHtml) strandHtml = '<p class="note">' + (S.mode === "hardcore" && S.deaths.length ? "This hardcore run was wiped, so there are no answers on the current run yet. Deaths from earlier runs are listed below." : "No stages answered yet.") + '</p>';
+
+  var deathHtml = S.deaths.length ? S.deaths.map(function(d, i){
+    return '<div class="dl"><div class="meta">death ' + (i+1) + (d.run ? ' · run ' + d.run : '') + ' · gate ' + d.ch + ' ' + d.chName + ' · ' + (STRAND[d.strand] ? STRAND[d.strand].short : "") + '</div>'
+      + '<div class="q">' + d.q + '</div>'
+      + '<div class="a">You chose: ' + d.opts[d.given] + '<br>Correct: <b>' + d.opts[d.correct] + '</b><br>' + d.why + '</div></div>';
+  }).join("") : '<p class="note">No deaths recorded. Either you know this cold, or the run has only just started.</p>';
+
+  var todo = [];
+  if(worst && ranked.length > 1) todo.push("Your weakest topic is <b>" + STRAND[worst.k].name + "</b> at " + Math.round(worst.rate*100) + "% first-time correct. Re-read that section of the study guide before anything else.");
+  worstChambers.forEach(function(w){ todo.push("Gate " + w.ch + " — " + w.name + " stranded you " + w.n + " time" + (w.n>1?"s":"") + ". Go back to those summary notes and redo the guide's questions on it."); });
+  if(!todo.length) todo.push("Nothing is flagged yet. Get further into the run and the debrief will tell you where you are losing marks.");
+  if(best && ranked.length > 1) todo.push("Your strongest topic is <b>" + STRAND[best.k].name + "</b> at " + Math.round(best.rate*100) + "%. Spend less time there — you already have those marks.");
+
+  var awardsHtml = ACH.map(function(a){
+    return '<div class="aw' + (S.ach[a.id] ? ' on' : '') + '"><div class="t">' + a.name + '</div><div class="d">' + a.d + '</div></div>';
+  }).join("");
+
+  var modeWord = S.mode === "hardcore" ? "hardcore" : "standard";
+  var head = S.done ? (S.mode === "hardcore" ? "HARDCORE TOUR GUIDE" : "QUALIFIED TOUR GUIDE") : "RUN ENDED EARLY";
+  var sub = S.done
+    ? "All " + NCH + " gates cleared in " + modeWord + " mode. Every topic in the Grade 10 study guide, stamped in your passport."
+    : "You stopped at gate " + Math.min(S.ch+1,NCH) + " of " + NCH + " (" + pct + "% of the journey) in " + modeWord + " mode. Progress is saved; you can pick the run back up at any time.";
+
+  document.getElementById("reportArea").innerHTML =
+    '<div class="report">'
+    + '<h2>' + head + '</h2>'
+    + '<p class="sub">' + sub + '</p>'
+    + '<div class="rsec"><h3>THE RUN</h3><div class="strands">'
+      + '<div class="strand"><div class="nm">Journey</div><div class="fig">' + pct + '%</div><div class="meter"><i class="ok" style="width:' + pct + '%"></i></div></div>'
+      + '<div class="strand"><div class="nm">Stages reached</div><div class="fig">' + attempted + ' / ' + NST + '</div></div>'
+      + '<div class="strand"><div class="nm">First-time correct</div><div class="fig">' + clean + ' · ' + acc + '%</div></div>'
+      + '<div class="strand"><div class="nm">Deaths</div><div class="fig">' + S.deaths.length + '</div></div>'
+      + '<div class="strand"><div class="nm">Gates cleared</div><div class="fig">' + Math.min(S.ch,NCH) + ' / ' + NCH + '</div></div>'
+      + '<div class="strand"><div class="nm">Best streak</div><div class="fig">' + (S.bestStreak||0) + '</div></div>'
+      + '<div class="strand"><div class="nm">Best hardcore run</div><div class="fig">' + (S.hcBest||0) + ' gates</div></div>'
+    + '</div></div>'
+    + '<div class="rsec"><h3>ACHIEVEMENTS — ' + Object.keys(S.ach).length + ' / ' + ACH.length + '</h3><div class="awards">' + awardsHtml + '</div></div>'
+    + '<div class="rsec"><h3>STRENGTHS AND WEAKNESSES BY TOPIC</h3><div class="strands">' + strandHtml + '</div>'
+      + '<p class="note">Ranked by first-time-correct rate, so retries do not inflate the score.</p></div>'
+    + '<div class="rsec"><h3>WHAT TO REVISE, IN ORDER</h3><div class="todo">' + todo.map(function(t){ return "<div>" + t + "</div>"; }).join("") + '</div></div>'
+    + '<div class="rsec"><h3>EVERY DEATH — ' + S.deaths.length + '</h3><div class="deathlist">' + deathHtml + '</div></div>'
+    + '</div>';
+  document.getElementById("reportArea").scrollIntoView({behavior: reduced ? "auto" : "smooth", block:"start"});
+}
+
+/* ============================================================
+   GO
+   ============================================================ */
+boot();
+</script>
+
+</body>
+</html>
