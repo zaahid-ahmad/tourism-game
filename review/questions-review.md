@@ -25,6 +25,8 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 | 2026-09-16 | All gates, after Sectors 10–18 | 64 | 26 |
 | 2026-09-16 | Attractions 28–37 (whole topic) | 0 | 0 |
 | 2026-09-16 | All gates, after Attractions | 35 | 18 |
+| 2026-09-16 | Culture and heritage 45–48 (whole topic) | 0 | 0 |
+| 2026-09-16 | All gates, after Culture and heritage | 20 | 10 |
 
 ---
 
@@ -243,6 +245,33 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 | 42.3 | How do the 3Rs cut CO2? | Factories produce fewer products | 69 | Plants absorb CO2 · Gas blanket gone · Lower departure tax | 3.2 | Deforestation · greenhouse gases · climate change consequence | 68 | ☑ |
 | 42.4 | PLANNING: reduce carbon footprint? | Fewer, longer holidays closer to home | 69 | Direct flights · Warm water and laundry · Public transport at destination | 3.2 | Transport · accommodation · transport | 69 | ☑ |
 | 42.5 | Pair for SELECTING TRANSPORT? | Train + direct flights | 69 | Train + laundry · Warm water + direct flights · Connecting flights + public transport | 3.5 | Accommodation · transfers contradict direct flights | 69 | ☑ |
+
+## Term 4 · Culture and heritage
+
+| gate.stage | question | correct option | page | wrong option | tech | belongs to / why wrong | page | OK |
+|---|---|---|---|---|---|---|---|---|
+| 45.1 | What is culture? | Values, attitudes, beliefs and practices of a group of people | 78 | Inherited from the past, basis of national identity · Protected because of its heritage importance · Property needing permission to remove | 3.1 | Heritage · heritage site · national estate | 78–79 | ☑ |
+| 45.2 | Home language and traditions passed on through people are? | Living culture — intangible | 78 | Living culture — tangible · Non-living culture — intangible · Non-living culture — tangible | 3.5 | Wrong pairings of living/non-living × tangible/intangible | 78 | ☑ |
+| 45.3 | Lobola once paid in cattle, now often money: which belief? | Dynamic — beliefs can change | 78 | Symbolic — shown through language or rings · Learned — passed down generations · Shared — practised by a community | 3.3 | The other three beliefs about culture | 78 | ☑ |
+| 45.4 | Umngqusho, babotie, braaivleis: which element of culture? | Cuisine | 79 | Architecture · Arts and crafts · Music and dance | 3.1 | Other elements of culture | 79 | ☑ |
+| 45.5 | Which fact about SA cultural diversity is correct? | Four population groups; eleven spoken official languages; African, European, Asian influences | 79 | Two groups (not four) · Nine languages (not eleven) · Mainly African and European only (Asian omitted) | 3.4 | Wrong counts/omission, real numbers swapped | 79 | ☑ |
+| 46.1 | What is the NHRA? | The law that protects our heritage | 79–80 | The UN body that encourages heritage sites worldwide · The agency that sets site-significance criteria · The property needing permission to remove | 3.1 | UNESCO · SAHRA · national estate | 79–80 | ☑ |
+| 46.2 | What does 'national estate' mean? | Belongs to SA; may not be removed without special permission | 79 | Belongs to the province · Belongs to the municipality · Belongs to the landowner | 3.2 | Provincial sites · local sites · private ownership | 79,81 | ☑ |
+| 46.3 | Site employs 40 people, earns ticket income: which value? | Economic value | 79 | Social value · Environmental value · Cultural diversity | 3.1 | Other conservation values | 79 | ☑ |
+| 46.4 | Which organisation sets site-significance criteria? | SAHRA | 80 | TGCSA · UNWTO · SANBI | 3.1 | Other acronym bodies | 80 | ☑ |
+| 46.5 | Sarah Baartman's grave meets which criterion? | History of slavery | 80 | Great technical achievement · Rare plants · A natural feature | 3.2 | Union Buildings · King Protea · natural site type | 80 | ☑ |
+| 47.1 | Drakensberg Mountains: which type of heritage site? | Mixed | 81 | Natural · Cultural · Provincial | 3.1 | Other type · category, not a type | 81 | ☑ |
+| 47.2 | Hole in the Wall is an example of a ___ heritage site? | Natural | 81 | Cultural · Mixed · World | 3.1 | Other type · other type · category | 81 | ☑ |
+| 47.3 | National Heritage Sites are? | Grade 1 sites | 81 | Grade 2 sites · Grade 3 sites · Grade 4 sites (made up — no Grade 4 exists) | 3.4 | Provincial · Local · invented, no clash | 81 | ☑ |
+| 47.4 | Battlefields in KwaZulu-Natal are? | Provincial Heritage Sites | 81 | World Heritage Sites · Local Heritage Sites · Not heritage sites | 3.1 | Confirmed by the guide's answer key | 81 | ☑ |
+| 47.5 | Which qualifies as a local heritage site? | Rock art older than 100 years | 81 | Robben Island (World Heritage Site) · Cradle of Humankind (WHS) · iSimangaliso (WHS) | 3.1 | All three are World, not Local, sites | 81 | ☑ |
+| 48.1 | What is a heritage plaque? | A commemorative plate | 81–82 | A star grading sign · A brown road sign · An entrance ticket | 3.1 | TGCSA grading · road signage · admission | 81–82 | ☑ |
+| 48.2 | How old is the Sunland Big Baobab? | About 6 000 years | 82 | About 600 years · About 60 000 years · About 2 billion years (Vredefort crater age) | 3.4 | Made up · made up · real figure from elsewhere | 82 | ☑ |
+| 48.3 | What is inside the Sunland Big Baobab? | A pub and wine cellar | 82 | A museum of gifts · A church · A cave with rock art | 3.2 | Bhunga Building · made up · San rock art sites | 82 | ☑ |
+| 48.4 | Where was Nelson Mandela born? | Mvezo | 82 | Qunu · Mthatha · Soweto | 3.1 | Where he grew up · Bhunga Building's town · unrelated | 82 | ☑ |
+| 48.5 | Which part of the Mandela Museum exhibits the gifts he received? | The Bhunga Building | 82 | Qunu Village · Mvezo Village · Robben Island | 3.1 | Where he grew up · where he was born · unrelated Mandela site | 82 | ☑ |
+
+**Judgement calls to check:** 47.3's "Grade 4 sites" and 48.3's "A church" are made-up distractors (no clashing real fact elsewhere); 46.3 keeps the pre-existing "Cultural diversity" distractor (not itself a conservation value, but not touched this batch since it already passed lint).
 
 ## Term 4 · Communication and customer care
 
