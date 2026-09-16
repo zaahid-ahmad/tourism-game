@@ -29,6 +29,8 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 | 2026-09-16 | All gates, after Culture and heritage | 20 | 10 |
 | 2026-09-16 | Map work 19–25 (whole topic) | 0 | 0 |
 | 2026-09-16 | All gates, after Map work | 6 | 4 |
+| 2026-09-16 | Marketing 43–44 (whole topic) | 0 | 0 |
+| 2026-09-16 | All gates, after Marketing (all 265 questions rewritten) | 0 | 3 |
 
 ---
 
@@ -287,6 +289,21 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 | 42.3 | How do the 3Rs cut CO2? | Factories produce fewer products | 69 | Plants absorb CO2 · Gas blanket gone · Lower departure tax | 3.2 | Deforestation · greenhouse gases · climate change consequence | 68 | ☑ |
 | 42.4 | PLANNING: reduce carbon footprint? | Fewer, longer holidays closer to home | 69 | Direct flights · Warm water and laundry · Public transport at destination | 3.2 | Transport · accommodation · transport | 69 | ☑ |
 | 42.5 | Pair for SELECTING TRANSPORT? | Train + direct flights | 69 | Train + laundry · Warm water + direct flights · Connecting flights + public transport | 3.5 | Accommodation · transfers contradict direct flights | 69 | ☑ |
+
+## Term 3 · Marketing
+
+| gate.stage | question | correct option | page | wrong option | tech | belongs to / why wrong | page | OK |
+|---|---|---|---|---|---|---|---|---|
+| 43.1 | What is marketing? | Placing products and services in the hands of the target market | 73 | Finding information to make good marketing decisions · The portion of a market controlled by one company or product · Offering customers something unique or special compared to competitors | 3.1 | Market research · market share · competitive edge | 73–75 | ☑ |
+| 43.2 | Holiday packages/cruises are ___; bookings/reservations are ___? | products; services | 73 | services; products · niche markets; core markets · promotion; place | 3.5 | Swapped/other pairings | 73–75 | ☑ |
+| 43.3 | 48% of tourists visited Gauteng: this is Gauteng's? | Market share | 73 | Competitive edge · Niche market · Marketing mix | 3.1 | Other marketing concepts | 73 | ☑ |
+| 43.4 | Green Cab's eco-friendly transport is its? | Competitive edge | 73 | Market share · Core market · Research plan | 3.1 | Other marketing concepts | 73 | ☑ |
+| 43.5 | What are niche markets? | Special interest groups (SIT) | 73 | Market segments that provide the most business · Offering customers something unique · Services | 3.2 | Core markets · competitive edge · services | 73 | ☑ |
+| 44.1 | Which is an aim of marketing? | To set an affordable and competitive price | 73–74 | To grade establishments using a star system · To issue permits for tour operators · To reduce the business's market share | 3.2 | TGCSA grading · DHA/DIRC permits · opposite of the real aim | 73–74 | ☑ |
+| 44.2 | Which are the five Ps of the marketing mix? | Product, price, place, promotion, people | 74 | Planet, people, profit, price, place · Promptness, politeness, preparation, professionalism, product · Product, planet, promotion, profit, place | 3.5 | Made-up "green" mix · telephone 4 Ps · mixed pairing | 74 | ☑ |
+| 44.3 | Air hostess smiles and offers drinks: which P? | People — staff providing the service | 75 | Place — how it reaches the market · Promotion — advertising and sponsorships · Product — the tour or service itself | 3.1 | Other Ps' real descriptions | 75 | ☑ |
+| 44.4 | Organisations share the cost of research: this is? | Co-operative research | 75 | Outsourcing · In-house research · A research plan | 3.1 | Other research resource types | 75 | ☑ |
+| 44.5 | When must a research plan be completed? | Before the information becomes outdated | 75 | At any time, even after launch · After the product has already launched · Once every ten years, like a census | 3.2 | Contradicts the guide's answer key directly | 75 | ☑ |
 
 ## Term 4 · Culture and heritage
 
