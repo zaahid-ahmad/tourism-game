@@ -116,6 +116,7 @@ Gate 27.2 already nearly follows this pattern and is the model to copy. Use it w
 7. **Four options** stay, matching the A–D format of their exams.
 8. **Wrong-answer text (`w`) teaches the difference.** It names the correct answer *and* says which sibling each tempting wrong option actually belongs to, e.g. "Kgalagadi. Joined in 2003 with the Nama is /Ai-/Ais-Richtersveld."
 9. **Only use wording from the guide.** Keep the guide's spellings where exams expect them (see §6 for exceptions already in place).
+11. **No missing visuals.** Never refer to a table, chart, graph, map or diagram the player can't see. If the question needs one, draw it in the text as a simple drawing (`#screen` lines keep spacing and line breaks). If it can't be drawn in text, rephrase the question so it doesn't need it, or leave it out.
 10. **Never mention the guide in the game.** No "according to the guide", "the guide lists", "study guide" or "answer key" in `n`, `q`, `o`, `g`, `w` or any UI text. The game must make sense to players who have never seen the guide. If a fact is only true as of the guide, anchor it with a date or context instead.
 
 ---

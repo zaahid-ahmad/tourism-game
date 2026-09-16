@@ -17,6 +17,8 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 | 2026-09-16 | All gates, after Communication | 150 | 51 |
 | 2026-09-16 | Sustainable 38–42 | 0 | 0 |
 | 2026-09-16 | All gates, after Sustainable | 131 | 45 |
+| 2026-09-16 | Domestic 26–27 | 0 | 0 |
+| 2026-09-16 | All gates, after Domestic | 123 | 44 |
 
 ---
 
@@ -39,6 +41,21 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 | 7.5 | How long is a star grading valid? | One year | 11 | Two years | 3.4 | Made up: no other durations in guide's grading section | — | ☑ |
 | 7.5 | … | … | | Three years | 3.4 | Made up (as above) | — | ☑ |
 | 7.5 | … | … | | Five years | 3.4 | Made up (as above) | — | ☑ |
+
+## Term 2 · Domestic, regional and international tourism
+
+| gate.stage | question | correct option | page | wrong option | tech | belongs to / why wrong | page | OK |
+|---|---|---|---|---|---|---|---|---|
+| 26.1 | Negative influence on domestic tourism? | Less spending money, high cost of living | 40 | Leakage · Congestion · Income not reaching community | 3.2 | Negative impacts of tourism on an area (not influences) | 65–66 | ☑ |
+| 26.2 | Benefit for PEOPLE? | Labour intensive, creates jobs | 40 | Income pays for conservation · Pollution monitoring · Maintains infrastructure | 3.2 | Environment · environment · economy | 40–41 | ☑ |
+| 26.3 | Way to grow domestic tourism? | Longer stays, holiday travel culture | 41 | Local entrepreneurs and crafts · Employ locals, local suppliers · Environmental awareness | 3.2 | Reduce negative economic impacts (66) · domestic benefit (41) | 41, 66 | ☑ |
+| 26.4 | What does Sho't Left adapt to mean? | Short trip or quick getaway | 41 | All parts of SA · Longer stay · Group trip with discounts | 3.2 | Other growth methods | 41 | ☑ |
+| 26.5 | Sho't Left target + association? | Youth; ASATA | 41 | Youth + SATSA · Business travellers + ASATA · Business travellers + SATSA | 3.5 | SATSA = tourism services association (21) | 41 | ☑ |
+| 27.1 | What are statistics + who collects? | Numerical data; Statistics SA and SAT | 41 | Numerical data + TGCSA/SATSA · Travel patterns + StatsSA/SAT · Travel patterns + TGCSA/SATSA | 3.5 | Reports identify patterns (42); TGCSA grades, SATSA services | 41–42 | ☑ |
+| 27.2 | Within a province: term + share? | intra-provincial; 60% | 41 | inter; 60% · intra; 40% · inter; 40% | 3.5 | Inter-provincial ≈ 40% | 41 | ☑ |
+| 27.3 | Major sources + destinations? | Sources GP, KZN; destinations KZN, EC | 42 | Swapped · Sources GP, NW · Destinations WC, LP | 3.5 | GP and NW = most inter-provincial; WC/LP made-up destinations | 42 | ☑ |
+| 27.4 | Average business trip? | 7 nights | 42 | 4,5 · 5 · 5,2 | 3.4 | Domestic trip · holiday · Limpopo stay | 42 | ☑ |
+| 27.5 | Most popular activities? | Social activities, shopping, night life | 42 | Family, holidays, business · Religious events, medical · School holidays | 3.2 | Purposes of trips · purposes · seasonality | 42 | ☑ |
 
 ## Term 3 · Tourist attractions in South Africa
 

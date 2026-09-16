@@ -96,6 +96,8 @@ The number of gates per topic follows how much content that topic has in the stu
 - **Gain (`g`) lines** start with an uppercase keyword and a colon, e.g. `"GAUTRAIN: rapid transit…"`.
 - **Death (`w`) lines** state the right answer first, then the distinction that separates it from the distractors.
 - **Spelling is South African English** ("organisation", "programme", "centre").
+- **No missing visuals.** Content must never refer to a table, chart, map or diagram that isn't shown. Draw it as simple text inside the string (`.line` uses `white-space: pre-wrap`, so `
+` and spaces are kept), or rephrase so no visual is needed.
 - **Never mention the study guide in player-facing text** (questions, feedback, report, footer, boot text). Anyone should be able to play, not only Tourism learners. Where a fact is only true "per the guide" (an older count, a disputed location), anchor it with a date or context instead, e.g. "By 2010, how many World Heritage Sites…?"
 
 ### 3.3 Gate list
