@@ -21,6 +21,8 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 | 2026-09-16 | All gates, after Domestic | 123 | 44 |
 | 2026-09-16 | Sectors 1–9 | 0 | 0 |
 | 2026-09-16 | All gates, after Sectors 1–9 | 101 | 37 |
+| 2026-09-16 | Sectors 1–18 (whole topic) | 0 | 0 |
+| 2026-09-16 | All gates, after Sectors 10–18 | 64 | 26 |
 
 ---
 
@@ -83,6 +85,52 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 | 7.5 | How long is a star grading valid? | One year | 11 | Two years | 3.4 | Made up: no other durations in guide's grading section | — | ☑ |
 | 7.5 | … | … | | Three years | 3.4 | Made up (as above) | — | ☑ |
 | 7.5 | … | … | | Five years | 3.4 | Made up (as above) | — | ☑ |
+
+| 10.1 | Spur, Ocean Basket? | Family restaurants | 13 | Fine dining · Fast food · Coffee shops | 3.1 | Other food establishments | 13–14 | ☑ |
+| 10.2 | Nando's, Wimpy, KFC? | Fast food outlets | 14 | Family · Coffee shops · Taverns | 3.1 | Other food establishments | 13–14 | ☑ |
+| 10.3 | Township, home-brew: type + who? | Tavern/shebeen; adventurous tourists | 14 | Tavern + business · Pub + adventurous · Pub + leisure/family | 3.5 | Pubs (13–14); leisure/family = ice cream stores | 14 | ☑ |
+| 10.4 | Pubs and bars? | Limited menu, drinks, TV for sport | 13–14 | Coffee, cakes · Soft serve · Formal menu | 3.2 | Coffee shops · ice cream · fine dining | 13–14 | ☑ |
+| 10.5 | Street stalls, kiosks, markets? | Not permanent, festivals and events | 14 | Townships, home-brew · Malls, meeting places · Budget take-away | 3.2 | Taverns · coffee shops · fast food | 13–14 | ☑ |
+| 11.1 | What an attraction is? | Place of interest for amusement or education | 14 | On the way to main reason · Wants and expectations · Profit through tourism | 3.2 | Secondary (16) · tourist profile (6) · product owners (20) | 6–20 | ☑ |
+| 11.2 | Two that are BOTH sub-sectors? | Gaming and lotteries; events and conferences | 15 | + natural · primary + events · primary + natural | 3.5 | Types of attraction, not sub-sectors | 15 | ☑ |
+| 11.3 | MICE? | Meetings, incentives, conferences, exhibitions | 15 | Near-miss expansions | 3.1 | Made up (no other expansions in guide) | — | ☑ |
+| 11.4 | Table Mountain; stadium? | natural; constructed | 15 | Swapped / same-same | 3.5 | Guide examples | 15 | ☑ |
+| 11.5 | Kruger; God's Window on the way? | primary; secondary | 15–16 | Swapped / same-same | 3.5 | Definitions | 15–16 | ☑ |
+| 12.1 | Kruger tourist types? | Adventure, ecotourist, cultural, SIT | 16 | Cape Town · Wild Coast · Garden Route sets | 3.2 | Appeal table rows | 16 | ☑ |
+| 12.2 | Soweto tourist types? | Cultural, SIT, backpacking | 16 | Johannesburg · Cape Town · Winelands sets | 3.2 | Appeal table rows | 16 | ☑ |
+| 12.3 | Robben Island tourist types? | Ecotourist, cultural, education, SIT | 16 | Johannesburg · Durban · Blyde sets | 3.2 | Appeal table rows | 16 | ☑ |
+| 12.4 | Clay pots, woodcarving, dance? | Cultural village | 16 | Theme park · Tourist route · Scenic beauty | 3.2 | Activities table rows | 16 | ☑ |
+| 12.5 | Scenic beauty, flora, bungee, rafting? | Garden Route | 16 | Blyde River Canyon · Wild Coast · Winelands | 3.2 | Appeal table rows | 16 | ☑ |
+| 13.1 | NDT MISSION? | Responsible, sustainable tourism for all South Africans | 17 | World leader in excellence · Reduce poverty · Stop degradation | 3.2 | NDT vision · UNWTO (22) · WWF (22) | 17, 22 | ☑ |
+| 13.2 | Who issues permits? | Provincial tourism authorities | 17 | Regional marketing · LTOs · DMOs | 3.1 | Other public sector levels | 18 | ☑ |
+| 13.3 | Largest → smallest? | NDT → provincial → regional → DMO → LTO | 17 | Order swaps | 3.5 | Public sector list | 17 | ☑ |
+| 13.4 | Describes LTOs? | Smallest, promote local attractions | 18 | Central town + district offices · Climate and landscape · Linking villages | 3.2 | DMO · region · CBO | 18, 20 | ☑ |
+| 13.5 | Public + private marketing a region? | Convention Bureau (Western Cape) | 18 | TEP · NDT plans · FTTSA packages | 3.2 | Partly state-owned · public only · private association | 17–21 | ☑ |
+| 14.1 | Passports, immigration? | Home Affairs (DHA) | 18 | DIRC · DTI · Transport | 3.1 | Other departments | 18–19 | ☑ |
+| 14.2 | Foreign policy, SADC Univisa? | DIRC | 18 | DHA · DTI · StatsSA | 3.1 | Other departments (q avoids "issues visas": DHA also does in practice) | 18–19 | ☑ |
+| 14.3 | DTI function? | Supporting SMMEs | 19 | Sporting events · Foreign policy · Surveys | 3.2 | Sports and Recreation · DIRC · StatsSA | 18–19 | ☑ |
+| 14.4 | Runs PRASA? | Transport | 19 | DTI · Sports and Recreation · DHA | 3.1 | Other departments | 18–19 | ☑ |
+| 14.5 | Surveys on arrivals and reasons? | StatsSA | 19 | SANParks · SAHRA · NGB | 3.1 | Public entities | 19 | ☑ |
+| 15.1 | SANParks, SAHRA, ACSA: type + definition? | Public entities; one function | 19 | Public + profit · Parastatals + one function · Parastatals + profit | 3.5 | Parastatal definition | 19 | ☑ |
+| 15.2 | SAA, Transnet, Eskom? | Parastatals | 19 | Public entities · Partly state-owned · Product owners | 3.1 | Ownership types | 19–20 | ☑ |
+| 15.3 | TEP type + role? | Partly state-owned; develops small businesses | 19 | Partly + grades · Public entity + develops · Public entity + grades | 3.5 | Grading = TGCSA (10) | 10, 19 | ☑ |
+| 15.4 | ACSA? | Airports Company of South Africa | 19 | Near-miss expansions | 3.1 | Made up | — | ☑ |
+| 15.5 | NGB? | National Gambling Board | 19 | Grading · Game · Guesthouse Board | 3.1 | Made up | — | ☑ |
+| 16.1 | Product owner? | Business making a profit through tourism | 20 | Training and funding · One-function department · Helps entrepreneurs start | 3.2 | NGO/CBO · public entity · professional associations | 19–20 | ☑ |
+| 16.2 | Community campsite profits spent on? | Roads, schools, clinics | 20 | Grading plaques · Parastatal shares · Fair Trade packages | 3.2 | TGCSA · parastatals · FTTSA | 10, 19, 21 | ☑ |
+| 16.3 | NGOs and CBOs? | Link communities with operators; training | 20 | Regulate travel agencies · Represent private sector · Issue permits | 3.2 | ASATA · TBCSA · provincial authorities | 17–21 | ☑ |
+| 16.4 | Official voice, Southern African HOSPITALITY? | FEDHASA | 21 | TBCSA · SATSA · SAACI | 3.1 | TBCSA = travel and tourism overall | 20–21 | ☑ |
+| 16.5 | Money stays in local economy? | FTTSA | 21 | ASATA · SATSA · TBCSA | 3.1 | Other associations | 20–21 | ☑ |
+| 17.1 | UNWTO name + base? | UN World Tourism Organisation; Madrid | 22 | + Geneva · WTTC + Madrid · WTTC + Geneva | 3.5 | Geneva made up; WTTC (22) | 22 | ☑ |
+| 17.2 | UNWTO aim? | Reduce poverty through sustainable tourism | 22 | Stop degradation · Raise awareness · Peace and security | 3.2 | WWF · WTTC · SADC | 21–22 | ☑ |
+| 17.3 | WTTC members? | Tourism business leaders worldwide | 22 | Public sector bodies · Southern African countries · 1 300+ projects | 3.2 | UNWTO · SADC · WWF | 21–22 | ☑ |
+| 17.4 | WWF year + projects? | 1961; 1 300+ | 22 | 1961/3 100 · 1991/1 300 · 1991/3 100 | 3.4, 3.5 | Made-up swaps | 22 | ☑ |
+| 17.5 | SADC? | Co-operation, peace and security | 21 | Rankings · Biodiversity · Awareness | 3.2 | UNWTO · WWF · WTTC | 22 | ☑ |
+| 18.1 | Internet payment disadvantage? | Two-day transfers between banks | 22 | Small businesses lack facilities · May bounce · Fee for guarantee | 3.2 | Credit card · personal cheque · bank-guaranteed cheque | 23–24 | ☑ |
+| 18.2 | Too many wrong PINs? | Three in a row: keeps the card | 23 | Three: blocks account · Five: keeps card · Five: blocks | 3.4, 3.5 | Five and blocking made up | 23 | ☑ |
+| 18.3 | Portable speed points? | Card stays in sight, not copied | 23 | Immediate EFT · Hold a reservation · Bank guarantee | 3.2 | Debit card · credit card · bank cheque | 23–24 | ☑ |
+| 18.4 | Credit card disadvantage? | Commission charged to providers | 23 | Two-day transfers · Cheques bounce · Refused if low funds | 3.2 | Internet · cheque · debit card | 22–24 | ☑ |
+| 18.5 | Refuse personal cheque + bank-guaranteed? | May bounce; guaranteed costs a fee | 24 | Bounce + free · No signature + fee · No signature + free | 3.5 | Must be signed; bank charges a fee | 24 | ☑ |
 
 ## Term 2 · Domestic, regional and international tourism
 
