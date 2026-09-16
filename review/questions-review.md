@@ -15,6 +15,8 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 | 2026-09-16 | All gates, after pilot | 170 | 54 |
 | 2026-09-16 | Communication 49–53 | 0 | 3 (guide wording "not always") |
 | 2026-09-16 | All gates, after Communication | 150 | 51 |
+| 2026-09-16 | Sustainable 38–42 | 0 | 0 |
+| 2026-09-16 | All gates, after Sustainable | 131 | 45 |
 
 ---
 
@@ -57,6 +59,36 @@ One row per wrong option. Rules and techniques: [`difficulty-plan.md`](../diffic
 | 37.5 | Which pair describes Maloti-Drakensberg TFCA? | Lesotho and SA; bearded and Cape vultures | 59 | Lesotho and SA; baobab trees and mlala palms | 3.5 | Plants belong to Limpopo-Shashe | 59 | ☑ |
 | 37.5 | … | … | | Botswana and SA; bearded and Cape vultures | 3.5 | Botswana is Limpopo-Shashe / Kgalagadi | 59 | ☑ |
 | 37.5 | … | … | | Botswana and SA; baobab trees and mlala palms | 3.5 | Both halves Limpopo-Shashe | 59 | ☑ |
+
+## Term 3 · Sustainable and responsible tourism
+
+| gate.stage | question | correct option | page | wrong option | tech | belongs to / why wrong | page | OK |
+|---|---|---|---|---|---|---|---|---|
+| 38.1 | Term: protecting and preserving resources for future generations? | Sustainable tourism | 64 | Green tourism practices · Responsible tourism · Biodiversity | 3.3 | Business actions (68) · tourist behaviour (66) · positive env impact (65) | 65–68 | ☑ |
+| 38.2 | 'People' and 'profit' stand for? | social; economic | 64 | economic/social · social/environmental · cultural/economic | 3.5 | Pillar swaps (planet = environmental) | 64 | ☑ |
+| 38.3 | Hotel block spoils the view: which impact? | Visual pollution | 65 | Loss of natural habitat · Congestion · Vandalism | 3.3 | Other negative env impacts | 65 | ☑ |
+| 38.4 | POSITIVE environmental impact? | Tourist income aids conservation | 65 | New ideas and values · Investment · Awareness of traditions | 3.2 | Social positive · economic positive · social positive | 65–66 | ☑ |
+| 38.5 | NEGATIVE social impact? | Locals denied access to culturally significant places | 65 | Construction destroys habitat · Prices rise with demand · Traffic, crowded beaches | 3.2 | Env negative · economic (inflation) · env (congestion) | 65–66 | ☑ |
+| 39.1 | Overseas owner, imported goods: which impact? | Leakage | 66 | Inflation · External costs · Overdependence | 3.3 | Other negative economic impacts | 66 | ☑ |
+| 39.2 | Peak-season prices rise: which impact? | Inflation | 66 | Leakage · External costs · Balance of payments | 3.3 | Negative economic · positive economic | 66 | ☑ |
+| 39.3 | Municipality pays more for waste and electricity? | External costs | 66 | Overdependence · Leakage · Inflation | 3.3 | Other negative economic impacts | 66 | ☑ |
+| 39.4 | POSITIVE economic impact? | Tourists bring money into the country (balance of payments) | 66 | Cultural pride · Biodiversity · New ideas and values | 3.2 | Social · environmental · social | 65 | ☑ |
+| 39.5 | Reduce negative economic impacts? | Buy from local suppliers, local content | 66 | Recycling bins · Support conservation businesses · Switch off appliances | 3.2 | Litter control · scarce resources · energy | 66–67 | ☑ |
+| 40.1 | Rule for behaviour in the natural environment? | Do not remove anything | 66 | Refillable containers · Switch off engines · Avoid endangered-species restaurants | 3.2 | Water · energy · scarce resources | 67 | ☑ |
+| 40.2 | Pair both conserving WATER? | Re-use towels; refillable containers | 67 | Towels + engines · Walk/cycle + containers · Walk/cycle + engines | 3.5 | Energy practices | 67 | ☑ |
+| 40.3 | Labelled recycling bins collected weekly: which practice? | Controlling litter | 66 | Conserving energy · Conserving scarce resources · Conserving water | 3.3 | Other practice groups | 67 | ☑ |
+| 40.4 | Conserve other scarce resources? | Don't buy endangered species products | 67 | Tap water · Fewer, closer holidays · Direct flights | 3.2 | Water · carbon footprint planning · transport | 67, 69 | ☑ |
+| 40.5 | Benefit of good environmental practices? | Attractions conserved, human impact limited | 67 | Employment · New ideas · Education and community development | 3.2 | Economic positive · social positives | 65–66 | ☑ |
+| 41.1 | What causes global warming? | Greenhouse gases like CO2 trap heat | 67 | Melting ice raises sea level · Heavier rain, storms · Planting trees releases CO2 | 3.2 | Results of warming · results · answer key: cutting trees, not planting | 67, 71 | ☑ |
+| 41.2 | What is a carbon footprint? | Tons of CO2 emitted | 68 | Heat-trapping blanket · Vehicle purchase tax · Extra departure tax | 3.2 | Greenhouse gases · emissions tax · environmental tax | 68 | ☑ |
+| 41.3 | What are green tourism practices? | Actions reducing businesses' environmental impact | 68 | Tourist rules · Preserving for future generations · Tourists choosing sustainable products | 3.2 | Rules (66) · sustainable tourism (64) · responsible tourism (66) | 64–66 | ☑ |
+| 41.4 | Deforestation facts? | Trees 50% carbon; 25% of human CO2 | 68 | 25/50 · 50/50 · 25/25 | 3.4, 3.5 | Swapped real figures | 68 | ☑ |
+| 41.5 | Consequence of climate change for tourism? | Fewer Namaqualand flowers, fewer tourists | 68 | Coal burned for electricity · Deforestation · Greenhouse blanket | 3.2 | Causes, not consequences | 67–68 | ☑ |
+| 42.1 | Why saving electricity cuts emissions in SA? | SA burns coal to make electricity | 68 | Burning trees · Wood fires and gas heaters make electricity · Plants absorb more CO2 | 3.2 | Deforestation · other gas sources · plants absorb CO2 (reworded to be wrong) | 67–68 | ☑ |
+| 42.2 | Establishment saves ELECTRICITY how? | Efficient bulbs and solar geysers | 68 | Turn off taps · Refillable containers · Recycling bins | 3.2 | Water · water · litter | 66–67 | ☑ |
+| 42.3 | How do the 3Rs cut CO2? | Factories produce fewer products | 69 | Plants absorb CO2 · Gas blanket gone · Lower departure tax | 3.2 | Deforestation · greenhouse gases · climate change consequence | 68 | ☑ |
+| 42.4 | PLANNING: reduce carbon footprint? | Fewer, longer holidays closer to home | 69 | Direct flights · Warm water and laundry · Public transport at destination | 3.2 | Transport · accommodation · transport | 69 | ☑ |
+| 42.5 | Pair for SELECTING TRANSPORT? | Train + direct flights | 69 | Train + laundry · Warm water + direct flights · Connecting flights + public transport | 3.5 | Accommodation · transfers contradict direct flights | 69 | ☑ |
 
 ## Term 4 · Communication and customer care
 
