@@ -143,7 +143,15 @@ These were conscious calls. Keep them unless the owner says otherwise.
 5. **"Eleven languages"** follows the guide (Gate 45), worded as "eleven spoken official languages", and the `g` text notes that South African Sign Language became the twelfth in 2023. The WHS count (Gate 24) is anchored "by 2010" (eight).
 6. **Guide typo "Walter Sizulu"** is corrected to Walter Sisulu.
 
-**Known content weakness:** the correct option is often the longest or most detailed one, so a learner could guess by length. Shuffling doesn't fix this. Balancing distractor length is a good future content pass.
+**Known content weakness — resolved (2026-09-16).** All 265 questions were rewritten to remove
+the length tell and word-matching shortcuts (`difficulty-plan.md` has the full rules and
+technique bank). Baseline was 200/265 (75%) strictly-or-tied longest, 181/265 (68%) strictly
+longest, with some topics as bad as 96%. After the rewrite: `node scripts/check.js --strict`
+gives **FAIL 0** on all 265 questions (3 reviewed warnings — genuine guide phrasing in
+Communication, not a hint), and the correct option is strictly longest in at most ~31% of any
+topic's questions (cap: 35%). A deterministic guessing-heuristic check ("always pick the
+longest option", ties split evenly) lands at 25% overall, matching chance, with no topic above
+40%.
 
 ---
 
@@ -285,6 +293,8 @@ answer(i)
 
 Buttons below the terminal: Back to question, Help, Map, Stats, Achievements, End run & report, New run, Wipe everything. Back to question just calls `renderStage()` (same as typing `look`/`r`) — Map, Stats, Achievements, Help and Mode now `clear()` the terminal before printing, so it's the only way back to the current question for a player who never types.
 
+**`warp` — hidden teacher tool, not listed in `help` or above.** Typing `warp 37` or `warp 37.3` after picking a mode jumps straight to that gate (or gate.stage) via `cmdWarp()`. The first use of `warp` in a run sets `S.warped`, which `unlock()`, `checkAfterGate()` and `answer()` check to suppress achievements and lifetime records (`bestStreak`, `hcBest`) for the rest of that run — so a teacher jumping around for review can't accidentally earn or corrupt them. New run clears the flag.
+
 ### 6.5 Debrief (`endGame`)
 
 The report is rendered into `#reportArea`, in this order:
@@ -337,33 +347,22 @@ The report is rendered into `#reportArea`, in this order:
 
 ## 10. Testing recipes
 
-### 10.1 Content validation (Node)
+### 10.1 Content and difficulty lint (Node) — `scripts/check.js`
 
-Checks the content invariants: sequential ids, 5 steps per gate, 4 unique options per step, required fields present, no `<` in content.
+The actual tool in use: run `node scripts/check.js --strict` (optionally `--gates 7,37,53` to
+scope it) from the repo root. It does two things in one pass:
 
-```js
-// scripts/check-content.js  —  run: node scripts/check-content.js
-const fs = require('fs');
-const html = fs.readFileSync('index.html', 'utf8');
-const m = html.match(/var CHAMBERS = \[([\s\S]*?)\];\s*var NCH/);
-if (!m) throw new Error('CHAMBERS block not found');
-const C = eval('[' + m[1] + ']');
-const err = [];
-C.forEach((c, i) => {
-  if (c.id !== i + 1) err.push(`gate ${c.id}: id should be ${i + 1}`);
-  ['strand', 'name', 'intro'].forEach(k => { if (!c[k]) err.push(`gate ${c.id}: missing ${k}`); });
-  if (c.steps.length !== 5) err.push(`gate ${c.id}: ${c.steps.length} steps`);
-  c.steps.forEach((s, j) => {
-    ['n', 'q', 'g', 'w'].forEach(k => { if (!s[k]) err.push(`${c.id}.${j}: missing ${k}`); });
-    if (s.o.length !== 4) err.push(`${c.id}.${j}: ${s.o.length} options`);
-    if (new Set(s.o).size !== s.o.length) err.push(`${c.id}.${j}: duplicate options`);
-    if (JSON.stringify(s).includes('<')) err.push(`${c.id}.${j}: contains "<"`);
-  });
-});
-console.log(`gates ${C.length}, stages ${C.reduce((a, c) => a + c.steps.length, 0)}`);
-if (err.length) { console.error(err.join('\n')); process.exit(1); }
-console.log('OK');
-```
+- **Structure check** (what a standalone `check-content.js` used to do): sequential ids, 5
+  steps per gate, 4 unique options per step, required fields present, no `<` in content.
+- **Difficulty lint** (`difficulty-plan.md` §7): length-ratio balance between the correct
+  option and the distractors, the correct-option-longest share per topic (cap 35%), feedback
+  leaks into the next stage, absolute words in distractors, stem echoes, and NOT/INCORRECT
+  question density per gate.
+
+**Final numbers (2026-09-16, all 265 questions rewritten):** `FAIL 0`, `WARN 3` (49.2, 49.5,
+50.2 — "not always" in a distractor, genuine guide phrasing, reviewed). See
+`difficulty-plan.md` for the full rules and technique bank behind these numbers, and
+`review/questions-review.md` for the per-question fairness record with guide page citations.
 
 ### 10.2 Automated playthrough (Playwright)
 
@@ -399,6 +398,17 @@ const { chromium } = require('playwright');
 ```
 
 The last verified run of this simulation reached all expected states with zero page errors.
+
+**2026-09-16 re-verification (post content rewrite):** rather than install Playwright fresh,
+the same checkpoints were re-run through an already-open tab (the `<script>` is a single
+unwrapped top-level block, so `S`, `CHAMBERS`, `answer`, `renderStage` etc. are `window`
+properties, reachable the same way `p.evaluate()` reaches them). Direct `S.ch`/`S.st` warps
+were used to reach specific gates instantly rather than clicking through all 265 in real time.
+Confirmed: hardcore reaching `S.ch` 10 unlocks `iron10` with zero errors; a hardcore death
+resets to `ch 0, run 2` with `hcBest` kept; a full run reaches `pct "100% · 265/265"` and
+`endGame()` renders a non-empty debrief; a hand-built pre-rewrite-shaped save (old `n`/`q`/`o`
+text, same `LS` key) loads correctly with position, achievements and deaths intact — confirming
+§4.3's save-compatibility rule held through the rewrite. Zero `window.onerror` events throughout.
 
 ---
 
