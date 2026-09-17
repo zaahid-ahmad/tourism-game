@@ -1,8 +1,11 @@
 # Source material stays local: never commit or publish it (Netlify serves the repo root)
 *.pdf
 node_modules/
-# Local session handover notes
+# Local session handover notes and planning docs
 continue.md
+difficulty-plan.md
+Hardcore_WW_Plan.md
+senior-dev.md
 
 # Local Netlify folder
 .netlify
