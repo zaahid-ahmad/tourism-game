@@ -2505,7 +2505,9 @@ function lbSay(msg){
 
 function trySubmit(attempted, clean, acc){
   if(S.warped) return;
-  if(attempted < 1) return;
+  /* attempted can be 0 right after a hardcore/Mr Worldwide death (the run wipes seen/clean to
+     nothing) — that's still worth submitting if there's a lifetime hcBest/mwBest to report. */
+  if(attempted < 1 && !(S.hcBest > 0) && !(S.mwBest > 0)) return;
   if(Date.now() - (S.subTs||0) < 60000) return;
   if(!S.name){
     pendingSubmit = {attempted:attempted, clean:clean, acc:acc};

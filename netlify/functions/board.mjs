@@ -55,9 +55,13 @@ export default async (req) => {
         ga = num("gates"), bs = num("bestStreak"),
         hc = num("hcGates"), mw = num("mwCorrect");
 
-  /* structural impossibility only — deliberately NOT answer validation, honour system */
-  if (!name || at < 1 || cl < 0 || de < 0 || ga < 0 ||
-      at > TOTAL || cl > at || ga > GATES || at < ga * 5 || bs > at ||
+  /* structural impossibility only — deliberately NOT answer validation, honour system.
+     attempted may legitimately be 0: a hardcore/Mr Worldwide death wipes the current run's
+     seen/clean counts, but S.hcBest/S.mwBest (and S.bestStreak) are lifetime figures that survive
+     the wipe, so a report right after dying carries real hc/mw data with attempted:0 — that must
+     not be rejected outright, just treated as "no accuracy data this submission" below. */
+  if (!name || at < 0 || cl < 0 || de < 0 || ga < 0 ||
+      at > TOTAL || cl > at || ga > GATES || at < ga * 5 || (at >= 1 && bs > at) ||
       hc > GATES || mw > TOTAL ||
       (b.mode !== "standard" && b.mode !== "hardcore" && b.mode !== "worldwide")) {
     return json({ ok: false, err: "rejected" }, 400);
@@ -66,18 +70,21 @@ export default async (req) => {
   const key = slug(name);
   const old = await store.get(key, { type: "json" }).catch(() => null) || {};
 
-  const acc = Math.round((cl / at) * 100);
   /* Reaching the ranking floor for the first time always counts as an improvement, regardless of
      accuracy — otherwise an early short/high-accuracy run permanently blocks every later, more
      substantial run from ever being stored (and therefore ever being ranked), since it would
      always compare "worse" on accuracy alone. Once both sides are on the same side of the floor,
-     fall back to the existing best-accuracy (tie-broken by more attempted) comparison. */
+     fall back to the existing best-accuracy (tie-broken by more attempted) comparison. A
+     no-accuracy-data submission (attempted:0, see above) can never count as an accuracy
+     improvement, so it can never touch the stored accuracy fields — hc/mw stay fully independent. */
+  const hasAccData = at >= 1;
+  const acc = hasAccData ? Math.round((cl / at) * 100) : 0;
   const oldQualifies = (old.attempted || 0) >= FLOOR;
-  const newQualifies = at >= FLOOR;
-  const accBetter =
+  const newQualifies = hasAccData && at >= FLOOR;
+  const accBetter = hasAccData && (
     (newQualifies && !oldQualifies) ||
     (newQualifies === oldQualifies &&
-      (!(old.acc > 0) || acc > old.acc || (acc === old.acc && at > (old.attempted || 0))));
+      (!(old.acc > 0) || acc > old.acc || (acc === old.acc && at > (old.attempted || 0)))));
   const hcBetter = hc > (old.hcGates || 0);
   const mwBetter = mw > (old.mwCorrect || 0);
 
