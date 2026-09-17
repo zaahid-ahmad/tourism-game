@@ -3,3 +3,6 @@
 node_modules/
 # Local session handover notes
 continue.md
+
+# Local Netlify folder
+.netlify

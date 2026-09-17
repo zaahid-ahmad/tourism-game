@@ -247,6 +247,7 @@ footer{color:var(--amber-ghost);font-size:12px;margin-top:26px;line-height:1.7}
   <button class="btn" type="button" id="mapBtn">Map</button>
   <button class="btn" type="button" id="statsBtn">Stats</button>
   <button class="btn" type="button" id="awardsBtn">Achievements</button>
+  <button class="btn" type="button" id="boardBtn">Leaderboard</button>
   <button class="btn" type="button" id="reportBtn">End run &amp; report</button>
   <button class="btn" type="button" id="newBtn">New run</button>
   <button class="btn" type="button" id="resetBtn">Wipe everything</button>
@@ -256,7 +257,8 @@ footer{color:var(--amber-ghost);font-size:12px;margin-top:26px;line-height:1.7}
 
 <footer>
   Fifty-three gates across all eight Grade 10 Tourism topics, five stages each. Standard mode: a wrong answer strands you and you retry that stage. Hardcore mode: one wrong answer wipes the whole run and you start again from Gate 01.<br>
-  Achievements carry over between runs. "New run" lets you pick a mode again; "Wipe everything" also clears achievements. Answer order shuffles every attempt. Progress saves in this browser.
+  Achievements carry over between runs. "New run" lets you pick a mode again; "Wipe everything" also clears achievements. Answer order shuffles every attempt. Progress saves in this browser.<br>
+  The leaderboard is optional and shares only a name you choose, plus your first-time-correct rate. Type <code>board</code> to view it or <code>name &lt;you&gt;</code> to set your name; type <code>skip</code> to stay off it. It runs on a best-effort basis and never affects your saved progress.
 </footer>
 
 </div>
@@ -1986,7 +1988,10 @@ function freshRun(keep){
     ach: keep.ach || {},
     flawless: keep.flawless || 0,
     bestStreak: keep.bestStreak || 0,
-    hcBest: keep.hcBest || 0
+    hcBest: keep.hcBest || 0,
+    name: keep.name || "",
+    subTs: keep.subTs || 0,
+    subAcc: keep.subAcc || 0
   };
 }
 var S = freshRun();
@@ -2019,6 +2024,11 @@ function out(html, cls){
 }
 function clear(){ screenEl.innerHTML = ""; choicesEl.innerHTML = ""; }
 function pad(n){ return String(n).padStart(2,"0"); }
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
 
 function typeInto(el, text, done){
   if(reduced){ el.innerHTML = text; if(done) done(); return; }
@@ -2289,7 +2299,7 @@ function cmdHelp(){
   clear();
   out("", "rule");
   out("COMMANDS", "tag");
-  out("1-4        choose an answer\nr          retry after a death\nlook       re-read the current stage\nmap        show gate progress\nstats      show current run figures\nawards     list achievements\nmode       show the current mode\nreport     end the run and open the debrief\nnew        start a new run and pick a mode (keeps achievements)\nwipe       erase everything, including achievements", "sys");
+  out("1-4        choose an answer\nr          retry after a death\nlook       re-read the current stage\nmap        show gate progress\nstats      show current run figures\nawards     list achievements\nmode       show the current mode\nboard      show the shared leaderboard\nname <you> set your name for the leaderboard\nreport     end the run and open the debrief\nnew        start a new run and pick a mode (keeps achievements)\nwipe       erase everything, including achievements", "sys");
   out("Click Back to question (or type look / r) to return.", "sys");
   unlock("brochure");
 }
@@ -2358,8 +2368,116 @@ function cmdWarp(arg){
   renderStage();
 }
 
+/* ============================================================
+   LEADERBOARD (optional, offline-safe — never blocks the game)
+   ============================================================ */
+var pendingName = false;
+var pendingSubmit = null;
+
+function api(method, body, done){
+  if(!window.fetch){ if(done) done(null); return; }
+  var ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+  var t = setTimeout(function(){ if(ctl) ctl.abort(); }, 4000);
+  fetch("/.netlify/functions/board", {
+    method: method,
+    headers: body ? {"content-type":"application/json"} : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+    signal: ctl ? ctl.signal : undefined
+  }).then(function(r){ return r.json(); })
+    .then(function(d){ clearTimeout(t); if(done) done(d); })
+    .catch(function(){ clearTimeout(t); if(done) done(null); });
+}
+
+function setName(raw){
+  var n = String(raw||"").replace(/[^A-Za-z0-9 .'-]/g,"").replace(/\s+/g," ").trim().slice(0,16);
+  if(n.length < 2) return null;
+  S.name = n; save();
+  return n;
+}
+
+function cmdName(arg){
+  if(!arg){ out("usage: name <your name>   (letters, numbers and spaces, 16 max)", "sys"); return; }
+  var n = setName(arg);
+  if(!n){ out("that name didn't work — use letters, numbers and spaces, at least 2 characters.", "sys"); return; }
+  out("name set to " + esc(n) + ".", "sys");
+}
+
+function lbSay(msg){
+  var el = document.getElementById("lbNote");
+  if(el) el.textContent = msg;
+}
+
+function trySubmit(attempted, clean, acc){
+  if(S.warped) return;
+  if(attempted < 1) return;
+  if(Date.now() - (S.subTs||0) < 60000) return;
+  if(!S.name){
+    pendingSubmit = {attempted:attempted, clean:clean, acc:acc};
+    lbSay("Type your name in the terminal to add this run to the shared leaderboard, or type skip.");
+    if(!pendingName){
+      pendingName = true;
+      out("Type your name for the shared leaderboard — other learners will see it.", "sys");
+      out("Letters, numbers and spaces, 16 max. Type skip to stay off the board.", "sys");
+    }
+    return;
+  }
+  if(acc <= (S.subAcc||0)) return;
+  api("POST", {
+    name: S.name, attempted: attempted, clean: clean,
+    deaths: S.deaths.length, gates: Math.min(S.ch, NCH),
+    bestStreak: S.bestStreak||0, mode: S.mode, done: !!S.done
+  }, function(d){
+    if(d && d.ok){ S.subTs = Date.now(); S.subAcc = acc; save(); lbSay("Added to the shared leaderboard as " + esc(S.name) + "."); }
+    else{ lbSay("leaderboard unavailable right now — your run is unaffected."); }
+  });
+}
+
+function cmdBoard(){
+  clear();
+  out("", "rule");
+  out("LEADERBOARD", "tag");
+  var loading = out("loading…", "sys");
+  api("GET", null, function(d){
+    loading.remove();
+    if(!d || !d.ok){
+      out("leaderboard unavailable right now — your run is unaffected.", "sys");
+      out("Click Back to question (or type look / r) to return.", "sys");
+      return;
+    }
+    if(!d.top.length){
+      out("No one has qualified yet — reach " + d.floor + " stages and finish a run to be ranked.", "sys");
+    }else{
+      var head = "   #  " + "NAME".padEnd(18) + "FIRST-TIME   GATES";
+      var lines = d.top.map(function(r, i){
+        var mine = S.name && r.name.toLowerCase() === S.name.toLowerCase();
+        return (mine ? "▶ " : "  ") + pad(i+1) + "  " + esc(r.name.padEnd(18)) + String(r.acc).padStart(3) + "%  " + String(r.attempted).padStart(3) + "      " + String(r.gates).padStart(2);
+      });
+      out([head].concat(lines).join("\n"), "sys");
+    }
+    if(d.pending) out("\n" + d.pending + " more run" + (d.pending===1?"":"s") + " below the " + d.floor + "-stage floor, not yet ranked.", "sys");
+    out("Click Back to question (or type look / r) to return.", "sys");
+  });
+}
+
 function runCmd(raw){
   var v = raw.trim().toLowerCase();
+  if(pendingName){
+    pendingName = false;
+    if(!v) return;
+    out("$ " + raw.replace(/</g,"&lt;"), "sys");
+    if(v === "skip"){
+      out("okay — staying off the leaderboard for now. Type name <yourname> anytime to join.", "sys");
+      return;
+    }
+    var n = setName(raw);
+    if(!n){ out("that name didn't work — use letters, numbers and spaces, at least 2 characters. Type name <yourname> to try again.", "sys"); return; }
+    out("name set to " + esc(n) + ".", "sys");
+    if(pendingSubmit){
+      var ps = pendingSubmit; pendingSubmit = null;
+      trySubmit(ps.attempted, ps.clean, ps.acc);
+    }
+    return;
+  }
   if(!v) return;
   out("$ " + raw.replace(/</g,"&lt;"), "sys");
   if(/^[1-9]$/.test(v)){
@@ -2379,6 +2497,8 @@ function runCmd(raw){
   if(v === "report"){ endGame(); return; }
   if(v === "new" || v === "new run"){ newRun(); return; }
   if(v === "wipe" || v === "reset"){ askWipe(); return; }
+  if(v === "board" || v === "leaderboard"){ cmdBoard(); return; }
+  if(/^name\b/.test(v)){ cmdName(raw.trim().slice(4).trim()); return; }
   if(/^warp\b/.test(v)){ cmdWarp(v.slice(4).trim()); return; }
   out("unknown command: " + v.replace(/</g,"&lt;") + "   (try: help)", "sys");
 }
@@ -2391,12 +2511,13 @@ document.getElementById("helpBtn").addEventListener("click", cmdHelp);
 document.getElementById("mapBtn").addEventListener("click", cmdMap);
 document.getElementById("statsBtn").addEventListener("click", cmdStats);
 document.getElementById("awardsBtn").addEventListener("click", cmdAwards);
+document.getElementById("boardBtn").addEventListener("click", cmdBoard);
 document.getElementById("reportBtn").addEventListener("click", endGame);
 document.getElementById("newBtn").addEventListener("click", newRun);
 document.getElementById("resetBtn").addEventListener("click", askWipe);
 
 function newRun(){
-  S = freshRun({run:(S.run||1)+1, ach:S.ach, flawless:S.flawless, bestStreak:S.bestStreak, hcBest:S.hcBest});
+  S = freshRun({run:(S.run||1)+1, ach:S.ach, flawless:S.flawless, bestStreak:S.bestStreak, hcBest:S.hcBest, name:S.name, subTs:S.subTs, subAcc:S.subAcc});
   save();
   document.getElementById("reportArea").innerHTML = "";
   boot();
@@ -2500,6 +2621,7 @@ function endGame(){
     '<div class="report">'
     + '<h2>' + head + '</h2>'
     + '<p class="sub">' + sub + '</p>'
+    + '<p class="note" id="lbNote"></p>'
     + '<div class="rsec"><h3>THE RUN</h3><div class="strands">'
       + '<div class="strand"><div class="nm">Journey</div><div class="fig">' + pct + '%</div><div class="meter"><i class="ok" style="width:' + pct + '%"></i></div></div>'
       + '<div class="strand"><div class="nm">Stages reached</div><div class="fig">' + attempted + ' / ' + NST + '</div></div>'
@@ -2516,6 +2638,7 @@ function endGame(){
     + '<div class="rsec"><h3>EVERY DEATH — ' + S.deaths.length + '</h3><div class="deathlist">' + deathHtml + '</div></div>'
     + '</div>';
   document.getElementById("reportArea").scrollIntoView({behavior: reduced ? "auto" : "smooth", block:"start"});
+  trySubmit(attempted, clean, acc);
 }
 
 /* ============================================================

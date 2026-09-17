@@ -4,7 +4,7 @@ Technical and content analysis of the current production version of the site, wr
 
 - **Repo:** `https://github.com/zaahid-ahmad/tourism-game` (branch `main`)
 - **Hosting:** Netlify, auto-deploys on every push to `main`
-- **Codebase:** one file, `index.html` (about 2,495 lines, about 180 KB). No build step, no dependencies, no backend.
+- **Codebase:** the game itself is one file, `index.html` (about 2,600 lines, about 185 KB), with no build step and no dependencies. Since 2026-09-17 the repo also has a small **optional, best-effort leaderboard**: one Netlify Function (`netlify/functions/board.mjs`) backed by Netlify Blobs, plus `netlify.toml` and a `package.json` (single dependency, `@netlify/blobs`, needed only so Netlify's bundler can resolve the function's import). `index.html` still opens directly from disk with no server and no build step; only the shared leaderboard needs the deployed function. See §12.
 - **Owner:** Zaahid Ahmad Mohamed, CAT teacher, APAX School (Johannesburg)
 - **Audience:** Grade 10 Tourism learners (CAPS, South Africa)
 - **Content source:** *Via Afrika Tourism Grade 10 Study Guide* (all 8 topics). Every question and every feedback line was pulled from this guide.
@@ -34,18 +34,20 @@ Line numbers are approximate. Use them as a map and search for the section comme
 |---|---|---|
 | 1–10 | `<!doctype>`, `<head>`, `<title>Passport Tourism Sim</title>`, Google Fonts link | Fonts: **VT323** (CRT display) and **IBM Plex Mono** (body) |
 | 11–201 | `<style>` | All CSS inline. Design tokens are on `:root`. |
-| 203–262 | Markup | `.shell` (bar, `.hud`, `.journey`, `#screen`, `#choices`, `.inputrow`), `.btnrow`, `#reportArea`, `footer` |
+| 203–262 | Markup | `.shell` (bar, `.hud`, `.journey`, `#screen`, `#choices`, `.inputrow`), `.btnrow` (incl. `#boardBtn`), `#reportArea`, `footer` |
 | 264–276 | `var STRAND` | 8 topic definitions |
 | 278–1934 | `var CHAMBERS = [...]` | **All game content** (53 gates). Sub-comments mark each topic: `/* ===== TERM 1 · TOURISM SECTORS ===== */` and so on. |
 | 1936–1937 | `NCH`, `NST` | Gate count and total stage count, derived from `CHAMBERS` |
 | 1939–1973 | `var ACH`, `STRAND_LAST` | Achievement definitions; last gate index per topic |
-| 1975–2005 | State: `LS`, `freshRun()`, `S`, load/migrate, `save()` | localStorage persistence |
-| 2007–2088 | Helpers: `out`, `clear`, `pad`, `typeInto`, `shuffle`, `stagesDone`, tick drawing, `hud()` | |
-| 2090–2132 | Achievement engine: `unlock`, `checkAfterCorrect`, `checkAfterGate` | |
-| 2134–2281 | Render and game loop: `boot`, `renderModePick`, `chooseMode`, `renderStage`, `answer` | |
-| 2283–2392 | Commands: `cmdHelp`, `cmdMap`, `cmdStats`, `cmdAwards`, `cmdMode`, `runCmd`, event bindings, `newRun`, `askWipe` | |
-| 2394–2486 | `endGame()` | Debrief/report HTML |
-| 2488–2492 | `boot();` | Entry point |
+| 1975–2010 | State: `LS`, `freshRun()`, `S`, load/migrate, `save()` | localStorage persistence. `freshRun()` includes leaderboard fields `name`, `subTs`, `subAcc` (§6.6). |
+| 2012–2095 | Helpers: `out`, `clear`, `pad`, `esc`, `typeInto`, `shuffle`, `stagesDone`, tick drawing, `hud()` | `esc()` escapes leaderboard rows read back over the network — the one place remote content is rendered. |
+| 2097–2140 | Achievement engine: `unlock`, `checkAfterCorrect`, `checkAfterGate` | |
+| 2142–2295 | Render and game loop: `boot`, `renderModePick`, `chooseMode`, `renderStage`, `answer` | |
+| 2297–2376 | Commands: `cmdHelp`, `cmdMap`, `cmdStats`, `cmdAwards`, `cmdMode`, `cmdWarp` | |
+| 2377–2460 | Leaderboard client: `api`, `setName`, `cmdName`, `lbSay`, `trySubmit`, `cmdBoard` | Optional, best-effort, never blocks the game (§6.6) |
+| 2462–2518 | `runCmd`, event bindings, `newRun`, `askWipe` | |
+| 2550–2642 | `endGame()` | Debrief/report HTML; calls `trySubmit()` at the end |
+| 2647 | `boot();` | Entry point |
 
 The JavaScript is plain ES5-style with `var` and `function`, no modules and no framework. Keep that style unless you're doing a deliberate refactor.
 
@@ -180,6 +182,9 @@ Created by `freshRun(keep)`:
 | `flawless` | int | save | Lifetime count of gates cleared with no deaths |
 | `bestStreak` | int | save | Best streak ever |
 | `hcBest` | int | save | Most gates cleared in a single hardcore run |
+| `name` | string | save (lifetime) | Display name for the leaderboard, empty until set. See §6.6. |
+| `subTs` | int (ms epoch) | save | Timestamp of the last leaderboard submission (throttles resubmits) |
+| `subAcc` | int | save | First-time-correct % of the last successful submission (only a better run resubmits) |
 
 ### 4.2 Lifecycle
 
@@ -187,8 +192,8 @@ Created by `freshRun(keep)`:
 |---|---|---|
 | Page load | — | Loads `S`. An old save with no `mode` but with progress is migrated to `"standard"`. `ch` and `st` are clamped to the current content size. |
 | Hardcore death | `ch`, `st`, `seen`, `clean`, `done` | `deaths`, `mode`, all lifetime fields; `run++` |
-| **New run** (button or `new`) | Everything run-scoped, including `deaths` and `mode` (so the picker shows) | `run+1`, `ach`, `flawless`, `bestStreak`, `hcBest` |
-| **Wipe everything** (button or `wipe`, press twice within 5 s) | Everything, including achievements | — |
+| **New run** (button or `new`) | Everything run-scoped, including `deaths` and `mode` (so the picker shows) | `run+1`, `ach`, `flawless`, `bestStreak`, `hcBest`, `name`, `subTs`, `subAcc` |
+| **Wipe everything** (button or `wipe`, press twice within 5 s) | Everything, including achievements and the leaderboard name | — |
 
 ### 4.3 Save compatibility rule
 
@@ -287,11 +292,13 @@ answer(i)
 | `stats` | Mode, journey %, accuracy, deaths, streaks, best hardcore run, achievement count |
 | `awards`, `achievements` | Achievement checklist |
 | `mode` | Current mode and how to switch |
+| `board`, `leaderboard` | `cmdBoard()` — fetches and prints the top 20 (§6.6) |
+| `name <text>` | `cmdName()` — sets the leaderboard display name (§6.6) |
 | `report` | `endGame()` |
 | `new`, `new run` | `newRun()` |
 | `wipe`, `reset` | `askWipe()` (two-step confirm; no `confirm()` dialogs) |
 
-Buttons below the terminal: Back to question, Help, Map, Stats, Achievements, End run & report, New run, Wipe everything. Back to question just calls `renderStage()` (same as typing `look`/`r`) — Map, Stats, Achievements, Help and Mode now `clear()` the terminal before printing, so it's the only way back to the current question for a player who never types.
+Buttons below the terminal: Back to question, Help, Map, Stats, Achievements, Leaderboard, End run & report, New run, Wipe everything. Back to question just calls `renderStage()` (same as typing `look`/`r`) — Map, Stats, Achievements, Leaderboard, Help and Mode now `clear()` the terminal before printing, so it's the only way back to the current question for a player who never types.
 
 **`warp` — hidden teacher tool, not listed in `help` or above.** Typing `warp 37` or `warp 37.3` after picking a mode jumps straight to that gate (or gate.stage) via `cmdWarp()`. The first use of `warp` in a run sets `S.warped`, which `unlock()`, `checkAfterGate()` and `answer()` check to suppress achievements and lifetime records (`bestStreak`, `hcBest`) for the rest of that run — so a teacher jumping around for review can't accidentally earn or corrupt them. New run clears the flag.
 
@@ -305,6 +312,42 @@ The report is rendered into `#reportArea`, in this order:
 4. **STRENGTHS AND WEAKNESSES BY TOPIC:** ranked by first-time-correct rate, with strongest/weakest badges.
 5. **WHAT TO REVISE, IN ORDER:** weakest topic, the top 3 deadliest gates, and the strongest topic.
 6. **EVERY DEATH:** question, the learner's answer, the correct answer, and the explanation, tagged with run number.
+
+At the end of `endGame()`, after the report HTML is written, it calls `trySubmit(attempted, clean, acc)` (§6.6).
+
+### 6.6 Leaderboard (optional, added 2026-09-17)
+
+A shared, best-effort leaderboard. It never blocks or breaks the game: every network call has a
+timeout and a catch, and the game is byte-identical to before this feature if the function is
+unreachable, blocked, or the page is opened from `file://`.
+
+- **Backend:** `netlify/functions/board.mjs`, a Netlify Function (v2, ESM) backed by Netlify
+  Blobs — one blob per player, keyed by a slug of their name, so concurrent writes from a class
+  answering at the same time never race each other the way one shared aggregate blob would.
+  `GET` lists and ranks all blobs; `POST` validates and stores one player's best run.
+- **Identity:** a free-text display name, letters/numbers/spaces (and `. ' -`) only, 2–16
+  characters, asked once via the terminal (never `prompt()`) and stored in `S.name` (lifetime).
+  The player can `skip`, change it anytime with `name <text>`, or lose it via Wipe everything.
+- **Ranking:** first-time-correct rate (`clean/attempted`), tie-broken by more stages attempted,
+  then fewer deaths, then earliest submission. A **floor of 50 attempted stages** (mirroring the
+  `scholar` achievement threshold) is required to be ranked; runs below it are stored but shown
+  as "not yet ranked".
+- **Submission:** automatic at the end of `endGame()`, but only after the name prompt has given
+  consent (states plainly that the name is shared). Skipped when `S.warped` (a warped run already
+  earns no achievements or lifetime records — see the `warp` note above — and must not reach the
+  board either), no name is set, `attempted < 1`, a submission happened in the last 60 s, or the
+  new accuracy is no better than the last submitted one (`S.subAcc`).
+- **Cheating:** honour system by design. The function rejects only *structurally impossible*
+  submissions (`clean > attempted`, `attempted < gates * 5`, out-of-range counts, an unrecognised
+  `mode`) — deliberately **not** answer validation, which would need the whole game loop moved
+  server-side. A learner with DevTools can still fabricate a result; this adds friction, not proof.
+- **Escaping — the one real security-relevant piece:** names now arrive from other users over the
+  network, and this codebase renders everything with `innerHTML` (§8). The server sanitises on
+  write (`cleanName()` in `board.mjs`, strips everything outside the allowed charset) **and** the
+  client escapes on read (`esc()`, `index.html` ~2027) before any remote value is put in the DOM.
+  Both layers are mandatory, not defensive — do not remove either one.
+- **Commands:** `board`/`leaderboard` and `name <text>` (§6.4); a `Leaderboard` button beside
+  Achievements.
 
 ---
 
@@ -322,7 +365,7 @@ The report is rendered into `#reportArea`, in this order:
 
 ## 8. Security and robustness notes
 
-- **HTML injection:** content strings are trusted (authored in the file) and rendered with `innerHTML`. The one user input, the command echo, is escaped for `<`. Keep it that way: never render raw user input.
+- **HTML injection:** content strings are trusted (authored in the file) and rendered with `innerHTML`. The command echo is escaped for `<`. Leaderboard rows are the one place genuinely untrusted, remote content is rendered — they go through `esc()` (§6.6) on the way in. Keep it that way: never render raw user input, local or remote.
 - **Death log growth:** `S.deaths` grows with no limit within a run and is only cleared by New run or Wipe. With 265 short entries it's far below localStorage limits, but capping it would be a sensible guard.
 - **Screen trimming:** `#screen` is trimmed to 110 lines in `renderStage` so the DOM doesn't grow forever.
 - **Hardcore and COMEBACK TRIP:** `justDied` carries across a hardcore wipe, so the first correct answer of the next run unlocks COMEBACK TRIP. This is intentional and harmless.
@@ -332,14 +375,15 @@ The report is rendered into `#reportArea`, in this order:
 
 ## 9. Deployment
 
-- **Netlify settings:** base directory, build command, publish directory and functions directory are all empty. No environment variables. Production branch `main`.
+- **Netlify settings:** publish directory `.` and functions directory `netlify/functions`, both now set explicitly in `netlify.toml` (previously empty/default). No environment variables. Production branch `main`.
+- **`package.json`:** exists only so Netlify's bundler can resolve `netlify/functions/board.mjs`'s `@netlify/blobs` import — it triggers an automatic `npm install` on deploy. This is *not* a build step for `index.html`, which still has none and still opens directly from disk with no server. `node_modules/` is gitignored; `package-lock.json` is committed.
 - **Updating:** push to `main` and Netlify redeploys in well under a minute. Learners get the new version on reload, and their progress is kept (subject to §4.3).
 - **Free plan costs (credit-based, accounts created from Sept 2025):**
   - 300 credits/month.
   - Each production deploy costs 15 credits, so batch commits and push once.
-  - Bandwidth is 20 credits/GB and requests 2 credits per 10k. One page load (a single ~180 KB file, usually compressed) costs a fraction of a credit.
+  - Bandwidth is 20 credits/GB and requests 2 credits per 10k. One page load (a single ~180 KB file, usually compressed) costs a fraction of a credit. Leaderboard function invocations are the same order of cost — negligible for a class-sized audience; deploys remain the binding constraint.
   - The realistic limit is the number of deploys, not learner traffic.
-  - If credits run out, the site pauses until the next billing cycle.
+  - If credits run out, the site pauses until the next billing cycle, and the leaderboard function simply stops responding — `index.html` still works fully offline (§6.6).
 - **Local testing:** open `index.html` directly in a browser. This costs nothing, and localStorage works on `file://` in Chromium and Firefox.
 - **Line endings:** Git on Windows shows an LF→CRLF warning. It's harmless. Optionally add a `.gitattributes` with `* text=auto`.
 
@@ -416,12 +460,14 @@ text, same `LS` key) loads correctly with position, achievements and deaths inta
 
 ### Invariants to keep
 
-- A single self-contained `index.html` with no build step (Netlify is configured for this).
+- `index.html` itself is still self-contained and needs no build step and no server to play — it opens straight from disk exactly as before. The repo as a whole is no longer build-step-free: `package.json` + `netlify.toml` exist solely to deploy the optional leaderboard function (§6.6, §9). Don't reintroduce a *real* build step (bundler, transpiler, minifier) for `index.html` — that invariant still holds.
 - `CHAMBERS[i].id === i + 1`, correct option at `o[0]`, 4 options per step, and all content taken from the Via Afrika Grade 10 study guide.
 - Every `localStorage` access wrapped in `try/catch`.
 - No `alert`/`confirm`/`prompt` dialogs; use in-terminal two-step confirms instead.
 - The visual identity (amber CRT tokens, VT323 and Plex Mono) and the teacher's sample-game structure.
 - Counts derived from `NCH`, `NST` and `ACH.length`. Some copy still hardcodes "53" (the footer, and the `guide`, `hcgrad` and `streak53` descriptions), so update those strings if the gate count changes.
+- The game must work fully offline / with the leaderboard function unreachable — every leaderboard call is optional, timed out and caught (§6.6). Never make the leaderboard load-bearing for play.
+- Never render a value that came back from `board.mjs` without `esc()` first (§6.6, §8).
 
 ### Common tasks
 
