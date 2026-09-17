@@ -77,6 +77,20 @@ body{
 .hud .v.bad{color:var(--red)}
 .hud .v.small{font-size:17px;letter-spacing:.04em;margin-top:5px}
 
+/* ---------- Mr Worldwide floating clock ---------- */
+.mwclock{
+  position:fixed;top:14px;right:14px;z-index:40;
+  font-family:var(--crt);font-size:30px;line-height:1;
+  padding:9px 16px;border:1px solid var(--edge);background:var(--panel);
+  color:var(--amber-hi);box-shadow:0 8px 24px -10px #000;
+  font-variant-numeric:tabular-nums;letter-spacing:.02em;
+  transition:color .15s,border-color .15s;
+}
+.mwclock.urgent{color:var(--red);border-color:var(--red-dim);animation:mwpulse 1s steps(2) infinite}
+@keyframes mwpulse{50%{opacity:.5}}
+@media (max-width:520px){.mwclock{top:8px;right:8px;font-size:22px;padding:6px 11px}}
+@media (prefers-reduced-motion:reduce){.mwclock.urgent{animation:none}}
+
 /* ---------- journey progress ---------- */
 .journey{padding:10px 12px 12px;border-bottom:1px solid var(--edge)}
 .jtop{display:flex;align-items:baseline;gap:6px 12px;flex-wrap:wrap;margin-bottom:7px}
@@ -205,6 +219,7 @@ footer{color:var(--amber-ghost);font-size:12px;margin-top:26px;line-height:1.7}
 <div class="wrap">
 
 <div class="shell">
+  <div id="mwClock" class="mwclock" style="display:none" aria-live="assertive"><span id="mwClockNum">15</span>s</div>
   <div class="bar">
     <span class="dot live" aria-hidden="true"></span>
     <span class="name">passport.sim</span>
@@ -219,7 +234,6 @@ footer{color:var(--amber-ghost);font-size:12px;margin-top:26px;line-height:1.7}
     <div><div class="k">Streak</div><div class="v" id="hudStreak">0</div></div>
     <div><div class="k">Awards</div><div class="v" id="hudAw">0</div></div>
     <div><div class="k">Status</div><div class="v small" id="hudStatus">EXCURSIONIST</div></div>
-    <div id="hudClockTile" style="display:none"><div class="k">Clock</div><div class="v" id="hudClock">15s</div></div>
   </div>
 
   <div class="journey">
@@ -2033,12 +2047,17 @@ function stopMwClock(){
 }
 function startMwClock(){
   if(mwTick) clearInterval(mwTick);
-  var el = document.getElementById("hudClock");
-  mwTick = setInterval(function(){
+  var el = document.getElementById("mwClock");
+  var num = document.getElementById("mwClockNum");
+  function tick(){
     var left = Math.ceil((S.qEnd - Date.now()) / 1000);
-    if(el) el.textContent = Math.max(left, 0) + "s";
+    var shown = Math.max(left, 0);
+    if(num) num.textContent = shown;
+    if(el) el.classList.toggle("urgent", shown <= 5);
     if(left <= 0){ clearInterval(mwTick); mwTick = null; mwTimeout(); }
-  }, 250);
+  }
+  tick(); /* sync immediately so a fresh question never flashes the previous tick's stale time */
+  mwTick = setInterval(tick, 250);
 }
 function mwTimeout(){
   answer(-1);
@@ -2136,8 +2155,8 @@ function hud(){
   ml.className = isWipeMode() ? "hcl" : "";
   document.body.classList.toggle("hc", isWipeMode());
 
-  var clockTile = document.getElementById("hudClockTile");
-  if(clockTile) clockTile.style.display = S.mode === "worldwide" ? "" : "none";
+  var mwClock = document.getElementById("mwClock");
+  if(mwClock) mwClock.style.display = S.mode === "worldwide" ? "" : "none";
 
   var done = stagesDone();
   var frac = S.done ? 1 : done / NST;

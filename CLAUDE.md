@@ -225,7 +225,9 @@ boot()
      ├─ print gate header (intro on stage 1) + narrative + typed question
      │   render 4 shuffled buttons (data-idx = original option index)
      └─ if worldwide and !done: arm a fresh 15s S.qEnd unless it's still live from a reload,
-        save(), startMwClock() (updates #hudClock every 250ms, calls mwTimeout() at 0)
+        save(), startMwClock() (updates #mwClockNum every 250ms — plus an immediate sync call so a
+        fresh question never flashes the previous tick's stale time — turns #mwClock red/pulsing
+        at ≤5s via the "urgent" class, calls mwTimeout() at 0)
 
 answer(i)
  ├─ cancelPending(), mwLocked = false — briefly unlocked while the next question/death recap is up
@@ -274,7 +276,7 @@ on every hardcore/Mr Worldwide death. The hidden `warp` teacher tool bypasses bo
 - **Hardcore:** a death wipes the run. The 5 stages inside each gate are reshuffled every time the run (re)starts, so a memorised answer sequence from a previous attempt no longer works; gate order itself stays fixed.
 - **Mr Worldwide:** hardcore rules, plus a 15-second clock per question (persisted as `S.qEnd`, a wall-clock deadline, so it survives a reload with the remaining time intact — not a fresh 15s — and a genuinely stale value, e.g. a save from days ago, gets a fresh deadline instead of an instant death) and gates in random order (`S.gOrder`). A timeout is treated as a death with no answer given (`answer(-1)`). Map, Stats, Help, Awards, Mode and the Leaderboard are locked for the whole run (`mwLocked`), briefly unlocked between questions and during the death recap, fully unlocked by `report`/`new`/`wipe`. Only the "MR WORLDWIDE" achievement can be earned in this mode — every other achievement is suppressed the same way `S.warped` suppresses all of them.
 - **Switching:** the mode is picked at the start of every run and can only be changed through New run. This stops anyone playing most of the game in Standard and switching to Hardcore/Mr Worldwide to earn their achievements.
-- **Visual cues:** `body.hc` turns the status dot red and the bar's mode label turns red in both wipe modes (`isWipeMode()`); the HUD's Clock tile only shows in Mr Worldwide.
+- **Visual cues:** `body.hc` turns the status dot red and the bar's mode label turns red in both wipe modes (`isWipeMode()`); a floating clock badge (`#mwClock`, `position:fixed` top-right, so it stays in view regardless of scroll position — the page auto-scrolls to the choices, which would otherwise carry a HUD-row clock off-screen) only shows in Mr Worldwide, and turns red with a pulse (`.urgent`) at 5 seconds or less remaining.
 
 ### 6.2 Achievements (`ACH`, 27 total)
 
