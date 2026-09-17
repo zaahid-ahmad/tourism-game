@@ -219,6 +219,7 @@ footer{color:var(--amber-ghost);font-size:12px;margin-top:26px;line-height:1.7}
     <div><div class="k">Streak</div><div class="v" id="hudStreak">0</div></div>
     <div><div class="k">Awards</div><div class="v" id="hudAw">0</div></div>
     <div><div class="k">Status</div><div class="v small" id="hudStatus">EXCURSIONIST</div></div>
+    <div id="hudClockTile" style="display:none"><div class="k">Clock</div><div class="v" id="hudClock">15s</div></div>
   </div>
 
   <div class="journey">
@@ -1968,7 +1969,8 @@ var ACH = [
   {id:"hcgrad",   name:"HARDCORE GRADUATE",    d:"Clear all 53 gates in hardcore mode. One life, no mistakes."},
   {id:"flyer",    name:"FREQUENT FLYER",       d:"Start a fifth run."},
   {id:"brochure", name:"READ THE BROCHURE",    d:"Open the help screen."},
-  {id:"mapread",  name:"MAP READER",           d:"Check the map."}
+  {id:"mapread",  name:"MAP READER",           d:"Check the map."},
+  {id:"worldwide",name:"MR WORLDWIDE",         d:"Clear all 53 gates in Mr Worldwide — fifteen seconds a question, gates in random order, one mistake ends it."}
 ];
 
 /* last gate index of each strand, for topic-complete achievements */
@@ -1990,7 +1992,11 @@ function freshRun(keep){
     bestStreak: keep.bestStreak || 0,
     hcBest: keep.hcBest || 0,
     name: keep.name || "",
-    subTs: keep.subTs || 0
+    subTs: keep.subTs || 0,
+    gOrder: keep.gOrder || null,
+    sOrder: keep.sOrder || null,
+    qEnd: keep.qEnd || 0,
+    mwBest: keep.mwBest || 0
   };
 }
 var S = freshRun();
@@ -2013,6 +2019,38 @@ var screenEl = document.getElementById("screen");
 var choicesEl = document.getElementById("choices");
 var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 var typing = null;
+var tNext = null;      // pending setTimeout handle for the next renderStage()/endGame() call
+var mwTick = null;     // Mr Worldwide: the live countdown's setInterval handle
+var mwLocked = false;  // Mr Worldwide: true while a question is on screen — locks info commands
+
+function cancelPending(){
+  if(typing){ clearInterval(typing); typing = null; }
+  if(tNext){ clearTimeout(tNext); tNext = null; }
+  stopMwClock();
+}
+function stopMwClock(){
+  if(mwTick){ clearInterval(mwTick); mwTick = null; }
+}
+function startMwClock(){
+  if(mwTick) clearInterval(mwTick);
+  var el = document.getElementById("hudClock");
+  mwTick = setInterval(function(){
+    var left = Math.ceil((S.qEnd - Date.now()) / 1000);
+    if(el) el.textContent = Math.max(left, 0) + "s";
+    if(left <= 0){ clearInterval(mwTick); mwTick = null; mwTimeout(); }
+  }, 250);
+}
+function mwTimeout(){
+  answer(-1);
+}
+/* Mr Worldwide locks Map/Stats/Help/Mode/Awards/Leaderboard for the whole run,
+   briefly unlocked between questions (answer() clears mwLocked) and fully
+   unlocked by report/new/wipe. */
+function mwGuard(){
+  if(!mwLocked) return false;
+  out("locked while Mr Worldwide is live. Type report, new or wipe to stop.", "sys");
+  return true;
+}
 
 function out(html, cls){
   var d = document.createElement("div");
@@ -2047,9 +2085,24 @@ function shuffle(n){
   return a;
 }
 
+/* Hardcore & Mr Worldwide: gate/stage order indirection.
+   gateAt/realStep translate a presentation position to the real CHAMBERS/steps index;
+   everywhere else, S.ch/S.st keep meaning "presentation position" as they always have. */
+function gateAt(pos){ return CHAMBERS[S.gOrder ? S.gOrder[pos] : pos]; }
+function realStep(c, pos){ return (S.sOrder && S.sOrder[c.id]) ? S.sOrder[c.id][pos] : pos; }
+function isWipeMode(){ return S.mode === "hardcore" || S.mode === "worldwide"; }
+
+/* Precompute a full run's gate/stage order once, never lazily mid-gate
+   (a lazy per-gate reshuffle could silently re-ask an already-answered stage). */
+function reshuffleRun(){
+  S.sOrder = {};
+  CHAMBERS.forEach(function(c){ S.sOrder[c.id] = shuffle(c.steps.length); });
+  S.gOrder = (S.mode === "worldwide") ? shuffle(NCH) : null;
+}
+
 function stagesDone(){
   var t = 0;
-  for(var i=0;i<Math.min(S.ch,NCH);i++) t += CHAMBERS[i].steps.length;
+  for(var i=0;i<Math.min(S.ch,NCH);i++) t += gateAt(i).steps.length;
   return t + (S.ch < NCH ? S.st : 0);
 }
 
@@ -2070,7 +2123,7 @@ function stagesDone(){
 })();
 
 function hud(){
-  var c = CHAMBERS[Math.min(S.ch, NCH-1)];
+  var c = gateAt(Math.min(S.ch, NCH-1));
   document.getElementById("hudCh").textContent = (S.done ? NCH : Math.min(S.ch + 1, NCH)) + "/" + NCH;
   document.getElementById("hudSt").textContent = (S.done ? c.steps.length : S.st + 1) + "/" + c.steps.length;
   document.getElementById("hudDe").textContent = S.deaths.length;
@@ -2079,9 +2132,12 @@ function hud(){
   document.getElementById("runNo").textContent = S.run;
 
   var ml = document.getElementById("modeLbl");
-  ml.textContent = S.mode === "hardcore" ? "HARDCORE" : S.mode === "standard" ? "STANDARD" : "—";
-  ml.className = S.mode === "hardcore" ? "hcl" : "";
-  document.body.classList.toggle("hc", S.mode === "hardcore");
+  ml.textContent = S.mode === "hardcore" ? "HARDCORE" : S.mode === "worldwide" ? "MR WORLDWIDE" : S.mode === "standard" ? "STANDARD" : "—";
+  ml.className = isWipeMode() ? "hcl" : "";
+  document.body.classList.toggle("hc", isWipeMode());
+
+  var clockTile = document.getElementById("hudClockTile");
+  if(clockTile) clockTile.style.display = S.mode === "worldwide" ? "" : "none";
 
   var done = stagesDone();
   var frac = S.done ? 1 : done / NST;
@@ -2101,7 +2157,7 @@ function hud(){
    ACHIEVEMENT ENGINE
    ============================================================ */
 function unlock(id){
-  if(S.ach[id] || S.warped) return;
+  if(S.ach[id] || S.warped || (S.mode === "worldwide" && id !== "worldwide")) return;
   var a = ACH.find(function(x){ return x.id === id; });
   if(!a) return;
   S.ach[id] = Date.now();
@@ -2139,6 +2195,7 @@ function checkAfterGate(c, idx){
   if(S.ch >= NCH){
     unlock("guide");
     if(S.mode === "hardcore") unlock("hcgrad");
+    if(S.mode === "worldwide") unlock("worldwide");
   }
 }
 
@@ -2155,16 +2212,20 @@ function boot(){
 }
 
 function renderModePick(){
+  cancelPending(); mwLocked = false;
   hud();
   out("", "rule");
   out("CHOOSE YOUR TRAVEL MODE", "loc");
   out("Standard — a wrong answer strands you, and you retry the stage that got you. Your progress is kept.", "modeinfo");
-  out("Hardcore — <em>one wrong answer wipes the whole run.</em> Back to Gate 01, every time. Some achievements can only be earned here.", "modeinfo");
+  out("Hardcore — <em>one wrong answer wipes the whole run.</em> Back to Gate 01, every time. Gate order is fixed, but the 5 stages inside each gate are re-shuffled every time you restart. Some achievements can only be earned here.", "modeinfo");
+  out("Mr Worldwide — <em>hardcore rules, fifteen seconds a question, gates in random order.</em> Map, Stats, Help and the Leaderboard are locked while a run is live. Only one achievement can be earned here.", "modeinfo");
   out("Pick one to begin run " + S.run + ". You can switch later with New run.", "sys");
   choicesEl.innerHTML = "";
-  [["standard","Standard — retry the stage after a death"],["hardcore","Hardcore — one death wipes all progress"]].forEach(function(m, i){
+  [["standard","Standard — retry the stage after a death"],
+   ["hardcore","Hardcore — one death wipes all progress"],
+   ["worldwide","Mr Worldwide — 15s a question, one death wipes all progress, gates in random order"]].forEach(function(m, i){
     var b = document.createElement("button");
-    b.type = "button"; b.className = "ch" + (m[0] === "hardcore" ? " danger" : "");
+    b.type = "button"; b.className = "ch" + (m[0] !== "standard" ? " danger" : "");
     b.dataset.idx = "mode";
     b.innerHTML = '<span class="n">[' + (i+1) + ']</span><span>' + m[1] + '</span>';
     b.addEventListener("click", function(){ chooseMode(m[0]); });
@@ -2174,26 +2235,32 @@ function renderModePick(){
 
 function chooseMode(m){
   S.mode = m;
+  if(isWipeMode()) reshuffleRun();
   save(); hud();
   out(m === "hardcore"
     ? "HARDCORE selected. One life. Choose every answer carefully."
-    : "STANDARD selected. Deaths send you back to the start of the stage, not the start of the journey.", m === "hardcore" ? "deadwhy" : "gain");
+    : m === "worldwide"
+      ? "MR WORLDWIDE selected. One life, fifteen seconds a question, gates in random order. Good luck."
+      : "STANDARD selected. Deaths send you back to the start of the stage, not the start of the journey.", isWipeMode() ? "deadwhy" : "gain");
   renderStage();
 }
 
 function renderStage(){
+  cancelPending();
   if(!S.mode){ renderModePick(); return; }
   if(S.ch >= NCH){ endGame(); return; }
-  var c = CHAMBERS[S.ch];
-  var s = c.steps[S.st];
+  mwLocked = (S.mode === "worldwide");
+  var c = gateAt(S.ch);
+  var s = c.steps[realStep(c, S.st)];
   hud();
 
   while(screenEl.children.length > 110){ screenEl.removeChild(screenEl.firstChild); }
 
   out("", "rule");
+  var modeTag = S.mode === "hardcore" ? " · hardcore" : S.mode === "worldwide" ? " · mr worldwide" : "";
   if(S.st === 0){
     out('GATE <span class="no">' + pad(c.id) + ' /' + NCH + '</span> — ' + c.name, "loc");
-    out(STRAND[c.strand].name + (S.mode === "hardcore" ? " · hardcore" : ""), "tag");
+    out(STRAND[c.strand].name + modeTag, "tag");
     out(c.intro, "narr");
   } else {
     out('GATE <span class="no">' + pad(c.id) + '</span> — ' + c.name + ' <span class="no">· stage ' + (S.st+1) + '/' + c.steps.length + '</span>', "tag");
@@ -2214,13 +2281,20 @@ function renderStage(){
     choicesEl.appendChild(b);
   });
   choicesEl.scrollIntoView({block:"end", behavior: reduced ? "auto" : "smooth"});
+
+  if(S.mode === "worldwide" && !S.done){
+    if(!S.qEnd || S.qEnd < Date.now() - 60000) S.qEnd = Date.now() + 15000;
+    save();
+    startMwClock();
+  }
 }
 
 function answer(i){
-  var c = CHAMBERS[S.ch];
-  var s = c.steps[S.st];
+  cancelPending(); mwLocked = false;
+  var c = gateAt(S.ch);
+  var s = c.steps[realStep(c, S.st)];
   var correct = s.c || 0;
-  var key = c.id + "." + S.st;
+  var key = c.id + "." + realStep(c, S.st);
   var btns = choicesEl.querySelectorAll(".ch");
   btns.forEach(function(b){
     var bi = Number(b.dataset.idx);
@@ -2236,44 +2310,54 @@ function answer(i){
     if(!S.warped) S.bestStreak = Math.max(S.bestStreak || 0, S.streak);
     out(s.g, "gain");
     S.st++;
+    S.qEnd = 0; /* next renderStage() is a genuinely new question — force a fresh 15s deadline */
     checkAfterCorrect();
     if(S.st >= c.steps.length){
       var idx = S.ch;
       S.ch++; S.st = 0;
       if(S.ch >= NCH){
         S.done = true;
+        if(S.mode === "worldwide" && !S.warped) S.mwBest = Math.max(S.mwBest || 0, S.streak);
         save(); hud();
         out("", "rule");
-        out("GATE CLEARED. All " + NCH + " gates complete. Passport stamped" + (S.mode === "hardcore" ? " — in hardcore." : "."), "gain");
+        out("GATE CLEARED. All " + NCH + " gates complete. Passport stamped" + (S.mode === "hardcore" ? " — in hardcore." : S.mode === "worldwide" ? " — as Mr Worldwide." : "."), "gain");
         checkAfterGate(c, idx);
         save(); hud();
-        setTimeout(endGame, 700);
+        tNext = setTimeout(endGame, 700);
         return;
       }
       out("GATE CLEARED — " + c.name + ". Passport stamped. Boarding the next gate.", "gain");
       checkAfterGate(c, idx);
     }
     save(); hud();
-    setTimeout(function(){ renderStage(); }, reduced ? 0 : 420);
+    tNext = setTimeout(function(){ renderStage(); }, reduced ? 0 : 420);
   } else {
+    var streakAtDeath = S.streak;
     S.seen[key] = true;
     delete S.clean[key];
     S.streak = 0;
     S.justDied = true;
-    S.deaths.push({ch:c.id, chName:c.name, strand:c.strand, st:S.st, q:s.q, given:i, correct:correct, opts:s.o, why:s.w, t:Date.now(), mode:S.mode, run:S.run});
+    S.deaths.push({ch:c.id, chName:c.name, strand:c.strand, st: realStep(c, S.st), pos: S.st, q:s.q, given:i, correct:correct, opts:s.o, why:s.w, t:Date.now(), mode:S.mode, run:S.run});
     unlock("stranded");
 
     var b = document.createElement("button");
     b.type = "button"; b.className = "ch";
 
-    if(S.mode === "hardcore"){
+    if(isWipeMode()){
       var cleared = S.ch;
-      if(!S.warped) S.hcBest = Math.max(S.hcBest || 0, cleared);
-      out("*** PASSPORT REVOKED ***", "dead");
+      if(S.mode === "hardcore" && !S.warped) S.hcBest = Math.max(S.hcBest || 0, cleared);
+      if(S.mode === "worldwide" && !S.warped) S.mwBest = Math.max(S.mwBest || 0, streakAtDeath);
+      var timedOut = (i === -1);
+      out(S.mode === "worldwide"
+        ? (timedOut ? "*** PASSPORT REVOKED — TIME'S UP ***" : "*** PASSPORT REVOKED — WRONG ANSWER ***")
+        : "*** PASSPORT REVOKED ***", "dead");
       out(s.w, "deadwhy");
-      out("Hardcore rule: one death wipes the run. You fell at gate " + c.id + ", stage " + (S.st+1) + " with " + cleared + " gate" + (cleared===1?"":"s") + " cleared. Best hardcore run: " + S.hcBest + " gates.", "sys");
-      out("All progress wiped. Run " + (S.run + 1) + " starts at Gate 01.", "sys");
-      S.ch = 0; S.st = 0; S.seen = {}; S.clean = {}; S.done = false;
+      var ruleLine = S.mode === "worldwide" ? "One mistake or a missed clock wipes the run." : "Hardcore rule: one death wipes the run.";
+      var bestLine = S.mode === "worldwide" ? " Best Mr Worldwide streak: " + S.mwBest + "." : " Best hardcore run: " + S.hcBest + " gates.";
+      out(ruleLine + " You fell at gate " + c.id + ", stage " + (S.st+1) + " with " + cleared + " gate" + (cleared===1?"":"s") + " cleared." + bestLine, "sys");
+      out("All progress wiped. Run " + (S.run + 1) + " starts at Gate 01" + (S.mode === "worldwide" ? ", gates reshuffled." : ".") , "sys");
+      S.ch = 0; S.st = 0; S.seen = {}; S.clean = {}; S.done = false; S.qEnd = 0;
+      reshuffleRun();
       S.run++;
       if(S.run >= 5) unlock("flyer");
       save(); hud();
@@ -2295,6 +2379,8 @@ function answer(i){
    COMMANDS
    ============================================================ */
 function cmdHelp(){
+  if(mwGuard()) return;
+  cancelPending();
   clear();
   out("", "rule");
   out("COMMANDS", "tag");
@@ -2303,6 +2389,8 @@ function cmdHelp(){
   unlock("brochure");
 }
 function cmdMap(){
+  if(mwGuard()) return;
+  cancelPending();
   clear();
   out("", "rule");
   out("MAP", "tag");
@@ -2319,6 +2407,8 @@ function cmdMap(){
   unlock("mapread");
 }
 function cmdStats(){
+  if(mwGuard()) return;
+  cancelPending();
   clear();
   out("", "rule");
   out("RUN STATS", "tag");
@@ -2326,10 +2416,12 @@ function cmdStats(){
   var clean = Object.keys(S.clean).length;
   var acc = attempted ? Math.round(clean / attempted * 100) : 0;
   var pct = Math.floor((S.done ? 1 : stagesDone() / NST) * 100);
-  out("mode                " + (S.mode || "not chosen") + "\njourney             " + pct + "%  (" + stagesDone() + " of " + NST + " stages)\nstages reached      " + attempted + "\nfirst-time correct  " + clean + "  (" + acc + "%)\ndeaths              " + S.deaths.length + "\ngates cleared       " + Math.min(S.ch,NCH) + " of " + NCH + "\ncurrent streak      " + S.streak + "\nbest streak         " + (S.bestStreak||0) + "\nbest hardcore run   " + (S.hcBest||0) + " gates\nachievements        " + Object.keys(S.ach).length + " of " + ACH.length, "sys");
+  out("mode                " + (S.mode || "not chosen") + "\njourney             " + pct + "%  (" + stagesDone() + " of " + NST + " stages)\nstages reached      " + attempted + "\nfirst-time correct  " + clean + "  (" + acc + "%)\ndeaths              " + S.deaths.length + "\ngates cleared       " + Math.min(S.ch,NCH) + " of " + NCH + "\ncurrent streak      " + S.streak + "\nbest streak         " + (S.bestStreak||0) + "\nbest hardcore run   " + (S.hcBest||0) + " gates\nbest mr worldwide   " + (S.mwBest||0) + " correct\nachievements        " + Object.keys(S.ach).length + " of " + ACH.length, "sys");
   out("Click Back to question (or type look / r) to return.", "sys");
 }
 function cmdAwards(){
+  if(mwGuard()) return;
+  cancelPending();
   clear();
   out("", "rule");
   out("ACHIEVEMENTS — " + Object.keys(S.ach).length + " / " + ACH.length, "tag");
@@ -2339,14 +2431,18 @@ function cmdAwards(){
   out("Click Back to question (or type look / r) to return.", "sys");
 }
 function cmdMode(){
+  if(mwGuard()) return;
+  cancelPending();
   clear();
   out("", "rule");
   out("MODE", "tag");
   out(S.mode === "hardcore"
-    ? "You are in HARDCORE. One death wipes the run. Use New run to switch to standard."
-    : S.mode === "standard"
-      ? "You are in STANDARD. Deaths send you back to the stage. Use New run to switch to hardcore."
-      : "No mode chosen yet.", "sys");
+    ? "You are in HARDCORE. One death wipes the run. Use New run to switch mode."
+    : S.mode === "worldwide"
+      ? "You are in MR WORLDWIDE. Fifteen seconds a question, one death wipes the run. Use New run to switch mode."
+      : S.mode === "standard"
+        ? "You are in STANDARD. Deaths send you back to the stage. Use New run to switch mode."
+        : "No mode chosen yet.", "sys");
   out("Click Back to question (or type look / r) to return.", "sys");
 }
 /* teacher tool, not listed in help: "warp 37" or "warp 37.3" jumps to a gate/stage.
@@ -2358,6 +2454,7 @@ function cmdWarp(arg){
     out("usage: warp [gate 1-" + NCH + "] or warp [gate].[stage]   e.g. warp 37 or warp 37.3", "sys");
     return;
   }
+  S.gOrder = null; S.sOrder = null; /* warp targets the real gate/stage typed, never the shuffled position */
   S.ch = +m[1] - 1; S.st = m[2] ? +m[2] - 1 : 0; S.done = false; S.streak = 0;
   if(!S.warped){
     S.warped = true;
@@ -2423,7 +2520,8 @@ function trySubmit(attempted, clean, acc){
   api("POST", {
     name: S.name, attempted: attempted, clean: clean,
     deaths: S.deaths.length, gates: Math.min(S.ch, NCH),
-    bestStreak: S.bestStreak||0, mode: S.mode, done: !!S.done
+    bestStreak: S.bestStreak||0, hcGates: S.hcBest||0, mwCorrect: S.mwBest||0,
+    mode: S.mode, done: !!S.done
   }, function(d){
     if(d && d.ok){ S.subTs = Date.now(); save(); lbSay("Added to the shared leaderboard as " + esc(S.name) + "."); }
     else{ lbSay("leaderboard unavailable right now — your run is unaffected."); }
@@ -2431,6 +2529,8 @@ function trySubmit(attempted, clean, acc){
 }
 
 function cmdBoard(){
+  if(mwGuard()) return;
+  cancelPending();
   clear();
   out("", "rule");
   out("LEADERBOARD", "tag");
@@ -2442,17 +2542,41 @@ function cmdBoard(){
       out("Click Back to question (or type look / r) to return.", "sys");
       return;
     }
+    var mine = function(r){ return S.name && r.name.toLowerCase() === S.name.toLowerCase(); };
+
+    out("[ ACCURACY ]", "tag");
     if(!d.top.length){
       out("No one has qualified yet — reach " + d.floor + " stages and finish a run to be ranked.", "sys");
     }else{
       var head = "   #  " + "NAME".padEnd(18) + "FIRST-TIME   GATES";
       var lines = d.top.map(function(r, i){
-        var mine = S.name && r.name.toLowerCase() === S.name.toLowerCase();
-        return (mine ? "▶ " : "  ") + pad(i+1) + "  " + esc(r.name.padEnd(18)) + String(r.acc).padStart(3) + "%  " + String(r.attempted).padStart(3) + "      " + String(r.gates).padStart(2);
+        return (mine(r) ? "▶ " : "  ") + pad(i+1) + "  " + esc(r.name.padEnd(18)) + String(r.acc).padStart(3) + "%  " + String(r.attempted).padStart(3) + "      " + String(r.gates).padStart(2);
       });
       out([head].concat(lines).join("\n"), "sys");
     }
-    if(d.pending) out("\n" + d.pending + " more run" + (d.pending===1?"":"s") + " below the " + d.floor + "-stage floor, not yet ranked.", "sys");
+    if(d.pending) out(d.pending + " more run" + (d.pending===1?"":"s") + " below the " + d.floor + "-stage floor, not yet ranked.", "sys");
+
+    out("", "rule");
+    out("[ HARDCORE — furthest ]", "tag");
+    if(!d.hc || !d.hc.length){
+      out("No one yet.", "sys");
+    }else{
+      out(d.hc.map(function(r, i){
+        return (mine(r) ? "▶ " : "  ") + pad(i+1) + "  " + esc(r.name.padEnd(18)) + String(r.hcGates).padStart(2) + " gates";
+      }).join("\n"), "sys");
+    }
+
+    out("", "rule");
+    out("[ MR WORLDWIDE — correct ]", "tag");
+    if(!d.mw || !d.mw.length){
+      out("No one yet.", "sys");
+    }else{
+      out(d.mw.map(function(r, i){
+        return (mine(r) ? "▶ " : "  ") + pad(i+1) + "  " + esc(r.name.padEnd(18)) + String(r.mwCorrect).padStart(3);
+      }).join("\n"), "sys");
+    }
+
+    out("", "rule");
     out("Click Back to question (or type look / r) to return.", "sys");
   });
 }
@@ -2515,7 +2639,8 @@ document.getElementById("newBtn").addEventListener("click", newRun);
 document.getElementById("resetBtn").addEventListener("click", askWipe);
 
 function newRun(){
-  S = freshRun({run:(S.run||1)+1, ach:S.ach, flawless:S.flawless, bestStreak:S.bestStreak, hcBest:S.hcBest, name:S.name, subTs:S.subTs});
+  cancelPending(); mwLocked = false;
+  S = freshRun({run:(S.run||1)+1, ach:S.ach, flawless:S.flawless, bestStreak:S.bestStreak, hcBest:S.hcBest, mwBest:S.mwBest, name:S.name, subTs:S.subTs});
   save();
   document.getElementById("reportArea").innerHTML = "";
   boot();
@@ -2525,6 +2650,7 @@ function newRun(){
 /* two-step confirm, no browser dialogs */
 var wipeArmed = null;
 function askWipe(){
+  cancelPending(); mwLocked = false;
   var btn = document.getElementById("resetBtn");
   if(wipeArmed){
     clearTimeout(wipeArmed); wipeArmed = null;
@@ -2546,6 +2672,7 @@ function askWipe(){
    DEBRIEF
    ============================================================ */
 function endGame(){
+  cancelPending(); mwLocked = false;
   clear();
   S.done = S.ch >= NCH;
   save(); hud();
@@ -2591,12 +2718,12 @@ function endGame(){
       + '<div class="fig">' + x.b.clean + '/' + x.b.reached + ' clean · ' + x.b.deaths + ' death' + (x.b.deaths===1?"":"s") + ' · ' + p + '%</div>'
       + '<div class="meter"><i class="ok" style="width:' + p + '%"></i><i class="no" style="width:' + (100-p) + '%"></i></div></div>';
   }).join("");
-  if(!strandHtml) strandHtml = '<p class="note">' + (S.mode === "hardcore" && S.deaths.length ? "This hardcore run was wiped, so there are no answers on the current run yet. Deaths from earlier runs are listed below." : "No stages answered yet.") + '</p>';
+  if(!strandHtml) strandHtml = '<p class="note">' + (isWipeMode() && S.deaths.length ? "This run was wiped, so there are no answers on the current run yet. Deaths from earlier runs are listed below." : "No stages answered yet.") + '</p>';
 
   var deathHtml = S.deaths.length ? S.deaths.map(function(d, i){
     return '<div class="dl"><div class="meta">death ' + (i+1) + (d.run ? ' · run ' + d.run : '') + ' · gate ' + d.ch + ' ' + d.chName + ' · ' + (STRAND[d.strand] ? STRAND[d.strand].short : "") + '</div>'
       + '<div class="q">' + d.q + '</div>'
-      + '<div class="a">You chose: ' + d.opts[d.given] + '<br>Correct: <b>' + d.opts[d.correct] + '</b><br>' + d.why + '</div></div>';
+      + '<div class="a">You chose: ' + (d.given === -1 ? "(ran out of time)" : d.opts[d.given]) + '<br>Correct: <b>' + d.opts[d.correct] + '</b><br>' + d.why + '</div></div>';
   }).join("") : '<p class="note">No deaths recorded. Either you know this cold, or the run has only just started.</p>';
 
   var todo = [];
@@ -2609,8 +2736,8 @@ function endGame(){
     return '<div class="aw' + (S.ach[a.id] ? ' on' : '') + '"><div class="t">' + a.name + '</div><div class="d">' + a.d + '</div></div>';
   }).join("");
 
-  var modeWord = S.mode === "hardcore" ? "hardcore" : "standard";
-  var head = S.done ? (S.mode === "hardcore" ? "HARDCORE TOUR GUIDE" : "QUALIFIED TOUR GUIDE") : "RUN ENDED EARLY";
+  var modeWord = S.mode === "hardcore" ? "hardcore" : S.mode === "worldwide" ? "mr worldwide" : "standard";
+  var head = S.done ? (S.mode === "hardcore" ? "HARDCORE TOUR GUIDE" : S.mode === "worldwide" ? "MR WORLDWIDE TOUR GUIDE" : "QUALIFIED TOUR GUIDE") : "RUN ENDED EARLY";
   var sub = S.done
     ? "All " + NCH + " gates cleared in " + modeWord + " mode. Every topic, stamped in your passport."
     : "You stopped at gate " + Math.min(S.ch+1,NCH) + " of " + NCH + " (" + pct + "% of the journey) in " + modeWord + " mode. Progress is saved; you can pick the run back up at any time.";
@@ -2628,6 +2755,7 @@ function endGame(){
       + '<div class="strand"><div class="nm">Gates cleared</div><div class="fig">' + Math.min(S.ch,NCH) + ' / ' + NCH + '</div></div>'
       + '<div class="strand"><div class="nm">Best streak</div><div class="fig">' + (S.bestStreak||0) + '</div></div>'
       + '<div class="strand"><div class="nm">Best hardcore run</div><div class="fig">' + (S.hcBest||0) + ' gates</div></div>'
+      + '<div class="strand"><div class="nm">Best Mr Worldwide streak</div><div class="fig">' + (S.mwBest||0) + ' correct</div></div>'
     + '</div></div>'
     + '<div class="rsec"><h3>ACHIEVEMENTS — ' + Object.keys(S.ach).length + ' / ' + ACH.length + '</h3><div class="awards">' + awardsHtml + '</div></div>'
     + '<div class="rsec"><h3>STRENGTHS AND WEAKNESSES BY TOPIC</h3><div class="strands">' + strandHtml + '</div>'

@@ -20,7 +20,7 @@ function slug(n) {
 }
 
 function rank(a, b) {
-  return (b.acc - a.acc) || (b.attempted - a.attempted) || (a.deaths - b.deaths) || (a.ts - b.ts);
+  return (b.acc - a.acc) || (b.attempted - a.attempted) || (a.deaths - b.deaths) || (a.accTs - b.accTs);
 }
 
 export default async (req) => {
@@ -36,7 +36,9 @@ export default async (req) => {
       ok: true,
       floor: FLOOR,
       top: rows.filter((r) => r.attempted >= FLOOR).sort(rank).slice(0, 20),
-      pending: rows.filter((r) => r.attempted < FLOOR).length
+      pending: rows.filter((r) => r.attempted < FLOOR).length,
+      hc: rows.filter((r) => r.hcGates > 0).sort((a, b) => b.hcGates - a.hcGates || a.hcTs - b.hcTs).slice(0, 20),
+      mw: rows.filter((r) => r.mwCorrect > 0).sort((a, b) => b.mwCorrect - a.mwCorrect || a.mwTs - b.mwTs).slice(0, 20)
     });
   }
 
@@ -50,24 +52,39 @@ export default async (req) => {
     return Number.isInteger(b[k]) && b[k] >= 0 ? b[k] : -1;
   };
   const at = num("attempted"), cl = num("clean"), de = num("deaths"),
-        ga = num("gates"), bs = num("bestStreak");
+        ga = num("gates"), bs = num("bestStreak"),
+        hc = num("hcGates"), mw = num("mwCorrect");
 
   /* structural impossibility only — deliberately NOT answer validation, honour system */
   if (!name || at < 1 || cl < 0 || de < 0 || ga < 0 ||
       at > TOTAL || cl > at || ga > GATES || at < ga * 5 || bs > at ||
-      (b.mode !== "standard" && b.mode !== "hardcore")) {
+      hc > GATES || mw > TOTAL ||
+      (b.mode !== "standard" && b.mode !== "hardcore" && b.mode !== "worldwide")) {
     return json({ ok: false, err: "rejected" }, 400);
   }
 
+  const key = slug(name);
+  const old = await store.get(key, { type: "json" }).catch(() => null) || {};
+
+  const acc = Math.round((cl / at) * 100);
+  const accBetter = !(old.acc > 0) || acc > old.acc || (acc === old.acc && at > (old.attempted || 0));
+
   const entry = {
-    name: name, attempted: at, clean: cl, deaths: de, gates: ga, bestStreak: bs,
-    mode: b.mode, done: !!b.done, acc: Math.round((cl / at) * 100), ts: Date.now()
+    name: name,
+    attempted: accBetter ? at : old.attempted,
+    clean: accBetter ? cl : old.clean,
+    deaths: accBetter ? de : old.deaths,
+    gates: accBetter ? ga : old.gates,
+    bestStreak: accBetter ? bs : old.bestStreak,
+    mode: b.mode, done: accBetter ? !!b.done : !!old.done,
+    acc: accBetter ? acc : old.acc,
+    accTs: accBetter ? Date.now() : (old.accTs || old.ts || Date.now()),
+    hcGates: Math.max(old.hcGates || 0, hc),
+    hcTs: hc > (old.hcGates || 0) ? Date.now() : (old.hcTs || Date.now()),
+    mwCorrect: Math.max(old.mwCorrect || 0, mw),
+    mwTs: mw > (old.mwCorrect || 0) ? Date.now() : (old.mwTs || Date.now())
   };
 
-  const key = slug(name);
-  const old = await store.get(key, { type: "json" }).catch(() => null);
-  if (!old || entry.acc > old.acc || (entry.acc === old.acc && entry.attempted > old.attempted)) {
-    await store.setJSON(key, entry);
-  }
+  await store.setJSON(key, entry);
   return json({ ok: true });
 };
