@@ -1990,8 +1990,7 @@ function freshRun(keep){
     bestStreak: keep.bestStreak || 0,
     hcBest: keep.hcBest || 0,
     name: keep.name || "",
-    subTs: keep.subTs || 0,
-    subAcc: keep.subAcc || 0
+    subTs: keep.subTs || 0
   };
 }
 var S = freshRun();
@@ -2421,13 +2420,12 @@ function trySubmit(attempted, clean, acc){
     }
     return;
   }
-  if(acc <= (S.subAcc||0)) return;
   api("POST", {
     name: S.name, attempted: attempted, clean: clean,
     deaths: S.deaths.length, gates: Math.min(S.ch, NCH),
     bestStreak: S.bestStreak||0, mode: S.mode, done: !!S.done
   }, function(d){
-    if(d && d.ok){ S.subTs = Date.now(); S.subAcc = acc; save(); lbSay("Added to the shared leaderboard as " + esc(S.name) + "."); }
+    if(d && d.ok){ S.subTs = Date.now(); save(); lbSay("Added to the shared leaderboard as " + esc(S.name) + "."); }
     else{ lbSay("leaderboard unavailable right now — your run is unaffected."); }
   });
 }
@@ -2517,7 +2515,7 @@ document.getElementById("newBtn").addEventListener("click", newRun);
 document.getElementById("resetBtn").addEventListener("click", askWipe);
 
 function newRun(){
-  S = freshRun({run:(S.run||1)+1, ach:S.ach, flawless:S.flawless, bestStreak:S.bestStreak, hcBest:S.hcBest, name:S.name, subTs:S.subTs, subAcc:S.subAcc});
+  S = freshRun({run:(S.run||1)+1, ach:S.ach, flawless:S.flawless, bestStreak:S.bestStreak, hcBest:S.hcBest, name:S.name, subTs:S.subTs});
   save();
   document.getElementById("reportArea").innerHTML = "";
   boot();
