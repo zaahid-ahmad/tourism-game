@@ -2523,7 +2523,13 @@ function trySubmit(attempted, clean, acc){
     bestStreak: S.bestStreak||0, hcGates: S.hcBest||0, mwCorrect: S.mwBest||0,
     mode: S.mode, done: !!S.done
   }, function(d){
-    if(d && d.ok){ S.subTs = Date.now(); save(); lbSay("Added to the shared leaderboard as " + esc(S.name) + "."); }
+    if(d && d.ok){
+      S.subTs = Date.now(); save();
+      var imp = d.improved || {};
+      lbSay((imp.acc || imp.hc || imp.mw)
+        ? "Added to the shared leaderboard as " + esc(S.name) + "."
+        : "Run recorded, but it didn't beat your best on the leaderboard yet.");
+    }
     else{ lbSay("leaderboard unavailable right now — your run is unaffected."); }
   });
 }

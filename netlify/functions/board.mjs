@@ -67,7 +67,19 @@ export default async (req) => {
   const old = await store.get(key, { type: "json" }).catch(() => null) || {};
 
   const acc = Math.round((cl / at) * 100);
-  const accBetter = !(old.acc > 0) || acc > old.acc || (acc === old.acc && at > (old.attempted || 0));
+  /* Reaching the ranking floor for the first time always counts as an improvement, regardless of
+     accuracy — otherwise an early short/high-accuracy run permanently blocks every later, more
+     substantial run from ever being stored (and therefore ever being ranked), since it would
+     always compare "worse" on accuracy alone. Once both sides are on the same side of the floor,
+     fall back to the existing best-accuracy (tie-broken by more attempted) comparison. */
+  const oldQualifies = (old.attempted || 0) >= FLOOR;
+  const newQualifies = at >= FLOOR;
+  const accBetter =
+    (newQualifies && !oldQualifies) ||
+    (newQualifies === oldQualifies &&
+      (!(old.acc > 0) || acc > old.acc || (acc === old.acc && at > (old.attempted || 0))));
+  const hcBetter = hc > (old.hcGates || 0);
+  const mwBetter = mw > (old.mwCorrect || 0);
 
   const entry = {
     name: name,
@@ -79,12 +91,12 @@ export default async (req) => {
     mode: b.mode, done: accBetter ? !!b.done : !!old.done,
     acc: accBetter ? acc : old.acc,
     accTs: accBetter ? Date.now() : (old.accTs || old.ts || Date.now()),
-    hcGates: Math.max(old.hcGates || 0, hc),
-    hcTs: hc > (old.hcGates || 0) ? Date.now() : (old.hcTs || Date.now()),
-    mwCorrect: Math.max(old.mwCorrect || 0, mw),
-    mwTs: mw > (old.mwCorrect || 0) ? Date.now() : (old.mwTs || Date.now())
+    hcGates: hcBetter ? hc : (old.hcGates || 0),
+    hcTs: hcBetter ? Date.now() : (old.hcTs || Date.now()),
+    mwCorrect: mwBetter ? mw : (old.mwCorrect || 0),
+    mwTs: mwBetter ? Date.now() : (old.mwTs || Date.now())
   };
 
   await store.setJSON(key, entry);
-  return json({ ok: true });
+  return json({ ok: true, improved: { acc: accBetter, hc: hcBetter, mw: mwBetter } });
 };
