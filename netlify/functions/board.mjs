@@ -101,7 +101,11 @@ export default async (req) => {
     hcGates: hcBetter ? hc : (old.hcGates || 0),
     hcTs: hcBetter ? Date.now() : (old.hcTs || Date.now()),
     mwCorrect: mwBetter ? mw : (old.mwCorrect || 0),
-    mwTs: mwBetter ? Date.now() : (old.mwTs || Date.now())
+    mwTs: mwBetter ? Date.now() : (old.mwTs || Date.now()),
+    /* sticky: once a player has ever used the "overtime" cheat, every stored figure for them may
+       have been set under it, so the tag never clears — not even if a later honest submission
+       improves a field. */
+    cheats: !!b.cheats || !!old.cheats
   };
 
   await store.setJSON(key, entry);

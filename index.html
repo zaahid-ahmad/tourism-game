@@ -2010,7 +2010,9 @@ function freshRun(keep){
     gOrder: keep.gOrder || null,
     sOrder: keep.sOrder || null,
     qEnd: keep.qEnd || 0,
-    mwBest: keep.mwBest || 0
+    mwBest: keep.mwBest || 0,
+    cheats: false,                 /* hidden "overtime" cheat: on for this run only, suppresses achievements */
+    cheated: keep.cheated || false /* lifetime: this player has ever used overtime — tags leaderboard submissions */
   };
 }
 var S = freshRun();
@@ -2045,6 +2047,7 @@ function cancelPending(){
 function stopMwClock(){
   if(mwTick){ clearInterval(mwTick); mwTick = null; }
 }
+function mwWindow(){ return S.cheats ? 30000 : 15000; } /* hidden "overtime" cheat doubles the clock */
 function startMwClock(){
   if(mwTick) clearInterval(mwTick);
   var el = document.getElementById("mwClock");
@@ -2176,7 +2179,7 @@ function hud(){
    ACHIEVEMENT ENGINE
    ============================================================ */
 function unlock(id){
-  if(S.ach[id] || S.warped || (S.mode === "worldwide" && id !== "worldwide")) return;
+  if(S.ach[id] || S.warped || S.cheats || (S.mode === "worldwide" && id !== "worldwide")) return;
   var a = ACH.find(function(x){ return x.id === id; });
   if(!a) return;
   S.ach[id] = Date.now();
@@ -2197,7 +2200,7 @@ function checkAfterCorrect(){
 }
 
 function checkAfterGate(c, idx){
-  if(S.warped) return;
+  if(S.warped || S.cheats) return;
   unlock("stamp");
   var flawless = c.steps.every(function(_, si){ return S.clean[c.id + "." + si]; });
   if(flawless){
@@ -2302,7 +2305,7 @@ function renderStage(){
   choicesEl.scrollIntoView({block:"end", behavior: reduced ? "auto" : "smooth"});
 
   if(S.mode === "worldwide" && !S.done){
-    if(!S.qEnd || S.qEnd < Date.now() - 60000) S.qEnd = Date.now() + 15000;
+    if(!S.qEnd || S.qEnd < Date.now() - 60000) S.qEnd = Date.now() + mwWindow();
     save();
     startMwClock();
   }
@@ -2435,7 +2438,7 @@ function cmdStats(){
   var clean = Object.keys(S.clean).length;
   var acc = attempted ? Math.round(clean / attempted * 100) : 0;
   var pct = Math.floor((S.done ? 1 : stagesDone() / NST) * 100);
-  out("mode                " + (S.mode || "not chosen") + "\njourney             " + pct + "%  (" + stagesDone() + " of " + NST + " stages)\nstages reached      " + attempted + "\nfirst-time correct  " + clean + "  (" + acc + "%)\ndeaths              " + S.deaths.length + "\ngates cleared       " + Math.min(S.ch,NCH) + " of " + NCH + "\ncurrent streak      " + S.streak + "\nbest streak         " + (S.bestStreak||0) + "\nbest hardcore run   " + (S.hcBest||0) + " gates\nbest mr worldwide   " + (S.mwBest||0) + " correct\nachievements        " + Object.keys(S.ach).length + " of " + ACH.length, "sys");
+  out("mode                " + (S.mode || "not chosen") + "\njourney             " + pct + "%  (" + stagesDone() + " of " + NST + " stages)\nstages reached      " + attempted + "\nfirst-time correct  " + clean + "  (" + acc + "%)\ndeaths              " + S.deaths.length + "\ngates cleared       " + Math.min(S.ch,NCH) + " of " + NCH + "\ncurrent streak      " + S.streak + "\nbest streak         " + (S.bestStreak||0) + "\nbest hardcore run   " + (S.hcBest||0) + " gates\nbest mr worldwide   " + (S.mwBest||0) + " correct\nachievements        " + Object.keys(S.ach).length + " of " + ACH.length + (S.cheats ? "\ncheats              on" : ""), "sys");
   out("Click Back to question (or type look / r) to return.", "sys");
 }
 function cmdAwards(){
@@ -2481,6 +2484,20 @@ function cmdWarp(arg){
   }
   save();
   renderStage();
+}
+/* hidden cheat code, not listed in help: "overtime" doubles the Mr Worldwide clock to 30s.
+   Never mwGuard()-locked, so it can be typed while a question is live. A cheated run earns no
+   achievements for the rest of it; the run's Mr Worldwide/hardcore bests still update, and every
+   future leaderboard submission from this save is tagged "(cheats used)" — the tag never clears. */
+function cmdOvertime(){
+  if(S.cheats){ out("overtime is already on for this run.", "sys"); return; }
+  S.cheats = true; S.cheated = true;
+  if(S.mode === "worldwide" && S.qEnd > Date.now()){
+    S.qEnd += 15000;
+    startMwClock();
+  }
+  save();
+  out("OVERTIME ENABLED — 30 seconds a question. Achievements are off for this run, and the leaderboard will show \"(cheats used)\" against your name.", "deadwhy");
 }
 
 /* ============================================================
@@ -2542,6 +2559,7 @@ function trySubmit(attempted, clean, acc){
     name: S.name, attempted: attempted, clean: clean,
     deaths: S.deaths.length, gates: Math.min(S.ch, NCH),
     bestStreak: S.bestStreak||0, hcGates: S.hcBest||0, mwCorrect: S.mwBest||0,
+    cheats: !!(S.cheats || S.cheated),
     mode: S.mode, done: !!S.done
   }, function(d){
     if(d && d.ok){
@@ -2570,14 +2588,22 @@ function cmdBoard(){
       return;
     }
     var mine = function(r){ return S.name && r.name.toLowerCase() === S.name.toLowerCase(); };
+    /* name column: widened only for boards with a cheater, so a class with none sees the old
+       18-char layout unchanged. "(cheats used)" is appended to the name BEFORE padding, then the
+       whole cell is esc()'d — never the other way round (§6.6/§8: remote values are always escaped). */
+    var nameW = function(rows){ return rows.some(function(r){ return r.cheats; }) ? 31 : 18; };
+    var nameCell = function(r, w){
+      return esc((r.name + (r.cheats ? " (cheats used)" : "")).padEnd(w));
+    };
 
     out("[ ACCURACY ]", "tag");
     if(!d.top.length){
       out("No one has qualified yet — reach " + d.floor + " stages and finish a run to be ranked.", "sys");
     }else{
-      var head = "   #  " + "NAME".padEnd(18) + "FIRST-TIME   GATES";
+      var wAcc = nameW(d.top);
+      var head = "   #  " + "NAME".padEnd(wAcc) + "FIRST-TIME   GATES";
       var lines = d.top.map(function(r, i){
-        return (mine(r) ? "▶ " : "  ") + pad(i+1) + "  " + esc(r.name.padEnd(18)) + String(r.acc).padStart(3) + "%  " + String(r.attempted).padStart(3) + "      " + String(r.gates).padStart(2);
+        return (mine(r) ? "▶ " : "  ") + pad(i+1) + "  " + nameCell(r, wAcc) + String(r.acc).padStart(3) + "%  " + String(r.attempted).padStart(3) + "      " + String(r.gates).padStart(2);
       });
       out([head].concat(lines).join("\n"), "sys");
     }
@@ -2588,8 +2614,9 @@ function cmdBoard(){
     if(!d.hc || !d.hc.length){
       out("No one yet.", "sys");
     }else{
+      var wHc = nameW(d.hc);
       out(d.hc.map(function(r, i){
-        return (mine(r) ? "▶ " : "  ") + pad(i+1) + "  " + esc(r.name.padEnd(18)) + String(r.hcGates).padStart(2) + " gates";
+        return (mine(r) ? "▶ " : "  ") + pad(i+1) + "  " + nameCell(r, wHc) + String(r.hcGates).padStart(2) + " gates";
       }).join("\n"), "sys");
     }
 
@@ -2598,8 +2625,9 @@ function cmdBoard(){
     if(!d.mw || !d.mw.length){
       out("No one yet.", "sys");
     }else{
+      var wMw = nameW(d.mw);
       out(d.mw.map(function(r, i){
-        return (mine(r) ? "▶ " : "  ") + pad(i+1) + "  " + esc(r.name.padEnd(18)) + String(r.mwCorrect).padStart(3);
+        return (mine(r) ? "▶ " : "  ") + pad(i+1) + "  " + nameCell(r, wMw) + String(r.mwCorrect).padStart(3);
       }).join("\n"), "sys");
     }
 
@@ -2649,6 +2677,7 @@ function runCmd(raw){
   if(v === "board" || v === "leaderboard"){ cmdBoard(); return; }
   if(/^name\b/.test(v)){ cmdName(raw.trim().slice(4).trim()); return; }
   if(/^warp\b/.test(v)){ cmdWarp(v.slice(4).trim()); return; }
+  if(v === "overtime"){ cmdOvertime(); return; }
   out("unknown command: " + v.replace(/</g,"&lt;") + "   (try: help)", "sys");
 }
 
@@ -2667,7 +2696,7 @@ document.getElementById("resetBtn").addEventListener("click", askWipe);
 
 function newRun(){
   cancelPending(); mwLocked = false;
-  S = freshRun({run:(S.run||1)+1, ach:S.ach, flawless:S.flawless, bestStreak:S.bestStreak, hcBest:S.hcBest, mwBest:S.mwBest, name:S.name, subTs:S.subTs});
+  S = freshRun({run:(S.run||1)+1, ach:S.ach, flawless:S.flawless, bestStreak:S.bestStreak, hcBest:S.hcBest, mwBest:S.mwBest, name:S.name, subTs:S.subTs, cheated:S.cheated});
   save();
   document.getElementById("reportArea").innerHTML = "";
   boot();
@@ -2765,9 +2794,10 @@ function endGame(){
 
   var modeWord = S.mode === "hardcore" ? "hardcore" : S.mode === "worldwide" ? "mr worldwide" : "standard";
   var head = S.done ? (S.mode === "hardcore" ? "HARDCORE TOUR GUIDE" : S.mode === "worldwide" ? "MR WORLDWIDE TOUR GUIDE" : "QUALIFIED TOUR GUIDE") : "RUN ENDED EARLY";
-  var sub = S.done
+  var sub = (S.done
     ? "All " + NCH + " gates cleared in " + modeWord + " mode. Every topic, stamped in your passport."
-    : "You stopped at gate " + Math.min(S.ch+1,NCH) + " of " + NCH + " (" + pct + "% of the journey) in " + modeWord + " mode. Progress is saved; you can pick the run back up at any time.";
+    : "You stopped at gate " + Math.min(S.ch+1,NCH) + " of " + NCH + " (" + pct + "% of the journey) in " + modeWord + " mode. Progress is saved; you can pick the run back up at any time.")
+    + ((S.cheats || S.cheated) ? " · cheats used" : "");
 
   document.getElementById("reportArea").innerHTML =
     '<div class="report">'
