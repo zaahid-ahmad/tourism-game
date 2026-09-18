@@ -228,7 +228,7 @@ footer{color:var(--amber-ghost);font-size:12px;margin-top:26px;line-height:1.7}
     <span class="dot live" aria-hidden="true"></span>
     <span class="name">passport.sim</span>
     <span>tourism gr10 // full-year run</span>
-    <span class="right"><span>mode <b id="modeLbl">—</b></span><span>run <b id="runNo">1</b></span></span>
+    <span class="right"><span>name <b id="nameLbl">—</b></span><span>mode <b id="modeLbl">—</b></span><span>run <b id="runNo">1</b></span></span>
   </div>
 
   <div class="hud">
@@ -2158,6 +2158,7 @@ function hud(){
   document.getElementById("hudStreak").textContent = S.streak;
   document.getElementById("hudAw").textContent = Object.keys(S.ach).length + "/" + ACH.length;
   document.getElementById("runNo").textContent = S.run;
+  document.getElementById("nameLbl").textContent = S.name || "—";
 
   var ml = document.getElementById("modeLbl");
   ml.textContent = S.mode === "hardcore" ? "HARDCORE" : S.mode === "worldwide" ? "MR WORLDWIDE" : S.mode === "standard" ? "STANDARD" : "—";
@@ -2559,7 +2560,7 @@ function api(method, body, done){
 function setName(raw){
   var n = String(raw||"").replace(/[^A-Za-z0-9 .'-]/g,"").replace(/\s+/g," ").trim().slice(0,16);
   if(n.length < 2) return null;
-  S.name = n; save();
+  S.name = n; save(); hud(); /* refreshes the bar's name label — every call site funnels through here */
   return n;
 }
 
