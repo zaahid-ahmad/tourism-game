@@ -2588,7 +2588,7 @@ function cmdPin(arg){
   out("pin set.", "sys");
   if(pendingSubmit){
     var ps = pendingSubmit; pendingSubmit = null;
-    doSubmit(ps.attempted, ps.clean, ps.acc);
+    doSubmit(ps.attempted, ps.clean, ps.acc, ps.gates);
   }
 }
 
@@ -2597,14 +2597,14 @@ function lbSay(msg){
   if(el) el.textContent = msg;
 }
 
-function trySubmit(attempted, clean, acc){
+function trySubmit(attempted, clean, acc, gates){
   if(S.warped) return;
   /* attempted can be 0 right after a hardcore/Mr Worldwide death (the run wipes seen/clean to
      nothing) — that's still worth submitting if there's a lifetime hcBest/mwBest to report. */
   if(attempted < 1 && !(S.hcBest > 0) && !(S.mwBest > 0)) return;
   if(Date.now() - (S.subTs||0) < 60000) return;
   if(!S.name){
-    pendingSubmit = {attempted:attempted, clean:clean, acc:acc};
+    pendingSubmit = {attempted:attempted, clean:clean, acc:acc, gates:gates};
     lbSay("Type your name in the terminal to add this run to the shared leaderboard, or type skip.");
     if(!pendingName){
       pendingName = true;
@@ -2614,7 +2614,7 @@ function trySubmit(attempted, clean, acc){
     return;
   }
   if(!S.pin){
-    pendingSubmit = {attempted:attempted, clean:clean, acc:acc};
+    pendingSubmit = {attempted:attempted, clean:clean, acc:acc, gates:gates};
     lbSay("Pick a 4-digit PIN in the terminal to claim \"" + S.name + "\" on the leaderboard, or type skip.");
     if(!pendingPin){
       pendingPin = true;
@@ -2622,13 +2622,16 @@ function trySubmit(attempted, clean, acc){
     }
     return;
   }
-  doSubmit(attempted, clean, acc);
+  doSubmit(attempted, clean, acc, gates);
 }
 
-function doSubmit(attempted, clean, acc){
+/* gates is passed through rather than read live off S.ch: a report-triggered wipe-mode wipe
+   (§5) can zero S.ch before this actually posts, if the pendingName/pendingPin prompt above
+   delayed the submission — gates keeps reporting the gate this attempt actually reached. */
+function doSubmit(attempted, clean, acc, gates){
   api("POST", {
     name: S.name, pin: S.pin, attempted: attempted, clean: clean,
-    deaths: S.deaths.length, gates: Math.min(S.ch, NCH),
+    deaths: S.deaths.length, gates: gates,
     bestStreak: S.bestStreak||0, hcGates: S.hcBest||0, mwCorrect: S.mwBest||0,
     cheats: !!(S.cheats || S.cheated),
     mode: S.mode, done: !!S.done
@@ -2729,7 +2732,7 @@ function runCmd(raw){
     out("name set to " + esc(n) + ".", "sys");
     if(pendingSubmit){
       var ps = pendingSubmit; pendingSubmit = null;
-      trySubmit(ps.attempted, ps.clean, ps.acc); /* re-gates through the pin check below too */
+      trySubmit(ps.attempted, ps.clean, ps.acc, ps.gates); /* re-gates through the pin check below too */
     }
     return;
   }
@@ -2746,7 +2749,7 @@ function runCmd(raw){
     out("pin set. This keeps \"" + esc(S.name) + "\" yours.", "sys");
     if(pendingSubmit){
       var pps = pendingSubmit; pendingSubmit = null;
-      doSubmit(pps.attempted, pps.clean, pps.acc);
+      doSubmit(pps.attempted, pps.clean, pps.acc, pps.gates);
     }
     return;
   }
@@ -2827,12 +2830,6 @@ function endGame(){
   cancelPending(); mwLocked = false;
   clear();
   S.done = S.ch >= NCH;
-  /* report/New run/Wipe can end a Mr Worldwide run while the player is still alive (no death, no
-     full clear) — those two sites are the only other places S.mwBest is captured, so without this
-     a live streak ended by "report" was never banked and never reached the leaderboard. Harmless
-     to re-run after a death or full clear: S.streak is 0 post-death and Math.max is a no-op on the
-     already-captured full-clear case. */
-  if(S.mode === "worldwide" && !S.warped) S.mwBest = Math.max(S.mwBest || 0, S.streak);
   save(); hud();
 
   var byStrand = {};
@@ -2866,6 +2863,7 @@ function endGame(){
   var clean = Object.keys(S.clean).length;
   var acc = attempted ? Math.round(clean / attempted * 100) : 0;
   var pct = Math.floor((S.done ? 1 : stagesDone() / NST) * 100);
+  var gatesReached = Math.min(S.ch, NCH);
 
   var strandHtml = ranked.map(function(x){
     var p = Math.round(x.rate * 100);
@@ -2898,7 +2896,10 @@ function endGame(){
   var head = S.done ? (S.mode === "hardcore" ? "HARDCORE TOUR GUIDE" : S.mode === "worldwide" ? "MR WORLDWIDE TOUR GUIDE" : "QUALIFIED TOUR GUIDE") : "RUN ENDED EARLY";
   var sub = (S.done
     ? "All " + NCH + " gates cleared in " + modeWord + " mode. Every topic, stamped in your passport."
-    : "You stopped at gate " + Math.min(S.ch+1,NCH) + " of " + NCH + " (" + pct + "% of the journey) in " + modeWord + " mode. Progress is saved; you can pick the run back up at any time.")
+    : "You stopped at gate " + Math.min(S.ch+1,NCH) + " of " + NCH + " (" + pct + "% of the journey) in " + modeWord + " mode. "
+      + (isWipeMode()
+          ? "One life, remember — this run has been wiped. Answering again starts a fresh run at Gate 01."
+          : "Progress is saved; you can pick the run back up at any time."))
     + ((S.cheats || S.cheated) ? " · cheats used" : "");
 
   document.getElementById("reportArea").innerHTML =
@@ -2923,7 +2924,26 @@ function endGame(){
     + '<div class="rsec"><h3>EVERY DEATH — ' + S.deaths.length + '</h3><div class="deathlist">' + deathHtml + '</div></div>'
     + '</div>';
   document.getElementById("reportArea").scrollIntoView({behavior: reduced ? "auto" : "smooth", block:"start"});
-  trySubmit(attempted, clean, acc);
+
+  /* Hardcore & Mr Worldwide are "one life" — but report/New run/Wipe are the only ways to stop
+     mid-run without dying, and leaving S.ch/S.st/seen/clean untouched let a wipe-mode run be
+     silently resumed via look/r/Back to question, defeating the entire rule. Wipe here exactly
+     like a death would (§5), captured from the pre-wipe state above so the debrief and the
+     leaderboard submission below both still report what was actually achieved this attempt.
+     Gated on hadProgress so repeatedly typing report at an already-fresh Gate 01 doesn't inflate
+     S.run or re-trigger flyer for nothing. */
+  var hadProgress = S.ch > 0 || attempted > 0;
+  if(isWipeMode() && !S.done && hadProgress){
+    if(S.mode === "hardcore" && !S.warped) S.hcBest = Math.max(S.hcBest || 0, gatesReached);
+    if(S.mode === "worldwide" && !S.warped) S.mwBest = Math.max(S.mwBest || 0, S.streak);
+    S.ch = 0; S.st = 0; S.seen = {}; S.clean = {}; S.qEnd = 0;
+    reshuffleRun();
+    S.run++;
+    if(S.run >= 5) unlock("flyer");
+    save(); hud();
+  }
+
+  trySubmit(attempted, clean, acc, gatesReached);
 }
 
 /* ============================================================
