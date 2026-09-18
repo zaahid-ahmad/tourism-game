@@ -359,10 +359,21 @@ timeout and a catch, and the game is byte-identical to before this feature if th
 unreachable, blocked, or the page is opened from `file://`.
 
 - **Backend:** `netlify/functions/board.mjs`, a Netlify Function (v2, ESM) backed by Netlify
-  Blobs — one blob per player, keyed by a slug of their name, so concurrent writes from a class
-  answering at the same time never race each other the way one shared aggregate blob would.
-  `GET` lists and ranks all blobs into three arrays; `POST` validates one player's submitted run
-  and updates their stored entry.
+  Blobs — one blob per player, keyed by a slug of their name, in the `leaderboard` store. This is
+  the **source of truth**, and every write to it is unconditional (no read-modify-write), so
+  concurrent submissions from a class answering at the same time never race each other the way one
+  shared aggregate blob would. `POST` validates one player's submitted run and updates their
+  stored entry, then invalidates the read cache (below) with an unconditional delete.
+- **Read cache:** `GET` used to `list()` every player blob and `get()` up to 300 of them on every
+  view (an N+1 that gets more expensive as the class grows). It now reads a single derived-cache
+  blob (`leaderboard-cache` store, key `"boards"`, holding `{v, ts, payload}`) when one is present,
+  unexpired (60s TTL) and of the current `CACHE_V` shape, and only falls back to the full
+  `list()`+`get()` rebuild — writing the result back to the cache — on a cold or stale cache. The
+  cache is purely **derived** from the player blobs, never itself authoritative, which is what
+  makes it safe under concurrent rebuilds: two rebuilds racing each just write a valid snapshot of
+  the same underlying truth, so nothing can be lost the way a shared read-modify-write aggregate
+  could lose an entry. `CACHE_V` must be bumped whenever a stored row gains a field (e.g. `cheats`),
+  so an old-shaped cached payload is rebuilt rather than served stale-shaped.
 - **Identity:** a free-text display name, letters/numbers/spaces (and `. ' -`) only, 2–16
   characters, asked once via the terminal (never `prompt()`) and stored in `S.name` (lifetime).
   The player can `skip`, change it anytime with `name <text>`, or lose it via Wipe everything.
@@ -444,7 +455,7 @@ unreachable, blocked, or the page is opened from `file://`.
 - **Free plan costs (credit-based, accounts created from Sept 2025):**
   - 300 credits/month.
   - Each production deploy costs 15 credits, so batch commits and push once.
-  - Bandwidth is 20 credits/GB and requests 2 credits per 10k. One page load (a single ~180 KB file, usually compressed) costs a fraction of a credit. Leaderboard function invocations are the same order of cost — negligible for a class-sized audience; deploys remain the binding constraint.
+  - Bandwidth is 20 credits/GB and requests 2 credits per 10k. One page load (a single ~180 KB file, usually compressed) costs a fraction of a credit. Leaderboard function invocations are the same order of cost — negligible for a class-sized audience; deploys remain the binding constraint. `board.mjs`'s `GET` reads one cache blob in the common case rather than listing and fetching every player's blob (§6.6), so its per-request cost is smaller still now.
   - The realistic limit is the number of deploys, not learner traffic.
   - If credits run out, the site pauses until the next billing cycle, and the leaderboard function simply stops responding — `index.html` still works fully offline (§6.6).
 - **Local testing:** open `index.html` directly in a browser. This costs nothing, and localStorage works on `file://` in Chromium and Firefox.
