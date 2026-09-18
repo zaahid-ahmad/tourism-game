@@ -1,4 +1,5 @@
 import { getStore } from "@netlify/blobs";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 
 const MAXN = 16, FLOOR = 50, TOTAL = 265, GATES = 53;
 
@@ -35,6 +36,31 @@ function slug(n) {
   return n.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+/* ------------------------------------------------------------------------
+   Name ownership: a display name is a claim, not an identity — without this,
+   any client can submit under any name and overwrite that player's stored
+   row (their metrics only ever improve, so it can't be lowered, but a
+   better run — or a cheats:true tag, which is sticky forever — can be
+   attached to someone else's name). A learner picks a 4-digit PIN the first
+   time their name is submitted; every later write to that row must supply
+   the matching PIN. This is friction against a classmate typing your name,
+   not authentication: a 4-digit PIN on an unrate-limited endpoint is
+   brute-forceable in ~10k requests by a scripted attacker. Proportionate
+   given §6.6's existing honour-system stance on score fabrication — a real
+   rate limiter would need its own counter blob, i.e. the read-modify-write
+   race the leaderboard cache was just built to avoid. ------------------- */
+function validPin(v) {
+  return typeof v === "string" && /^\d{4}$/.test(v);
+}
+function hashPin(pin, salt) {
+  return createHash("sha256").update(salt + pin).digest("hex");
+}
+function pinMatches(pin, salt, hash) {
+  const a = Buffer.from(hashPin(pin, salt), "hex");
+  const b = Buffer.from(hash, "hex");
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 function rank(a, b) {
   return (b.acc - a.acc) || (b.attempted - a.attempted) || (a.deaths - b.deaths) || (a.accTs - b.accTs);
 }
@@ -44,7 +70,12 @@ async function buildBoards(store) {
   const results = await Promise.all(
     list.blobs.slice(0, 300).map((b) => store.get(b.key, { type: "json" }).catch(() => null))
   );
-  const rows = results.filter(Boolean);
+  /* pinHash/pinSalt never leave the server — the whole point of hashing is that an attacker has to
+     go through this rate-unlimited-but-network-bound endpoint, not brute-force an offline copy. */
+  const rows = results.filter(Boolean).map((r) => {
+    const { pinHash, pinSalt, ...pub } = r;
+    return pub;
+  });
   return {
     ok: true,
     floor: FLOOR,
@@ -96,7 +127,7 @@ export default async (req) => {
      seen/clean counts, but S.hcBest/S.mwBest (and S.bestStreak) are lifetime figures that survive
      the wipe, so a report right after dying carries real hc/mw data with attempted:0 — that must
      not be rejected outright, just treated as "no accuracy data this submission" below. */
-  if (!name || at < 0 || cl < 0 || de < 0 || ga < 0 ||
+  if (!name || !validPin(b.pin) || at < 0 || cl < 0 || de < 0 || ga < 0 ||
       at > TOTAL || cl > at || ga > GATES || at < ga * 5 || (at >= 1 && bs > at) ||
       hc > GATES || mw > TOTAL ||
       (b.mode !== "standard" && b.mode !== "hardcore" && b.mode !== "worldwide")) {
@@ -105,6 +136,17 @@ export default async (req) => {
 
   const key = slug(name);
   const old = await store.get(key, { type: "json" }).catch(() => null) || {};
+
+  /* Ownership: a row with a stored pinHash requires the matching PIN, or the submission is
+     rejected outright — this check sits above every field-update below, so a rejected attempt can
+     never touch the row's metrics or its sticky cheats flag. A row with NO pinHash (a stray
+     legacy row predating this check) is claimable by whoever submits next, so it can't become
+     permanently stuck. */
+  if (old.pinHash && !pinMatches(b.pin, old.pinSalt, old.pinHash)) {
+    return json({ ok: false, err: "name-taken" }, 409);
+  }
+  const pinSalt = old.pinHash ? old.pinSalt : randomBytes(8).toString("hex");
+  const pinHash = old.pinHash || hashPin(b.pin, pinSalt);
 
   /* Reaching the ranking floor for the first time always counts as an improvement, regardless of
      accuracy — otherwise an early short/high-accuracy run permanently blocks every later, more
@@ -126,6 +168,7 @@ export default async (req) => {
 
   const entry = {
     name: name,
+    pinSalt: pinSalt, pinHash: pinHash,
     attempted: accBetter ? at : old.attempted,
     clean: accBetter ? cl : old.clean,
     deaths: accBetter ? de : old.deaths,

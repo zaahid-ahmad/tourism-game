@@ -2006,6 +2006,7 @@ function freshRun(keep){
     bestStreak: keep.bestStreak || 0,
     hcBest: keep.hcBest || 0,
     name: keep.name || "",
+    pin: keep.pin || "",
     subTs: keep.subTs || 0,
     gOrder: keep.gOrder || null,
     sOrder: keep.sOrder || null,
@@ -2406,7 +2407,7 @@ function cmdHelp(){
   clear();
   out("", "rule");
   out("COMMANDS", "tag");
-  out("1-4        choose an answer\nr          retry after a death\nlook       re-read the current stage\nmap        show gate progress\nstats      show current run figures\nawards     list achievements\nmode       show the current mode\nboard      show the shared leaderboard\nname <you> set your name for the leaderboard\nreport     end the run and open the debrief\nnew        start a new run and pick a mode (keeps achievements)\nwipe       erase everything, including achievements", "sys");
+  out("1-4        choose an answer\nr          retry after a death\nlook       re-read the current stage\nmap        show gate progress\nstats      show current run figures\nawards     list achievements\nmode       show the current mode\nboard      show the shared leaderboard\nname <you> set your name for the leaderboard\npin <1234> claim your name with a 4-digit PIN\nreport     end the run and open the debrief\nnew        start a new run and pick a mode (keeps achievements)\nwipe       erase everything, including achievements", "sys");
   out("Click Back to question (or type look / r) to return.", "sys");
   unlock("brochure");
 }
@@ -2504,6 +2505,7 @@ function cmdOvertime(){
    LEADERBOARD (optional, offline-safe — never blocks the game)
    ============================================================ */
 var pendingName = false;
+var pendingPin = false;
 var pendingSubmit = null;
 
 function api(method, body, done){
@@ -2534,6 +2536,28 @@ function cmdName(arg){
   out("name set to " + esc(n) + ".", "sys");
 }
 
+/* A name is a claim, not an identity — without a PIN, anyone could submit under someone else's
+   name and overwrite their leaderboard row (§6.6). setPin()/cmdPin() let a learner claim or
+   re-claim a name; the server rejects any submission that doesn't match the PIN a name was first
+   claimed with. */
+function setPin(raw){
+  var p = String(raw||"").trim();
+  if(!/^\d{4}$/.test(p)) return null;
+  S.pin = p; save();
+  return p;
+}
+
+function cmdPin(arg){
+  if(!arg){ out("usage: pin <1234>   (exactly 4 digits — claims your name, or confirms it after a leaderboard mismatch)", "sys"); return; }
+  var p = setPin(arg);
+  if(!p){ out("that pin didn't work — use exactly 4 digits, e.g. pin 1234.", "sys"); return; }
+  out("pin set.", "sys");
+  if(pendingSubmit){
+    var ps = pendingSubmit; pendingSubmit = null;
+    doSubmit(ps.attempted, ps.clean, ps.acc);
+  }
+}
+
 function lbSay(msg){
   var el = document.getElementById("lbNote");
   if(el) el.textContent = msg;
@@ -2555,8 +2579,21 @@ function trySubmit(attempted, clean, acc){
     }
     return;
   }
+  if(!S.pin){
+    pendingSubmit = {attempted:attempted, clean:clean, acc:acc};
+    lbSay("Pick a 4-digit PIN in the terminal to claim \"" + S.name + "\" on the leaderboard, or type skip.");
+    if(!pendingPin){
+      pendingPin = true;
+      out("Pick a 4-digit PIN so \"" + esc(S.name) + "\" stays yours — you'll need it again if this device's saved data is ever cleared, or to play from another device. Type skip to leave this run off the board.", "sys");
+    }
+    return;
+  }
+  doSubmit(attempted, clean, acc);
+}
+
+function doSubmit(attempted, clean, acc){
   api("POST", {
-    name: S.name, attempted: attempted, clean: clean,
+    name: S.name, pin: S.pin, attempted: attempted, clean: clean,
     deaths: S.deaths.length, gates: Math.min(S.ch, NCH),
     bestStreak: S.bestStreak||0, hcGates: S.hcBest||0, mwCorrect: S.mwBest||0,
     cheats: !!(S.cheats || S.cheated),
@@ -2568,6 +2605,13 @@ function trySubmit(attempted, clean, acc){
       lbSay((imp.acc || imp.hc || imp.mw)
         ? "Added to the shared leaderboard as " + esc(S.name) + "."
         : "Run recorded, but it didn't beat your best on the leaderboard yet.");
+    }
+    else if(d && d.err === "name-taken"){
+      /* someone else already claimed this name with a different PIN — never clear S.name here:
+         this is also the path a genuine owner takes back after a lab PC wipes their saved data
+         (§4), they just need to re-enter the PIN they remember. */
+      pendingSubmit = {attempted:attempted, clean:clean, acc:acc};
+      lbSay("\"" + S.name + "\" is already claimed on the leaderboard. Type name <newname> for a different one, or pin <1234> if it's really yours.");
     }
     else{ lbSay("leaderboard unavailable right now — your run is unaffected."); }
   });
@@ -2651,7 +2695,24 @@ function runCmd(raw){
     out("name set to " + esc(n) + ".", "sys");
     if(pendingSubmit){
       var ps = pendingSubmit; pendingSubmit = null;
-      trySubmit(ps.attempted, ps.clean, ps.acc);
+      trySubmit(ps.attempted, ps.clean, ps.acc); /* re-gates through the pin check below too */
+    }
+    return;
+  }
+  if(pendingPin){
+    pendingPin = false;
+    if(!v) return;
+    out("$ " + raw.replace(/</g,"&lt;"), "sys");
+    if(v === "skip"){
+      out("okay — staying off the leaderboard for now. Type pin <1234> anytime to set one and join.", "sys");
+      return;
+    }
+    var p = setPin(v);
+    if(!p){ out("that pin didn't work — use exactly 4 digits, e.g. pin 1234. Type pin <1234> to try again, or skip.", "sys"); return; }
+    out("pin set. This keeps \"" + esc(S.name) + "\" yours.", "sys");
+    if(pendingSubmit){
+      var pps = pendingSubmit; pendingSubmit = null;
+      doSubmit(pps.attempted, pps.clean, pps.acc);
     }
     return;
   }
@@ -2676,6 +2737,7 @@ function runCmd(raw){
   if(v === "wipe" || v === "reset"){ askWipe(); return; }
   if(v === "board" || v === "leaderboard"){ cmdBoard(); return; }
   if(/^name\b/.test(v)){ cmdName(raw.trim().slice(4).trim()); return; }
+  if(/^pin\b/.test(v)){ cmdPin(v.slice(3).trim()); return; }
   if(/^warp\b/.test(v)){ cmdWarp(v.slice(4).trim()); return; }
   if(v === "overtime"){ cmdOvertime(); return; }
   out("unknown command: " + v.replace(/</g,"&lt;") + "   (try: help)", "sys");
@@ -2696,7 +2758,7 @@ document.getElementById("resetBtn").addEventListener("click", askWipe);
 
 function newRun(){
   cancelPending(); mwLocked = false;
-  S = freshRun({run:(S.run||1)+1, ach:S.ach, flawless:S.flawless, bestStreak:S.bestStreak, hcBest:S.hcBest, mwBest:S.mwBest, name:S.name, subTs:S.subTs, cheated:S.cheated});
+  S = freshRun({run:(S.run||1)+1, ach:S.ach, flawless:S.flawless, bestStreak:S.bestStreak, hcBest:S.hcBest, mwBest:S.mwBest, name:S.name, pin:S.pin, subTs:S.subTs, cheated:S.cheated});
   save();
   document.getElementById("reportArea").innerHTML = "";
   boot();
