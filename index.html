@@ -121,6 +121,10 @@ body{
 .ach .t{font-family:var(--crt);font-size:22px;line-height:1.1;letter-spacing:.03em;color:var(--amber-hi)}
 .ach .t::before{content:"★ ";color:var(--amber)}
 .ach .d{font-size:13px;color:var(--amber-dim)}
+.news{margin-top:12px;border:1px solid var(--amber-dim);background:var(--panel-2);padding:8px 12px;color:var(--amber-hi)}
+.news .t{font-family:var(--crt);font-size:22px;line-height:1.1;letter-spacing:.03em;color:var(--amber-hi)}
+.news .t::before{content:"✦ ";color:var(--amber)}
+.news .d{font-size:13px;color:var(--amber-dim);margin-top:4px}
 .modeinfo{color:var(--amber);margin-top:6px}
 .modeinfo em{font-style:normal;color:var(--red)}
 
@@ -2013,7 +2017,8 @@ function freshRun(keep){
     qEnd: keep.qEnd || 0,
     mwBest: keep.mwBest || 0,
     cheats: false,                 /* hidden "overtime" cheat: on for this run only, suppresses achievements */
-    cheated: keep.cheated || false /* lifetime: this player has ever used overtime — tags leaderboard submissions */
+    cheated: keep.cheated || false,/* lifetime: this player has ever used overtime — tags leaderboard submissions */
+    seenNews: keep.seenNews || "" /* lifetime: NEWS_ID of the last "what's new" notice this save has acknowledged */
   };
 }
 var S = freshRun();
@@ -2225,13 +2230,42 @@ function checkAfterGate(c, idx){
 /* ============================================================
    RENDER
    ============================================================ */
+/* "What's new" — a one-time notice shown once per S.seenNews < NEWS_ID, dismissed with an
+   explicit button (never a passive toast — this can carry news worth not missing, e.g. a
+   leaderboard reset). To post a new one: bump NEWS_ID, set NEWS_DATE to that day, and replace
+   NEWS_LINES; every save whose S.seenNews doesn't match will see it once, next boot. Never
+   mention hidden teacher/cheat tools here (e.g. "overtime") — this is shown to every player,
+   unlike `help`. */
+var NEWS_ID = "2026-09-pin";
+var NEWS_DATE = "18 September 2026";
+var NEWS_LINES = [
+  "Leaderboard names are now protected — the first time you submit, you'll pick a 4-digit PIN so nobody else can use your name.",
+  "The shared leaderboard has been reset for everyone — start fresh!"
+];
+function renderAnnouncement(){
+  out("", "rule");
+  out('<div class="t">WHAT’S NEW</div><div class="tag">' + NEWS_DATE + '</div><div class="d">' + NEWS_LINES.join("\n") + '</div>', "news");
+  choicesEl.innerHTML = "";
+  var b = document.createElement("button");
+  b.type = "button"; b.className = "ch";
+  b.dataset.idx = "news";
+  b.innerHTML = '<span class="n">[1]</span><span>Got it</span>';
+  b.addEventListener("click", function(){
+    S.seenNews = NEWS_ID; save();
+    renderStage();
+  });
+  choicesEl.appendChild(b);
+  b.focus();
+}
+
 function boot(){
   clear();
   out("PASSPORT v2026.09 — grade 10 tourism survival simulator", "sys");
   out("loading destinations ... " + NCH + " gates, " + NST + " stages, 8 topics, " + ACH.length + " achievements ... ok", "sys");
   out("type a number, or use the commands: help / look / map / stats / awards / report", "sys");
   hud();
-  renderStage();
+  if(S.seenNews !== NEWS_ID){ renderAnnouncement(); }
+  else{ renderStage(); }
 }
 
 function renderModePick(){
@@ -2758,7 +2792,7 @@ document.getElementById("resetBtn").addEventListener("click", askWipe);
 
 function newRun(){
   cancelPending(); mwLocked = false;
-  S = freshRun({run:(S.run||1)+1, ach:S.ach, flawless:S.flawless, bestStreak:S.bestStreak, hcBest:S.hcBest, mwBest:S.mwBest, name:S.name, pin:S.pin, subTs:S.subTs, cheated:S.cheated});
+  S = freshRun({run:(S.run||1)+1, ach:S.ach, flawless:S.flawless, bestStreak:S.bestStreak, hcBest:S.hcBest, mwBest:S.mwBest, name:S.name, pin:S.pin, subTs:S.subTs, cheated:S.cheated, seenNews:S.seenNews});
   save();
   document.getElementById("reportArea").innerHTML = "";
   boot();
