@@ -2620,7 +2620,7 @@ function trySubmit(attempted, clean, acc, gates){
     lbSay("Pick a 4-digit PIN in the terminal to claim \"" + S.name + "\" on the leaderboard, or type skip.");
     if(!pendingPin){
       pendingPin = true;
-      out("Pick a 4-digit PIN so \"" + esc(S.name) + "\" stays yours — you'll need it again if this device's saved data is ever cleared, or to play from another device. Type skip to leave this run off the board.", "sys");
+      out("Pick a 4-digit PIN so \"" + esc(S.name) + "\" stays yours — you'll need it again if this device's saved data is ever cleared, or to play from another device. Typo'd the name? Type name <newname> to fix it first. Type skip to leave this run off the board.", "sys");
     }
     return;
   }
@@ -2767,8 +2767,18 @@ function runCmd(raw){
       out("okay — staying off the leaderboard for now. Type pin <1234> anytime to set one and join.", "sys");
       return;
     }
+    /* Escape hatch for a name typo'd at the previous prompt — without this, the only way past
+       the PIN step is to submit under whatever name was just typed, typo included. Renames
+       locally and re-asks for a PIN under the corrected name; nothing is posted to the server
+       until a PIN is actually entered. */
+    if(/^name\b/.test(v)){
+      cmdName(raw.trim().slice(4).trim());
+      pendingPin = true;
+      out("Pick a 4-digit PIN so \"" + esc(S.name) + "\" stays yours — you'll need it again if this device's saved data is ever cleared, or to play from another device. Typo'd the name? Type name <newname> to fix it first. Type skip to leave this run off the board.", "sys");
+      return;
+    }
     var p = setPin(v);
-    if(!p){ out("that pin didn't work — use exactly 4 digits, e.g. pin 1234. Type pin <1234> to try again, or skip.", "sys"); return; }
+    if(!p){ out("that pin didn't work — use exactly 4 digits, e.g. pin 1234, or name <newname> to fix a typo. Type pin <1234> to try again, or skip.", "sys"); return; }
     out("pin saved locally — checking it against the leaderboard...", "sys");
     if(pendingSubmit){
       var pps = pendingSubmit; pendingSubmit = null;
