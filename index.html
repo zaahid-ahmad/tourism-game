@@ -2827,6 +2827,12 @@ function endGame(){
   cancelPending(); mwLocked = false;
   clear();
   S.done = S.ch >= NCH;
+  /* report/New run/Wipe can end a Mr Worldwide run while the player is still alive (no death, no
+     full clear) — those two sites are the only other places S.mwBest is captured, so without this
+     a live streak ended by "report" was never banked and never reached the leaderboard. Harmless
+     to re-run after a death or full clear: S.streak is 0 post-death and Math.max is a no-op on the
+     already-captured full-clear case. */
+  if(S.mode === "worldwide" && !S.warped) S.mwBest = Math.max(S.mwBest || 0, S.streak);
   save(); hud();
 
   var byStrand = {};

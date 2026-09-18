@@ -186,7 +186,7 @@ Created by `freshRun(keep)`:
 | `flawless` | int | save | Lifetime count of gates cleared with no deaths |
 | `bestStreak` | int | save | Best streak ever |
 | `hcBest` | int | save | Most gates cleared in a single hardcore run |
-| `mwBest` | int | save | Most correct answers reached in a single Mr Worldwide run (captured at death or at a full clear) |
+| `mwBest` | int | save | Most correct answers reached in a single Mr Worldwide run (captured at death, at a full clear, or in `endGame()` — so ending the run early via `report`/"End run & report" while still alive also banks the live streak) |
 | `name` | string | save (lifetime) | Display name for the leaderboard, empty until set. See §6.6. |
 | `pin` | string | save (lifetime) | 4-digit PIN that claims `name` on the leaderboard, empty until set. Sent with every submission; the server rejects a write to an existing name with a non-matching pin. See §6.6. |
 | `subTs` | int (ms epoch) | save | Timestamp of the last leaderboard submission (throttles resubmits) |
@@ -419,7 +419,8 @@ unreachable, blocked, or the page is opened from `file://`.
   - **Hardcore — furthest:** ranked by `hcGates` (most gates cleared in a single hardcore run),
     tie-broken by earliest improvement.
   - **Mr Worldwide — correct:** ranked by `mwCorrect` (most correct answers in a single Mr
-    Worldwide run, captured at death or at a full clear), tie-broken by earliest improvement.
+    Worldwide run, captured at death, at a full clear, or by `endGame()` itself if the run is
+    ended early via `report` while still alive), tie-broken by earliest improvement.
 - **Submission:** automatic at the end of `endGame()`, but only after the name prompt has given
   consent (states plainly that the name is shared). Skipped when `S.warped` (a warped run already
   earns no achievements or lifetime records — see the `warp` note above — and must not reach the
