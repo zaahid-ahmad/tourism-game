@@ -2970,7 +2970,11 @@ function endGame(){
   if(isWipeMode() && !S.done && hadProgress){
     if(S.mode === "hardcore" && !S.warped) S.hcBest = Math.max(S.hcBest || 0, gatesReached);
     if(S.mode === "worldwide" && !S.warped) S.mwBest = Math.max(S.mwBest || 0, S.streak);
-    S.ch = 0; S.st = 0; S.seen = {}; S.clean = {}; S.qEnd = 0;
+    /* S.streak itself must reset too, same as a death (answer()) — otherwise the live streak
+       carries across the wipe: position resets to Gate 01 but the HUD's "Streak" figure (and
+       hardcore's streak10/25/53 achievements, which aren't Mr Worldwide-suppressed) would keep
+       climbing as if this were still the same unbroken run. */
+    S.ch = 0; S.st = 0; S.seen = {}; S.clean = {}; S.qEnd = 0; S.streak = 0;
     reshuffleRun();
     S.run++;
     if(S.run >= 5) unlock("flyer");
