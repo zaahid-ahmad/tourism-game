@@ -2585,10 +2585,12 @@ function cmdPin(arg){
   if(!arg){ out("usage: pin <1234>   (exactly 4 digits — claims your name, or confirms it after a leaderboard mismatch)", "sys"); return; }
   var p = setPin(arg);
   if(!p){ out("that pin didn't work — use exactly 4 digits, e.g. pin 1234.", "sys"); return; }
-  out("pin set.", "sys");
   if(pendingSubmit){
+    out("pin saved locally — checking it against the leaderboard...", "sys");
     var ps = pendingSubmit; pendingSubmit = null;
     doSubmit(ps.attempted, ps.clean, ps.acc, ps.gates);
+  } else {
+    out("pin saved locally. It's checked against the leaderboard the next time a run is submitted.", "sys");
   }
 }
 
@@ -2627,8 +2629,11 @@ function trySubmit(attempted, clean, acc, gates){
 
 /* gates is passed through rather than read live off S.ch: a report-triggered wipe-mode wipe
    (§5) can zero S.ch before this actually posts, if the pendingName/pendingPin prompt above
-   delayed the submission — gates keeps reporting the gate this attempt actually reached. */
+   delayed the submission — gates keeps reporting the gate this attempt actually reached. A
+   call site that forgets the argument degrades to 0 (valid server-side) rather than silently
+   producing a rejected 400. */
 function doSubmit(attempted, clean, acc, gates){
+  gates = Number.isInteger(gates) ? gates : 0;
   api("POST", {
     name: S.name, pin: S.pin, attempted: attempted, clean: clean,
     deaths: S.deaths.length, gates: gates,
@@ -2639,18 +2644,31 @@ function doSubmit(attempted, clean, acc, gates){
     if(d && d.ok){
       S.subTs = Date.now(); save();
       var imp = d.improved || {};
-      lbSay((imp.acc || imp.hc || imp.mw)
+      var msg = (imp.acc || imp.hc || imp.mw)
         ? "Added to the shared leaderboard as " + esc(S.name) + "."
-        : "Run recorded, but it didn't beat your best on the leaderboard yet.");
+        : "Run recorded, but it didn't beat your best on the leaderboard yet.";
+      lbSay(msg);
+      out(msg, (imp.acc || imp.hc || imp.mw) ? "gain" : "sys");
     }
     else if(d && d.err === "name-taken"){
-      /* someone else already claimed this name with a different PIN — never clear S.name here:
-         this is also the path a genuine owner takes back after a lab PC wipes their saved data
-         (§4), they just need to re-enter the PIN they remember. */
-      pendingSubmit = {attempted:attempted, clean:clean, acc:acc};
-      lbSay("\"" + S.name + "\" is already claimed on the leaderboard. Type name <newname> for a different one, or pin <1234> if it's really yours.");
+      /* someone else already claimed this name with a different PIN. The stored PIN is now
+         known-bad for this name — keeping it in S.pin would silently fail every future
+         submission with nothing shown (never do that; see §6.6). Clear it and steer the
+         player to a new name + new PIN, which is the safe default: it can never overwrite
+         someone else's row. A genuine owner reclaiming their own name after a device wipe
+         (§4.2) types "pin <their digits>" at the prompt below instead — runCmd's pendingName
+         handler special-cases that input to call cmdPin() and keep the current S.name. */
+      S.pin = ""; save();
+      pendingSubmit = {attempted:attempted, clean:clean, acc:acc, gates:gates};
+      var takenMsg = "\"" + esc(S.name) + "\" is already claimed on the leaderboard with a different PIN. Type a new name to submit under, or pin <1234> if this name is really yours.";
+      lbSay(takenMsg);
+      out(takenMsg, "deadwhy");
+      if(!pendingName){
+        pendingName = true;
+        out("Type a new name for the shared leaderboard, or pin <1234> to reclaim \"" + esc(S.name) + "\". Type skip to stay off the board.", "sys");
+      }
     }
-    else{ lbSay("leaderboard unavailable right now — your run is unaffected."); }
+    else{ var failMsg = "leaderboard unavailable right now — your run is unaffected."; lbSay(failMsg); out(failMsg, "sys"); }
   });
 }
 
@@ -2727,6 +2745,11 @@ function runCmd(raw){
       out("okay — staying off the leaderboard for now. Type name <yourname> anytime to join.", "sys");
       return;
     }
+    /* Escape hatch for a genuine owner reclaiming their own name after a name-taken rejection
+       (§6.6) — "pin 1234" here means "keep the current name, verify with this pin instead",
+       not "set my username to the literal text pin 1234". */
+    var pinRetry = v.match(/^pin\s+(\d{4})$/);
+    if(pinRetry){ cmdPin(pinRetry[1]); return; }
     var n = setName(raw);
     if(!n){ out("that name didn't work — use letters, numbers and spaces, at least 2 characters. Type name <yourname> to try again.", "sys"); return; }
     out("name set to " + esc(n) + ".", "sys");
@@ -2746,7 +2769,7 @@ function runCmd(raw){
     }
     var p = setPin(v);
     if(!p){ out("that pin didn't work — use exactly 4 digits, e.g. pin 1234. Type pin <1234> to try again, or skip.", "sys"); return; }
-    out("pin set. This keeps \"" + esc(S.name) + "\" yours.", "sys");
+    out("pin saved locally — checking it against the leaderboard...", "sys");
     if(pendingSubmit){
       var pps = pendingSubmit; pendingSubmit = null;
       doSubmit(pps.attempted, pps.clean, pps.acc, pps.gates);

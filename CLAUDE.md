@@ -399,10 +399,21 @@ unreachable, blocked, or the page is opened from `file://`.
   security theatre. Client-side: `cmdPin()`/`pin <1234>` sets or corrects a PIN, `runCmd`'s
   `pendingPin` prompt chains right after a name is accepted (mirroring the existing `pendingName`
   pattern) if `S.pin` isn't set yet, and `trySubmit()`/`doSubmit()` are split so a PIN-entry retry
-  posts immediately rather than waiting out the 60s throttle. A `name-taken` response never clears
-  `S.name` — that response is also what a genuine owner sees after a lab PC wipes their saved data
-  (§4.2) or on a new device, and the fix there is re-entering the PIN they remember, not picking a
-  new name. **Known limit, accepted rather than engineered around:** a 4-digit PIN on this endpoint
+  posts immediately rather than waiting out the 60s throttle.
+
+  **`name-taken` handling — never let a rejection look like a success.** Every verdict
+  (`doSubmit()`'s response handler) is written to both `#lbNote` and the terminal (`out()`), the
+  latter in `"deadwhy"` red for a rejection — a wrong PIN must never be reported only in the
+  report-block note the player likely isn't looking at. A `name-taken` response also clears
+  `S.pin` (it's now known-bad for this name) and re-arms `pendingName`, steering the player to
+  submit under a **new name** by default — the safe choice, since it can never touch someone
+  else's row. Leaving the known-bad PIN in `S.pin` instead would silently re-fail every later
+  submission with nothing shown, which is the failure mode this exists to prevent. A genuine
+  owner reclaiming their own name after a lab PC wipes their saved data (§4.2) or on a new device
+  types `pin <their digits>` at that same prompt; `runCmd`'s `pendingName` handler special-cases
+  input matching `/^pin\s+(\d{4})$/` to call `cmdPin()` (keeping the current `S.name`) instead of
+  treating it as a literal username. **Known limit, accepted rather than engineered around:** a
+  4-digit PIN on this endpoint
   is brute-forceable in ~10k scripted requests — it's friction against a classmate typing your
   name, not authentication, matching the Cheating bullet's existing honour-system stance. A real
   rate limit would need its own counter blob, i.e. the read-modify-write race the cache above was
